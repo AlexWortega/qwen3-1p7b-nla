@@ -1,0 +1,49 @@
+# 3x scale of paper-faithful pipeline. Same architecture, larger SFT data.
+# Teacher switched: claude-haiku-4.5 → deepseek/deepseek-chat-v3 (~6x cheaper).
+# Should fit ~$22 OpenRouter budget for 9000 docs × 5 positions = 45k API calls.
+
+base_model: Qwen/Qwen3-1.7B
+layer_index: 18
+output_dir: artifacts/datagen_qwen3_1p7b_ultrafw_9k
+
+corpus:
+  name: openbmb/Ultra-FineWeb
+  config: null
+  split: en
+  text_column: content
+  start: 0
+  length: 9000
+
+stage0:
+  positions_per_doc: 5
+  chunk_size: 256
+  seed: 42
+  multigpu: false
+  streaming: true
+  extractor_kwargs:
+    batch_size: 8
+    max_length: 1024
+
+stage1:
+  av_sft_frac: 0.495
+  ar_sft_frac: 0.495
+  rl_frac: 0.01
+  seed: 42
+
+stage2:
+  provider_cls: nla.datagen.providers.OpenRouterProvider
+  provider_kwargs:
+    model: deepseek/deepseek-chat-v3
+    max_tokens: 300
+    temperature: 1.0
+    concurrency: 30
+  chunk_size: 512
+
+stage3:
+  keep_debug_metadata: true
+
+shuffle:
+  enabled: true
+  seed: 42
+
+storage_cls: nla.datagen.storage.LocalStorage

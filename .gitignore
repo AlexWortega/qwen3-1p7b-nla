@@ -1,0 +1,29 @@
+# env / secrets
+.env
+.env.local
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# artifacts
+artifacts/
+wandb/
+hf_release/
+*.safetensors
+*.pt
+*.bin
+
+# editor
+.vscode/
+.idea/
+.DS_Store
+
+# docker
+.docker/
+
+# claude code session metadata
+.claude/

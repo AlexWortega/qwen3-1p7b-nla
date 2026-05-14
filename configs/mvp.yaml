@@ -1,0 +1,82 @@
+seed: 42
+
+base_model:
+  id: Qwen/Qwen3-1.7B
+  hidden_size: 2048
+  num_layers: 28
+
+av_ar_model:
+  id: Qwen/Qwen3-1.7B
+  hidden_size: 2048
+  dtype: float16
+
+data:
+  dataset: HuggingFaceFW/fineweb-edu
+  subset: sample-10BT
+  n_passages: 10000
+  eval_n: 200
+  max_seq_len: 256
+  max_summary_tokens: 96
+  bulk_concurrency: 20
+
+activations:
+  layer: 14
+  position: last
+  out_path: artifacts/activations/layer14.safetensors
+  index_path: artifacts/activations/layer14.jsonl
+
+summaries:
+  bulk:
+    model: qwen/qwen3-8b
+    out_path: artifacts/summaries/bulk.jsonl
+    concurrency: 20
+    max_tokens: 80
+    budget_usd: 2.0
+  eval:
+    model: anthropic/claude-sonnet-4.6
+    out_path: artifacts/summaries/eval.jsonl
+    concurrency: 8
+    max_tokens: 80
+    budget_usd: 5.0
+
+prompt:
+  system: "You are a precise summarizer."
+  user_template: |-
+    Summarize the following text in one sentence focused on its main topic and key entities. Output only the summary sentence, nothing else.
+
+    Text:
+    {passage}
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+
+train_av:
+  batch_size: 8
+  grad_accum: 1
+  epochs: 5
+  lr: 1.5e-4
+  weight_decay: 0.0
+  warmup_steps: 500
+  log_every: 100
+  save_path: artifacts/av
+  eval_every: 1000
+
+train_ar:
+  batch_size: 8
+  grad_accum: 1
+  epochs: 5
+  lr: 3.0e-4
+  weight_decay: 0.0
+  warmup_steps: 500
+  log_every: 100
+  save_path: artifacts/ar
+  eval_every: 1000
+
+eval:
+  out_path: artifacts/eval/fve.json
+  qualitative_samples: 10
+
+wandb:
+  project: vae-llm-nla

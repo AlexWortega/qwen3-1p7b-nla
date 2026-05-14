@@ -1,0 +1,37 @@
+# G: same hparams as F but with batched AV sampling — 10-15x faster wall clock.
+# Recommended default for any future RL run.
+name: rl_mix_batched_v1
+description: |
+  Joint NLA RL with mix reward + batched AV sampling. End-to-end ~33 min on V100
+  vs ~5h for the unbatched variant (rl_mix_v1).
+
+init:
+  av_dir: artifacts/av_ultrafw_9k
+  ar_dir: artifacts/ar_ultrafw_9k
+
+data:
+  rl_parquet: artifacts/datagen_qwen3_1p7b_ultrafw_9k/av_sft_shuf.parquet
+
+train:
+  steps: 150
+  batch_size: 4
+  group_size: 2
+  max_new_tokens: 40
+  temperature: 1.0
+  lr_av: 1.0e-5
+  lr_ar: 5.0e-5
+  beta_kl: 0.05
+  reward: mix
+  contrastive_tau: 0.1
+  batched_sample: true    # << the speedup
+  grad_checkpoint: true
+
+runtime:
+  cuda_visible_devices: "0"
+  env:
+    PYTORCH_CUDA_ALLOC_CONF: "expandable_segments:True"
+  log_every: 5
+
+save:
+  av: artifacts/av_rl_G
+  ar: artifacts/ar_rl_G

@@ -1,0 +1,36 @@
+services:
+  nla:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: vae_llm:latest
+    env_file:
+      - ../.env
+    environment:
+      - HF_HOME=/cache/huggingface
+      - WANDB_DIR=/cache/wandb
+      - PYTHONPATH=/workspace
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    volumes:
+      - ../artifacts:/workspace/artifacts
+      - ../configs:/workspace/configs
+      - ../nla:/workspace/nla
+      - ../scripts:/workspace/scripts
+      - hf-cache:/cache/huggingface
+      - wandb-cache:/cache/wandb
+    working_dir: /workspace
+    shm_size: 16gb
+    ipc: host
+    ulimits:
+      memlock: -1
+      stack: 67108864
+
+volumes:
+  hf-cache:
+  wandb-cache:

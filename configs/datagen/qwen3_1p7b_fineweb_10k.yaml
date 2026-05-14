@@ -1,0 +1,52 @@
+# NLA datagen for Qwen3-1.7B on FineWeb-Edu.
+# Layer 18 ≈ 2/3 of 28 layers (paper convention).
+# Provider: OpenRouter → anthropic/claude-sonnet-4.6 (we don't have direct Anthropic key).
+#
+# Run inside the docker container:
+#   python -m nla.datagen.run_pipeline --config configs/datagen/qwen3_1p7b_fineweb_10k.yaml
+
+base_model: Qwen/Qwen3-1.7B
+layer_index: 18
+output_dir: artifacts/datagen_qwen3_1p7b_ultrafw
+
+corpus:
+  name: openbmb/Ultra-FineWeb
+  config: null
+  split: en
+  text_column: content
+  start: 0
+  length: 3000
+
+stage0:
+  positions_per_doc: 5
+  chunk_size: 256
+  seed: 42
+  multigpu: false
+  streaming: true
+  extractor_kwargs:
+    batch_size: 8
+    max_length: 1024
+
+stage1:
+  av_sft_frac: 0.495
+  ar_sft_frac: 0.495
+  rl_frac: 0.01
+  seed: 42
+
+stage2:
+  provider_cls: nla.datagen.providers.OpenRouterProvider
+  provider_kwargs:
+    model: anthropic/claude-haiku-4.5
+    max_tokens: 300
+    temperature: 1.0
+    concurrency: 20
+  chunk_size: 512
+
+stage3:
+  keep_debug_metadata: true
+
+shuffle:
+  enabled: true
+  seed: 42
+
+storage_cls: nla.datagen.storage.LocalStorage

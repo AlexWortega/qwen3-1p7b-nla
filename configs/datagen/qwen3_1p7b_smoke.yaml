@@ -1,0 +1,42 @@
+# Smoke test for Qwen3-1.7B paper-faithful pipeline. 10 docs only.
+base_model: Qwen/Qwen3-1.7B
+layer_index: 18
+output_dir: artifacts/datagen_smoke
+
+corpus:
+  name: HuggingFaceFW/fineweb-edu
+  config: sample-10BT
+  split: train
+  text_column: text
+  start: 0
+  length: 10
+
+stage0:
+  positions_per_doc: 3
+  chunk_size: 10
+  seed: 42
+  multigpu: false
+  extractor_kwargs: {batch_size: 4, max_length: 1024}
+
+stage1:
+  av_sft_frac: 0.5
+  ar_sft_frac: 0.5
+  rl_frac: 0.0
+  seed: 42
+
+stage2:
+  provider_cls: nla.datagen.providers.OpenRouterProvider
+  provider_kwargs:
+    model: anthropic/claude-sonnet-4.6
+    max_tokens: 300
+    concurrency: 4
+  chunk_size: 16
+
+stage3:
+  keep_debug_metadata: true
+
+shuffle:
+  enabled: true
+  seed: 42
+
+storage_cls: nla.datagen.storage.LocalStorage

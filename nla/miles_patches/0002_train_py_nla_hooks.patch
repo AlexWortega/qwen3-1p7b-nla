@@ -1,0 +1,98 @@
+diff --git a/train.py b/train.py
+index bd22ba5..ab8003a 100644
+--- a/train.py
++++ b/train.py
+@@ -2,6 +2,7 @@ import ray
+ from sglang.srt.constants import GPU_MEMORY_TYPE_CUDA_GRAPH, GPU_MEMORY_TYPE_KV_CACHE, GPU_MEMORY_TYPE_WEIGHTS
+ 
+ from miles.ray.placement_group import create_placement_groups, create_rollout_manager, create_training_models
++from nla.embed_store import get_embed_store
+ from miles.utils.arguments import parse_args
+ from miles.utils.logging_utils import configure_logger
+ from miles.utils.misc import should_run_periodic_action
+@@ -21,11 +22,35 @@ def train(args):
+     # create the actor and critic models
+     actor_model, critic_model = create_training_models(args, pgs, rollout_manager)
+ 
++    # === NLA patch: give RolloutManager a handle to the critic trainer ===
++    # nla.reward.nla_rm uses this to call critic_fwd on the idle critic GPUs
++    # during generation — live weights, no duplicate model, no checkpoint staleness.
++    if args.loss_type == "policy_loss":
++        assert args.use_critic, (
++            "NLA RL trains AV and AR simultaneously (the AR IS the reward "
++            "model). use_critic resolved False — pass --force-use-critic. A "
++            "frozen AR would give stale rewards the AV would game. See "
++            "configs/rl.sh."
++        )
++    if args.use_critic:
++        ray.get(rollout_manager.set_critic_handles.remote(critic_model._actor_handlers))
++    # === end NLA patch ===
++
++    def sync_weights():
++        actor_model.update_weights()
++        # Megatron: actor rank-0 placed the gathered embedding into the named
++        # ray actor; fetch it here (driver = sync ray client) and push to
++        # RolloutManager. nla_generate reads args._nla_embed_weight directly —
++        # zero NFS calls, no ray.get from inside the asyncio loop.
++        # FSDP writes the embed to a local file (single-node colocation).
++        if args.train_backend == "megatron":
++            ray.get(rollout_manager.set_embed.remote(ray.get(get_embed_store().get.remote())))
++
+     if args.offload_rollout:
+         ray.get(rollout_manager.onload_weights.remote())
+ 
+     # always update weight first so that sglang has the loaded weights from training.
+-    actor_model.update_weights()
++    sync_weights()
+ 
+     if args.check_weight_update_equal:
+         ray.get(rollout_manager.check_weights.remote(action="compare"))
+@@ -45,10 +70,18 @@ def train(args):
+                     actor_model.offload()
+             else:
+                 actor_model.offload()
+-        else:
++        elif rollout_id % 50 == 0:
++            # Per-step clear_memory thrashes the CUDA caching allocator
++            # (gc.collect ~0.5s + empty_cache ~0.3s). Steady-state fixed-batch
++            # SFT doesn't need it every step — every 50 keeps memory bounded.
+             actor_model.clear_memory()
+ 
+     def save(rollout_id):
++        # rollout_manager.save MUST come first so rollout/global_dataset_state_dict_<N>.pt
++        # exists when actor's _maybe_background_push copies rollout/* into iter_dir.
++        # Otherwise the GCS snapshot misses the latest offset → resume starts at 0.
++        if args.rollout_global_dataset:
++            ray.get(rollout_manager.save.remote(rollout_id))
+         if (not args.use_critic) or (rollout_id >= args.num_critic_only_steps):
+             actor_model.save_model(
+                 rollout_id,
+@@ -59,8 +92,6 @@ def train(args):
+                 rollout_id,
+                 force_sync=rollout_id == args.num_rollout - 1,
+             )
+-        if args.rollout_global_dataset:
+-            ray.get(rollout_manager.save.remote(rollout_id))
+ 
+     # train loop.
+     # note that for async training, one can change the position of the sync operation(ray.get).
+@@ -86,13 +117,15 @@ def train(args):
+         else:
+             ray.get(actor_model.async_train(rollout_id, rollout_data_ref))
+ 
+-        if should_run_periodic_action(rollout_id, args.save_interval, num_rollout_per_epoch, args.num_rollout):
+-            save(rollout_id)
+-
+         offload_train()
+         if args.offload_rollout:
+             ray.get(rollout_manager.onload_weights.remote())
+-        actor_model.update_weights()
++        # sync_weights BEFORE save: both consume post-train state, and any
++        # NFS-touching work in update_weights should complete before save's
++        # async bg-write saturates the server.
++        sync_weights()
++        if should_run_periodic_action(rollout_id, args.save_interval, num_rollout_per_epoch, args.num_rollout):
++            save(rollout_id)
+         if args.offload_rollout:
+             ray.get(rollout_manager.onload_kv.remote())
+ 

@@ -1,0 +1,973 @@
+diff --git a/miles/backends/fsdp_utils/actor.py b/miles/backends/fsdp_utils/actor.py
+index 536fdf9..3498392 100644
+--- a/miles/backends/fsdp_utils/actor.py
++++ b/miles/backends/fsdp_utils/actor.py
+@@ -93,11 +93,19 @@ class FSDPTrainRayActor(TrainRayActor):
+         init_context = self._get_init_weight_context_manager()
+ 
+         with init_context():
++            # === NLA patch: bf16 storage ===
++            # No torch_dtype → fp32 storage. MixedPrecisionPolicy(param_dtype=bf16)
++            # casts for FORWARD only — storage stays fp32. 2× the sharded params,
++            # 2× the full_state copy below, 2× the HF save. Adam already keeps
++            # fp32 master copies in optimizer state; storing params at fp32 too
++            # is just waste.
+             model = self.get_model_cls().from_pretrained(
+                 self.args.hf_checkpoint,
+                 trust_remote_code=True,
+                 attn_implementation=self.args.attn_implementation,
++                torch_dtype=torch.bfloat16,
+             )
++            # === end NLA patch ===
+ 
+         model.train()
+ 
+@@ -133,6 +141,15 @@ class FSDPTrainRayActor(TrainRayActor):
+ 
+         checkpoint_payload = checkpoint.load(self)
+ 
++        # Constant lr only — checkpoint-loaded scheduler state can carry stale
++        # decay config that drives lr→0 on resume. Neuter scheduler + set live lr.
++        self.lr_scheduler.max_lr = float(args.lr)
++        self.lr_scheduler.min_lr = float(args.lr)
++        for pg in self.optimizer.param_groups:
++            pg["lr"] = float(args.lr)
++            pg.pop("max_lr", None)
++        logger.info(f"[FSDP] reset scheduler + optimizer lr = {args.lr} (constant)")
++
+         # Create separate ref model if needed (kept in CPU until needed)
+         self.ref_model = None
+         if with_ref:
+@@ -596,6 +613,12 @@ class FSDPTrainRayActor(TrainRayActor):
+                     ref_load_path,
+                     trust_remote_code=True,
+                     attn_implementation=self.args.attn_implementation,
++                    # === NLA patch: bf16 ref ===
++                    # Without this, fp32-saved DCP→HF checkpoints (what
++                    # convert_fsdp_to_hf produces, since DCP itself is fp32)
++                    # load at fp32 → 2× VRAM with --nla-ref-on-gpu. CPUOffload
++                    # doesn't care, but keeping ref on GPU at 27b does.
++                    torch_dtype=torch.bfloat16,
+                 )
+ 
+             full_state = ref_model.state_dict()
+diff --git a/miles/backends/fsdp_utils/checkpoint.py b/miles/backends/fsdp_utils/checkpoint.py
+index 6daf7f9..9fba659 100644
+--- a/miles/backends/fsdp_utils/checkpoint.py
++++ b/miles/backends/fsdp_utils/checkpoint.py
+@@ -108,40 +108,39 @@ def load(actor: Any) -> dict[str, Any] | None:
+         logger.info(f"[FSDP] Model checkpoint {model_dir} not found; skipping load.")
+         return None
+ 
+-    # Load model weights (always)
++    # Load model weights (always). No try/except — DCP corruption (EOFError,
++    # shape mismatch, world-size mismatch) must raise. A swallowed exception here
++    # means training continues on random/partial weights.
+     model_state = ModelState(actor.model)
+     state_dict = {"model_state": model_state}
++    dcp.load(state_dict=state_dict, checkpoint_id=str(model_dir))
++    logger.info(f"[FSDP] Loaded model from {model_dir}")
+ 
+-    try:
+-        dcp.load(state_dict=state_dict, checkpoint_id=str(model_dir))
+-        logger.info(f"[FSDP] Loaded model from {model_dir}")
+-    except Exception as e:
+-        logger.error(f"[FSDP] Failed to load model from {model_dir}: {e}")
+-        return None
+-
+-    # Load optimizer state (optional)
++    # Load optimizer state (optional). Same: if the dir exists but load fails,
++    # that's corruption — raise, don't warn.
+     load_optimizer = not getattr(actor.args, "no_load_optim", False) and hasattr(actor, "optimizer")
+     if load_optimizer and optimizer_dir.exists():
+         optimizer_state = OptimizerState(actor.model, actor.optimizer)
+         optim_state_dict = {"optim_state": optimizer_state}
+-        try:
+-            dcp.load(state_dict=optim_state_dict, checkpoint_id=str(optimizer_dir))
+-            logger.info(f"[FSDP] Loaded optimizer from {optimizer_dir}")
+-        except Exception as e:
+-            logger.warning(f"[FSDP] Failed to load optimizer from {optimizer_dir}: {e}")
++        dcp.load(state_dict=optim_state_dict, checkpoint_id=str(optimizer_dir))
++        logger.info(f"[FSDP] Loaded optimizer from {optimizer_dir}")
+     elif load_optimizer:
+         logger.info(f"[FSDP] Optimizer checkpoint not found at {optimizer_dir}, skipping optimizer load.")
+ 
+-    # Load LR scheduler state (optional)
+-    load_lr_scheduler = hasattr(actor, "lr_scheduler") and lr_scheduler_dir.exists()
++    # Load LR scheduler state (optional). Skip under --finetune: scheduler state
++    # carries base LR in param_groups — resuming it overrides args.lr even with
++    # constant schedule. --finetune loads Adam (warm momenta) but wants fresh lr.
++    load_lr_scheduler = (
++        not getattr(actor.args, "finetune", False)
++        and load_optimizer
++        and hasattr(actor, "lr_scheduler")
++        and lr_scheduler_dir.exists()
++    )
+     if load_lr_scheduler:
+         lr_scheduler_state = LRSchedulerState(actor.lr_scheduler)
+         lr_scheduler_state_dict = {"lr_scheduler_state": lr_scheduler_state}
+-        try:
+-            dcp.load(state_dict=lr_scheduler_state_dict, checkpoint_id=str(lr_scheduler_dir))
+-            logger.info(f"[FSDP] Loaded LR scheduler from {lr_scheduler_dir}")
+-        except Exception as e:
+-            logger.warning(f"[FSDP] Failed to load LR scheduler from {lr_scheduler_dir}: {e}")
++        dcp.load(state_dict=lr_scheduler_state_dict, checkpoint_id=str(lr_scheduler_dir))
++        logger.info(f"[FSDP] Loaded LR scheduler from {lr_scheduler_dir}")
+     elif hasattr(actor, "lr_scheduler"):
+         logger.info(f"[FSDP] LR scheduler checkpoint not found at {lr_scheduler_dir}, skipping LR scheduler load.")
+ 
+@@ -173,7 +172,11 @@ def finalize_load(actor: Any, checkpoint_payload: dict[str, Any] | None) -> None
+ 
+     metadata = checkpoint_payload.get("metadata") or {}
+     iteration = checkpoint_payload.get("iteration")
+-    if metadata:
++    # --finetune: weights-only load; do not resume rollout_id/step counters
++    # (already at fresh-init values). arguments.py set start_rollout_id=0.
++    if getattr(actor.args, "finetune", False):
++        pass
++    elif metadata:
+         actor.global_step = int(metadata.get("global_step", actor.global_step))
+         actor.micro_step = int(metadata.get("micro_step", actor.micro_step))
+         next_rollout = metadata.get("next_rollout_id")
+diff --git a/miles/backends/megatron_utils/checkpoint.py b/miles/backends/megatron_utils/checkpoint.py
+index 03a9dd7..1164e35 100644
+--- a/miles/backends/megatron_utils/checkpoint.py
++++ b/miles/backends/megatron_utils/checkpoint.py
+@@ -146,6 +146,15 @@ def load_checkpoint(ddp_model, optimizer, opt_param_scheduler, checkpointing_con
+     return result
+ 
+ 
++def _strip_args_for_validation(common_state_dict):
++    # determine_main_replica_uniform_distribution does all_gather_object on the
++    # common state dict. args.local_rank differs per rank → pickles to different
++    # sizes → padding bytes land mid-unpickle → UnicodeDecodeError (0xb7 at pos 82).
++    # args is still saved (it goes in via state_dict['args'] before this hook),
++    # we just exclude it from the cross-rank consistency check.
++    return {k: v for k, v in common_state_dict.items() if k != "args"}
++
++
+ def save_checkpoint_with_lora(iteration, model, optimizer, opt_param_scheduler):
+     """Extended save that handles LoRA adapters separately."""
+     args = get_args()
+@@ -162,7 +171,13 @@ def save_checkpoint_with_lora(iteration, model, optimizer, opt_param_scheduler):
+             iteration=iteration,
+         )
+     else:
+-        save_checkpoint(iteration, model, optimizer, opt_param_scheduler)
++        save_checkpoint(
++            iteration,
++            model,
++            optimizer,
++            opt_param_scheduler,
++            preprocess_common_state_dict_fn=_strip_args_for_validation,
++        )
+ 
+ 
+ def _is_megatron_checkpoint(path: str | Path) -> bool:
+diff --git a/miles/backends/megatron_utils/initialize.py b/miles/backends/megatron_utils/initialize.py
+index cbe9816..18b88d8 100644
+--- a/miles/backends/megatron_utils/initialize.py
++++ b/miles/backends/megatron_utils/initialize.py
+@@ -62,9 +62,6 @@ def init(args):
+     # Pytorch distributed.
+     _initialize_distributed(args)
+ 
+-    # https://github.com/NVIDIA/Megatron-LM/issues/1563
+-    assert np.__version__.startswith("1."), "Megatron does not support numpy 2.x"
+-
+     # Random seeds for reproducibility.
+     if args.rank == 0:
+         logger.info(f"> setting random seeds to {args.seed} ...")
+diff --git a/miles/backends/megatron_utils/lora_utils.py b/miles/backends/megatron_utils/lora_utils.py
+index 15bda70..dc22327 100644
+--- a/miles/backends/megatron_utils/lora_utils.py
++++ b/miles/backends/megatron_utils/lora_utils.py
+@@ -9,7 +9,6 @@ from typing import Any
+ 
+ import torch
+ import torch.distributed as dist
+-from megatron.core import mpu
+ 
+ logger = logging.getLogger(__name__)
+ 
+@@ -268,6 +267,7 @@ def save_lora_checkpoint(
+     import json
+ 
+     from megatron.bridge import AutoBridge
++    from megatron.core import mpu
+ 
+     from miles.utils import megatron_bridge_utils
+ 
+@@ -379,6 +379,8 @@ def load_lora_adapter(
+         successfully loaded; *iteration* is the saved iteration number (or None
+         if no training state was found).
+     """
++    from megatron.core import mpu
++
+     adapter_dir = Path(adapter_path)
+     if not adapter_dir.exists():
+         logger.warning(f"LoRA adapter path does not exist: {adapter_dir}")
+diff --git a/miles/backends/megatron_utils/model_provider.py b/miles/backends/megatron_utils/model_provider.py
+index 0e70fa0..ad9d3e2 100644
+--- a/miles/backends/megatron_utils/model_provider.py
++++ b/miles/backends/megatron_utils/model_provider.py
+@@ -77,11 +77,18 @@ def get_model_provider_func(
+                 model = custom_model_provider(pre_process=pre_process, post_process=post_process, vp_stage=vp_stage)
+             else:
+                 model = custom_model_provider(pre_process=pre_process, post_process=post_process)
+-            # Apply critic output layer if needed
+-            if post_process and role == "critic":
++            # Apply critic output layer if needed. nla_model_is_critic covers
++            # standalone critic SFT (role=="actor" + --nla-model-is-critic) where
++            # the provider still needs the d→d head swap.
++            if post_process and (role == "critic" or getattr(args, "nla_model_is_critic", False)):
+                 model.output_layer = LinearForLastLayer(
+-                    input_size=model.config.hidden_size, output_size=1, config=model.config
++                    input_size=model.config.hidden_size,
++                    output_size=getattr(args, "critic_output_size", 1),
++                    config=model.config,
++                    bias=not getattr(args, "nla_model_is_critic", False),
+                 )
++                if getattr(args, "nla_model_is_critic", False):
++                    model.decoder.final_layernorm = torch.nn.Identity()
+             return model
+ 
+         return wrapped_model_provider
+@@ -229,8 +236,18 @@ def get_model_provider_func(
+         with build_model_context(**build_model_context_args):
+             model = GPTModel(**kwargs)
+ 
+-        if post_process and role == "critic":
+-            model.output_layer = LinearForLastLayer(input_size=config.hidden_size, output_size=1, config=config)
++        if post_process and (role == "critic" or getattr(args, "nla_model_is_critic", False)):
++            model.output_layer = LinearForLastLayer(
++                input_size=config.hidden_size,
++                output_size=getattr(args, "critic_output_size", 1),
++                config=config,
++                bias=not getattr(args, "nla_model_is_critic", False),
++            )
++            if getattr(args, "nla_model_is_critic", False):
++                # NLA arch: raw residual → value head, no final LN. Swap here
++                # (not post-init) so optimizer never sees the removed params —
++                # otherwise dist_checkpointing save can't find them.
++                model.decoder.final_layernorm = torch.nn.Identity()
+ 
+         return model
+ 
+diff --git a/miles/backends/megatron_utils/update_weight/update_weight_from_distributed.py b/miles/backends/megatron_utils/update_weight/update_weight_from_distributed.py
+index c166b19..4ac558e 100644
+--- a/miles/backends/megatron_utils/update_weight/update_weight_from_distributed.py
++++ b/miles/backends/megatron_utils/update_weight/update_weight_from_distributed.py
+@@ -1,5 +1,7 @@
++import os
+ import socket
+ import time
++from datetime import timedelta
+ from argparse import Namespace
+ from collections.abc import Callable, Mapping, Sequence
+ 
+@@ -148,6 +150,11 @@ class UpdateWeightFromDistributed:
+         Returns updated bytes on source, None on non-source.
+         """
+         param = all_gather_param(self.args, name, param)
++        # CUDA_DEVICE_MAX_CONNECTIONS=1 + NCCL allgather leaves the stream in a
++        # state where subsequent cudaLaunchKernel spins in sched_yield while
++        # non-source ranks have already posted the NEXT param's allgather.
++        # Syncing here drains the stream so convert_to_hf's reshape can launch.
++        torch.cuda.synchronize()
+         if not self._is_pp_src_rank:
+             return
+ 
+@@ -268,12 +275,19 @@ def connect_rollout_engines_from_distributed(
+         )
+         for i, engine in enumerate(rollout_engines)
+     ]
++    # Short watchdog timeout for the actor→sglang broadcast group. A normal full
++    # update_weights is ~90-100s; per-bucket broadcast ~1-2s. With NCCL_NET=Socket
++    # on GKE eth0, transient TCP resets stall a broadcast indefinitely (4 hangs in
++    # 72hr on llama70b). default_pg_timeout (30min) means 30-90min stalls before
++    # teardown. 5min → fail-fast; the run crashes deterministically and the driver-
++    # level restart picks up from the last finalized checkpoint.
+     model_update_groups = init_process_group(
+         backend="nccl",
+         init_method=f"tcp://{master_address}:{master_port}",
+         world_size=world_size,
+         rank=0,
+         group_name=group_name,
++        timeout=timedelta(minutes=int(os.environ.get("NLA_WEIGHT_SYNC_TIMEOUT_MIN", "5"))),
+     )
+     ray.get(refs)
+     return model_update_groups
+diff --git a/miles/backends/sglang_utils/sglang_engine.py b/miles/backends/sglang_utils/sglang_engine.py
+index 2d5ea73..cc5aff4 100644
+--- a/miles/backends/sglang_utils/sglang_engine.py
++++ b/miles/backends/sglang_utils/sglang_engine.py
+@@ -547,6 +547,14 @@ def _compute_server_args(
+         "skip_server_warmup": True,
+         # always enable draft weights cpu backup so that we run training without mtp weights.
+         "enable_draft_weights_cpu_backup": True,
++        # NLA: conservative admission stops KV retraction. 27b at default 1.0
++        # retracts (v14: 4130 @ step 200). Our input_embeds retract patch has a
++        # cross-process logprob leak (Req cleared but tokenizer_manager's state
++        # already got stale batches via IPC). factor=1 (in rollout.py env_vars)
++        # kills the sawtooth; 1.5 here raises init so we admit less to begin
++        # with. Qwen/12b never retract anyway — more-conservative admission
++        # just means sglang batches a touch smaller, no correctness impact.
++        "schedule_conservativeness": 1.5,
+     }
+ 
+     if worker_type == "prefill":
+diff --git a/miles/backends/training_utils/log_utils.py b/miles/backends/training_utils/log_utils.py
+index 91fa828..98cd84c 100644
+--- a/miles/backends/training_utils/log_utils.py
++++ b/miles/backends/training_utils/log_utils.py
+@@ -135,7 +135,10 @@ def log_rollout_data(
+                 if isinstance(val[0], torch.Tensor):
+                     # NOTE: Here we have to do the clone().detach(), otherwise the tensor will be
+                     # modified in place and will cause problem for the next rollout.
+-                    val = torch.cat(val).clone().detach()
++                    # atleast_1d: scalar tensors can't be cat'd. Happens when e.g.
++                    # a single-element group aggregation or all-FAILED batch leaves
++                    # a field at scalar. Crashed 27b v21 rollout 341 (Mar 22 2026).
++                    val = torch.cat([torch.atleast_1d(t) for t in val]).clone().detach()
+                     if key in [
+                         "log_probs",
+                         "ref_log_probs",
+diff --git a/miles/backends/training_utils/loss.py b/miles/backends/training_utils/loss.py
+index 1de441c..b4be40c 100644
+--- a/miles/backends/training_utils/loss.py
++++ b/miles/backends/training_utils/loss.py
+@@ -195,7 +195,11 @@ def get_log_probs_and_entropy(
+             true_on_policy=args.true_on_policy_mode,
+         )
+ 
+-        log_probs_list.append(log_prob.squeeze(-1))
++        # Megatron path returns [R,1] (via fused_vocab_parallel_cross_entropy),
++        # FSDP path returns [R] (plain F.cross_entropy). Unconditional squeeze(-1)
++        # on [R] strips the only dim when R==1 → scalar → torch.cat crash in
++        # log_rollout_data. Happened at 27b rollout 341 (1-token response, ~1/350k).
++        log_probs_list.append(log_prob.squeeze(-1) if log_prob.dim() > 1 else log_prob)
+         entropy_list.append(entropy)
+ 
+     res = {
+diff --git a/miles/ray/actor_group.py b/miles/ray/actor_group.py
+index 3b4fbe7..a0313df 100644
+--- a/miles/ray/actor_group.py
++++ b/miles/ray/actor_group.py
+@@ -5,6 +5,7 @@ from ray.util.placement_group import PlacementGroup
+ from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
+ 
+ from miles.ray.utils import NOSET_VISIBLE_DEVICES_ENV_VARS_LIST
++from miles.utils.misc import load_function
+ 
+ 
+ class RayTrainGroup:
+@@ -56,7 +57,6 @@ class RayTrainGroup:
+             "NCCL_CUMEM_ENABLE": os.environ.get("NCCL_CUMEM_ENABLE", "0"),
+             "NVTE_FP8_BLOCK_SCALING_FP32_SCALES": "1",
+             **{name: "1" for name in NOSET_VISIBLE_DEVICES_ENV_VARS_LIST},
+-            **self.args.train_env_vars,
+         }
+ 
+         if self.args.offload_train and self.args.train_backend == "megatron":
+@@ -72,8 +72,13 @@ class RayTrainGroup:
+             env_vars["TMS_INIT_ENABLE"] = "1"
+             env_vars["TMS_INIT_ENABLE_CPU_BACKUP"] = "1"
+ 
++        # user train_env_vars last so they override framework defaults
++        env_vars.update(self.args.train_env_vars)
++
+         backend = self.args.train_backend
+-        if backend == "megatron":
++        if self.args.custom_actor_cls_path is not None:
++            actor_impl = load_function(self.args.custom_actor_cls_path)
++        elif backend == "megatron":
+             from miles.backends.megatron_utils.actor import MegatronTrainRayActor
+ 
+             actor_impl = MegatronTrainRayActor
+@@ -139,3 +144,12 @@ class RayTrainGroup:
+ 
+     def set_rollout_manager(self, rollout_manager):
+         return ray.get([actor.set_rollout_manager.remote(rollout_manager) for actor in self._actor_handlers])
++
++    # === NLA patch: expose inference-only forward on the critic trainer ===
++    # Called from RolloutManager during generation (trainer idle). FSDP requires
++    # all ranks participate in the all-gather — dispatch to every handler, return
++    # rank 0's result (all identical under FSDP).
++    def critic_fwd(self, *a, **kw):
++        refs = [h.critic_fwd.remote(*a, **kw) for h in self._actor_handlers]
++        return ray.get(refs)[0]
++    # === end NLA patch ===
+diff --git a/miles/ray/placement_group.py b/miles/ray/placement_group.py
+index eb232b1..4c1cd4b 100644
+--- a/miles/ray/placement_group.py
++++ b/miles/ray/placement_group.py
+@@ -1,4 +1,5 @@
+ import logging
++import os
+ import socket
+ 
+ import ray
+@@ -100,8 +101,19 @@ def create_placement_groups(args):
+         rollout_offset = args.actor_num_nodes * args.actor_num_gpus_per_node
+         if args.use_critic:
+             num_gpus += args.critic_num_nodes * args.critic_num_gpus_per_node
+-            critic_offset = args.actor_num_nodes * args.actor_num_gpus_per_node
+-            rollout_offset += args.critic_num_nodes * args.critic_num_gpus_per_node
++            # === NLA: critic-after-rollout placement ===
++            # Default (actor→critic→rollout) at 6+6+4 on 2×8 GPUs bin-packs
++            # critic across nodes: actor n0[0-5], critic n0[6-7]+n1[0-3],
++            # rollout n1[4-7]. Cross-node FSDP all-gather → 85s/mb vs 1.6s/mb.
++            # actor→rollout→critic: actor n0[0-5], rollout n0[6-7]+n1[0-1],
++            # critic n1[2-7]. sglang engines are independent (no FSDP), so
++            # straddling is fine; critic stays intra-node. Gate on env var
++            # for rollback — set NLA_CRITIC_AFTER_ROLLOUT=0 to restore default.
++            if os.environ.get("NLA_CRITIC_AFTER_ROLLOUT", "1") == "1":
++                critic_offset = rollout_offset + args.rollout_num_gpus
++            else:
++                critic_offset = args.actor_num_nodes * args.actor_num_gpus_per_node
++                rollout_offset += args.critic_num_nodes * args.critic_num_gpus_per_node
+ 
+     logger.info(f"Creating placement group with {num_gpus} GPUs...")
+     pg, actor_pg_reordered_bundle_indices, actor_pg_reordered_gpu_ids = _create_placement_group(num_gpus)
+@@ -167,10 +179,32 @@ def create_training_models(args, pgs, rollout_manager):
+ 
+ 
+ def create_rollout_manager(args, pg):
++    # === NLA patch: pin RolloutManager to placement-group bundle-0 ===
++    # nla_generate reads {save}/_nla_rollout_embed.pt (written by actor-rank-0
++    # in NLAFSDPActor.update_weights). `pg` here is pgs["rollout"] — a tuple
++    # (PlacementGroup, bundle_indices, gpu_ids). Bundle indices are slices
++    # of the SAME underlying PG as actor (see line 109); rollout bundle[0]
++    # co-locates with actor bundle[0] for colocate+debug_train_only, and is
++    # on the same PG (hence same node set) otherwise. Harmless for stock miles.
++    rollout_pg, rollout_bundle_indices, _ = pg
+     rollout_manager = RolloutManager.options(
+-        num_cpus=1,
++        # num_cpus=0: bundle 0 is {GPU:1, CPU:1} — actor reserves both. With
++        # num_cpus=1 Ray can't fit us in the same bundle → deadlock. 0 CPU
++        # doesn't count against reservations; orchestration barely uses CPU.
++        num_cpus=0,
+         num_gpus=0,
++        scheduling_strategy=PlacementGroupSchedulingStrategy(
++            placement_group=rollout_pg,
++            placement_group_bundle_index=rollout_bundle_indices[0],
++        ),
++        # NLA: data_source._maybe_push_rollout_dumps reads NLA_BACKUP_REMOTE
++        # and NLA_BACKUP_STORAGE_CLS from env. Without runtime_env,
++        # RolloutManager on a worker node sees neither the shell export nor
++        # --train-env-vars (that only reaches RayTrainGroup). Multi-node v19
++        # silently dropped all rollout_dump pushes for 200 steps this way.
++        runtime_env={"env_vars": dict(args.train_env_vars)},
+     ).remote(args, pg)
++    # === end NLA patch ===
+ 
+     # calculate num_rollout from num_epoch
+     num_rollout_per_epoch = None
+diff --git a/miles/ray/rollout.py b/miles/ray/rollout.py
+index 32728d4..cb1e0bb 100644
+--- a/miles/ray/rollout.py
++++ b/miles/ray/rollout.py
+@@ -1,6 +1,9 @@
+ import itertools
+ import logging
+ import multiprocessing
++import os
+ import random
++import sys
++import sysconfig
+ import time
+ from pathlib import Path
+@@ -173,6 +176,17 @@ class RolloutManager:
+     def load(self, rollout_id=None):
+         self.data_source.load(rollout_id)
+ 
++    # === NLA patch: thread critic handles to custom rm ===
++    # Ray actor handles serialize cleanly across actors. Stash on args so
++    # args.custom_rm_path functions (called inside sglang_rollout.generate_and_rm
++    # with args as first arg) can reach the critic trainer.
++    def set_critic_handles(self, handles):
++        self.args._nla_critic_handles = handles
++
++    def set_embed(self, weight):
++        self.args._nla_embed_weight = weight
++    # === end NLA patch ===
++
+     def offload(self, tags: list[str] | None = None):
+         self.health_monitoring_pause()
+         return ray.get(
+@@ -309,6 +323,8 @@ class RolloutManager:
+     def _save_debug_rollout_data(self, data, rollout_id, evaluation: bool):
+         # TODO to be refactored (originally Buffer._set_data)
+         if (path_template := self.args.save_debug_rollout_data) is not None:
++            if not evaluation and rollout_id % self.args.save_debug_rollout_interval != 0:
++                return
+             path = Path(path_template.format(rollout_id=("eval_" if evaluation else "") + str(rollout_id)))
+             logger.info(f"Save debug rollout data to {path}")
+             path.parent.mkdir(parents=True, exist_ok=True)
+@@ -518,7 +534,28 @@ def init_rollout_engines(args, pg, all_rollout_engines):
+             "SGLANG_BATCH_INVARIANT_OPS_ENABLE_MM_FALLBACK_VARIANT": "true",
+             "SGLANG_ENABLE_HEALTH_ENDPOINT_GENERATION": "false",
+             "SGLANG_ENABLE_STRICT_MEM_CHECK_DURING_IDLE": "false",
++            # Ray runtime_env replaces PATH for SGLang engine actors → their
++            # subprocesses (ldconfig, ptxas, nvcc) fail "not found". This code
++            # itself runs inside a Ray actor, so os.environ["PATH"] reads the
++            # actor's runtime_env not the driver shell — derive the env-specific
++            # paths from the live interpreter instead (portable across conda /
++            # micromamba / venv / py-version). CUDA paths are conventional;
++            # cuda-compat first so a forward-compat libcuda.so wins if present.
++            "PATH": f"{os.path.dirname(sys.executable)}:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/sbin:/sbin:/usr/bin:/bin",
++            "CUDA_HOME": os.environ.get("CUDA_HOME", "/usr/local/cuda"),
++            "LD_LIBRARY_PATH": f"/usr/local/cuda/compat:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:{sys.prefix}/lib",
++            "TRITON_PTXAS_PATH": f"{sysconfig.get_paths()['purelib']}/triton/backends/nvidia/bin/ptxas",
+         }
++        # NLA: kill the admission-ratio sawtooth. 27b retracts under KV pressure
++        # (v14: 111 retracts/21 steps at mem_fraction=0.835). Our input_embeds
++        # retract patch (PR #14110) has a cross-process bug: Req accumulators
++        # cleared but tokenizer_manager's state already received stale logprobs
++        # via IPC — separate process, never told. Retraction is scheduler-internal.
++        # factor=1 → floor=ceiling → no decay → conservative admission → no retract.
++        # Qwen/12b never retract anyway (KV headroom) so this is a no-op for them.
++        # Hardcoded — RolloutManager is also a Ray actor so os.environ.get()
++        # here reads RolloutManager's runtime_env, not the shell's.
++        env_vars["SGLANG_MIN_NEW_TOKEN_RATIO_FACTOR"] = "1"
+ 
+         worker_type = "regular"
+         if args.prefill_num_servers is not None:
+@@ -600,7 +637,10 @@ def _allocate_rollout_engine_addr_and_ports_normal(*, args, num_engines, rollout
+         visited_nodes.add(rank // num_engines_per_node)
+         # TODO: currently when restarting engines, we will set port for all engines on this node starting with this rank.
+         # e.g. for 8 gpus, if we are restarting engine on gpu 3, we will set port for engine 3,4,5,6,7 on this node.
+-        num_engines_on_this_node = num_engines_per_node - (rank % num_engines_per_node)
++        num_engines_on_this_node = min(
++            num_engines_per_node - (rank % num_engines_per_node),
++            num_engines - rank,
++        )
+ 
+         def get_addr_and_ports(engine):
+             # use small ports to prevent ephemeral port between 32768 and 65536.
+@@ -675,6 +715,22 @@ def _start_router(args):
+         from miles.utils.http_utils import run_router
+ 
+         router_args = RouterArgs.from_cli_args(args, use_router_prefix=True)
++
++        # input_embeds workloads (signalled by radix-cache disabled — radix
++        # keys on token IDs and would silently cache-hit across DIFFERENT
++        # injected activations) send ~6-12MB request bodies. Default router
++        # config leaks these into RAM via two paths:
++        if getattr(args, "sglang_disable_radix_cache", False):
++            assert router_args.policy != "cache_aware", (
++                "router policy=cache_aware builds a prefix tree storing every "
++                "request body. With input_embeds (~6-12MB each) this leaks "
++                "~10-50GB/step → OOM. Use --router-policy round_robin."
++            )
++            assert router_args.history_backend != "memory", (
++                "router history_backend=memory stores every request body. With "
++                "input_embeds this leaks unboundedly. Use --router-history-backend none."
++            )
++
+         router_args.host = args.sglang_router_ip
+         router_args.port = args.sglang_router_port
+         router_args.prometheus_port = find_available_port(random.randint(4000, 5000))
+diff --git a/miles/rollout/data_source.py b/miles/rollout/data_source.py
+index 613319d..d29f93a 100644
+--- a/miles/rollout/data_source.py
++++ b/miles/rollout/data_source.py
+@@ -138,7 +138,20 @@ class RolloutDataSource(DataSource):
+ 
+         path = os.path.join(self.args.load, f"rollout/global_dataset_state_dict_{rollout_id}.pt")
+         if not os.path.exists(path):
+-            logger.info(f"Checkpoint {path} does not exist.")
++            # Resuming without the dataset offset = silent multi-epoch. Old order
++            # (train.py:save actor → push → rollout_manager.save) raced: push
++            # copied rollout/_*.pt before _N.pt existed. Now the rollout save
++            # happens first. Still guard against it here: if we're loading
++            # a real checkpoint (rollout_id > 0), the state dict MUST exist.
++            # To recover: synthesize _N.pt from the last valid _M.pt by adding
++            # (N-M)×rollout_batch to sample_offset/sample_group_index and
++            # (N-M)×rollout_batch×n_samples to sample_index.
++            assert rollout_id is None or rollout_id <= 0, (
++                f"Resuming at rollout_id={rollout_id} but {path} missing — "
++                f"would silently restart from offset 0 (multi-epoch). "
++                f"Available: {sorted(os.listdir(os.path.dirname(path)))}"
++            )
++            logger.info(f"Checkpoint {path} does not exist (fresh start).")
+             return
+ 
+         logger.info(f"load metadata from {path}")
+diff --git a/miles/utils/arguments.py b/miles/utils/arguments.py
+index 202b5a3..1e86ce8 100644
+--- a/miles/utils/arguments.py
++++ b/miles/utils/arguments.py
+@@ -173,6 +173,131 @@ def get_miles_extra_args_provider(add_custom_arguments=None):
+                 default="raw",
+                 help="The method to convert megatron weights to hugging face weights for SGLang.",
+             )
++            parser.add_argument(
++                "--custom-actor-cls-path",
++                type=str,
++                default=None,
++                help=(
++                    "Import path to a custom TrainRayActor subclass, e.g. 'mypackage.MyFSDPActor'. "
++                    "Overrides the --train-backend default class selection in actor_group.py."
++                ),
++            )
++            parser.add_argument(
++                "--force-use-critic",
++                action="store_true",
++                help=(
++                    "Enable critic training group regardless of advantage estimator. "
++                    "Default: use_critic is only True for PPO. Set this for custom critic training "
++                    "(e.g. NLA MSE critic) that doesn't feed GAE."
++                ),
++            )
++            parser.add_argument(
++                "--nla-model-is-critic",
++                action="store_true",
++                help=(
++                    "Load NLACriticModel (truncated transformer + vector value head) instead of "
++                    "AutoModelForCausalLM. Set for standalone Critic-SL. In RL with "
++                    "--force-use-critic, the critic group sets this automatically."
++                ),
++            )
++            parser.add_argument(
++                "--nla-reward-batch-size",
++                type=int,
++                default=16,
++                help=(
++                    "How many samples to accumulate before firing a critic_fwd call. "
++                    "Decoupled from n_samples_per_prompt: larger → fewer forwards "
++                    "(better GPU util), smaller → more pipeline overlap with generation. "
++                    "Tail batch flushes on a short timeout regardless."
++                ),
++            )
++            parser.add_argument(
++                "--nla-sidecar-source",
++                type=str,
++                default=None,
++                help=(
++                    "Explicit path to NLA sidecar (nla_meta.yaml). May be a directory "
++                    "(checkpoint-style, reads {dir}/nla_meta.yaml) or a file (parquet-style, "
++                    "reads {file}.nla_meta.yaml). If not set, falls back to --prompt-data "
++                    "then --hf-checkpoint."
++                ),
++            )
++            parser.add_argument(
++                "--nla-injection-scale",
++                type=str,
++                default=None,
++                help=(
++                    "Override the sidecar's injection_scale. The L2-norm activation vectors "
++                    "are scaled to before injection into the actor's embedding — a hyperparameter "
++                    "that affects how the model learns to interpret the injected vector. "
++                    "Accepts: a float (e.g. '1.0', '30.0'), 'sqrt_d_model', or 'raw' (no norm). "
++                    "If unset, uses the sidecar's extraction.injection_scale (default sqrt_d_model). "
++                    "Different from mse_scale which is just numerical stability for the loss."
++                ),
++            )
++            parser.add_argument(
++                "--nla-storage-cls",
++                type=str,
++                default=None,
++                help=(
++                    "Storage backend class for fetching remote --prompt-data "
++                    "(e.g. a custom remote-storage backend). "
++                    "If prompt_data is a remote path (contains ://) this must be set; "
++                    "NLADataSource auto-fetches to local cache before training."
++                ),
++            )
++            parser.add_argument(
++                "--nla-fetch-cache-dir",
++                type=str,
++                default="/tmp/nla_fetch_cache",
++                help="Local directory for auto-fetched remote parquets.",
++            )
++            parser.add_argument(
++                "--nla-critic-num-layers",
++                type=int,
++                default=None,
++                help=(
++                    "Megatron only: number of transformer layers for the online NLA critic "
++                    "(K+1 where K = extraction layer_index). Actor and critic share --num-layers "
++                    "on the CLI; NLAMegatronActor swaps this in for role=critic before building "
++                    "the model. Not needed for standalone critic SFT (set --num-layers directly)."
++                ),
++            )
++            parser.add_argument(
++                "--nla-ref-on-gpu",
++                action="store_true",
++                help=(
++                    "Keep the KL ref model on GPU instead of CPUOffload. Skips the "
++                    "~20s/step actor↔ref CPU swap at the cost of ~7.5GB VRAM (FSDP-sharded). "
++                    "Safe when actor+ref fit (e.g. m16+resp_len≤150 on 80GB: ~38GB total)."
++                ),
++            )
++            parser.add_argument(
++                "--nla-critic-sidecar-source",
++                type=str,
++                default=None,
++                help=(
++                    "Sidecar path for the critic (AR) role. --nla-sidecar-source is the "
++                    "actor's override (e.g. for injection_scale); actor and critic share the "
++                    "same CLI so without this the critic would try the actor's sidecar (no "
++                    "critic_num_layers). FSDP: None → resolve_sidecar_source falls to "
++                    "hf_checkpoint = critic_load (critic's HF dir, has the right sidecar). "
++                    "Megatron: --critic-load is torch_dist with no sidecar, so this MUST be "
++                    "set — point at the FSDP-generated critic HF dir."
++                ),
++            )
++            parser.add_argument(
++                "--nla-baseline-rawvar",
++                type=float,
++                default=None,
++                help=(
++                    "Predict-the-mean FVE baseline = var(v_norm) for fve_nrm logging. "
++                    "If unset, FSDP computes from --prompt-data parquet at init (rank 0 "
++                    "reads + broadcasts); Megatron leaves None → no fve metric. Precompute "
++                    "via schema.compute_predict_mean_baselines and pass here to skip the "
++                    "init-time parquet read."
++                ),
++            )
+             parser.add_argument(
+                 "--custom-model-provider-path",
+                 type=str,
+@@ -571,6 +696,23 @@ def get_miles_extra_args_provider(add_custom_arguments=None):
+                 ),
+             )
+ 
++            # === NLA patch: expose --finetune as CLI flag ===
++            # FSDP SFT→RL path: need --load (DCP weights) WITHOUT resuming
++            # optimizer/rollout_id. Megatron's parse_args already defines this
++            # (the NLA --finetune semantics at L1809-1814 layer on top of it);
++            # FSDP has no upstream definition, so add here. Skip if already in
++            # parser to avoid argparse conflict on the Megatron path.
++            if "--finetune" not in parser._option_string_actions:
++                parser.add_argument(
++                    "--finetune",
++                    action="store_true",
++                    help=(
++                        "Load model weights from --load but reset optimizer, RNG, and rollout_id to 0. "
++                        "Use when starting a new training phase (e.g. RL after SFT) from a DCP checkpoint."
++                    ),
++                )
++            # === end NLA patch ===
++
+             # batch sizes
+             parser.add_argument(
+                 "--rollout-batch-size",
+@@ -747,6 +889,12 @@ def get_miles_extra_args_provider(add_custom_arguments=None):
+ 
+             parser.add_argument("--num-critic-only-steps", type=int, default=0, help="Number of critic only steps")
+             parser.add_argument("--critic-load", type=str, default=None, help="The checkpoint for critic model.")
++            # === NLA patch: separate HF arch from DCP weights for critic ===
++            # --critic-load must be an HF dir (config.json). If Adam state lives
++            # in a DCP save, pass that root here. train_actor.py:102 routes it to
++            # args.load → checkpoint.py loads model+optim, --finetune skips lr_sched.
++            parser.add_argument("--critic-load-dcp", type=str, default=None)
++            # === end NLA patch ===
+             parser.add_argument("--critic-save", type=str, default=None, help="The checkpoint for critic model.")
+             parser.add_argument("--critic-lr", type=float, default=None, help="The lr for critic model")
+             parser.add_argument(
+@@ -755,6 +903,15 @@ def get_miles_extra_args_provider(add_custom_arguments=None):
+                 default=0,
+                 help="number of iterations to linearly warmup for critic model.",
+             )
++            parser.add_argument(
++                "--critic-output-size",
++                type=int,
++                default=1,
++                help=(
++                    "Output dimension of the Megatron critic's value head. Default 1 for PPO "
++                    "scalar value. Set to hidden_size for vector-valued critics (e.g. NLA MSE critic)."
++                ),
++            )
+ 
+             parser.add_argument("--eps-clip", type=float, default=0.2, help="PPO clip range")
+             parser.add_argument("--eps-clip-high", type=float, default=None, help="PPO clip upper range")
+@@ -1133,6 +1290,12 @@ def get_miles_extra_args_provider(add_custom_arguments=None):
+                     "The file will be saved to `save_debug_rollout_data.format(rollout_id)`."
+                 ),
+             )
++            parser.add_argument(
++                "--save-debug-rollout-interval",
++                type=int,
++                default=1,
++                help="Save debug rollout data every N steps (not every step) to control disk usage.",
++            )
+             parser.add_argument(
+                 "--load-debug-rollout-data",
+                 type=str,
+@@ -1304,8 +1467,9 @@ def get_miles_extra_args_provider(add_custom_arguments=None):
+                 "--loss-mask-type",
+                 type=str,
+                 default="qwen",
+-                choices=["qwen", "qwen3", "distill_qwen"],
+-                help="Loss mask type",
++                choices=["qwen", "qwen3", "distill_qwen", "generic"],
++                help="Loss mask type. 'generic' is tokenizer-agnostic "
++                     "(apply_chat_template + length split, single-user-turn only)",
+             )
+             parser.add_argument(
+                 "--data-pad-size-multiplier",
+@@ -1636,12 +1800,27 @@ def miles_validate_args(args):
+             if args.ref_ckpt_step is not None:
+                 args.ckpt_step = args.ref_ckpt_step
+             args.start_rollout_id = 0
++        elif args.finetune:
++            # === NLA patch: --finetune with valid DCP --load ===
++            # Load model weights + Adam state from DCP, reset rollout_id + lr schedule.
++            # Warm Adam momenta → no warmup needed. checkpoint.py skips lr_scheduler
++            # under --finetune so args.lr (RL's lower lr) takes effect.
++            args.no_load_rng = True
++            args.start_rollout_id = 0
++            # === end NLA patch ===
+ 
+     if args.eval_interval is not None:
+         assert args.eval_datasets, "Evaluation datasets must be configured when eval_interval is set."
+ 
+     if args.save_interval is not None:
+         assert args.save is not None, "'--save' is required when save_interval is set."
++    elif args.save is not None:
++        # misc.py:should_run_periodic_action returns False before the final-step check
++        # when interval is None — no checkpoint is ever written, including the last.
++        logger.warning(
++            "--save is set but --save-interval is None — NO checkpoints will be written, "
++            "including the final step. Set --save-interval or unset --save."
++        )
+ 
+     # Parse LoRA target modules
+     if args.lora_rank > 0:
+@@ -1707,7 +1886,7 @@ def miles_validate_args(args):
+         )
+         args.debug_train_only = True
+ 
+-    args.use_critic = args.advantage_estimator == "ppo"
++    args.use_critic = args.advantage_estimator == "ppo" or args.force_use_critic
+     if args.critic_num_gpus_per_node is None:
+         args.critic_num_gpus_per_node = args.actor_num_gpus_per_node
+     if args.critic_num_nodes is None:
+diff --git a/miles/utils/http_utils.py b/miles/utils/http_utils.py
+index 0abdbbf..ecb3da2 100644
+--- a/miles/utils/http_utils.py
++++ b/miles/utils/http_utils.py
+@@ -8,9 +8,12 @@ import random
+ import socket
+ 
+ import httpx
++import orjson
+ 
+ logger = logging.getLogger(__name__)
+ 
++_JSON_HEADERS = {"Content-Type": "application/json"}
++
+ MILES_HOST_IP_ENV = "MILES_HOST_IP"
+ 
+ 
+@@ -170,7 +173,20 @@ async def _post(client, url, payload, max_retries=60, action="post"):
+                 assert not payload
+                 response = await getattr(client, action)(url)
+             else:
+-                response = await getattr(client, action)(url, json=payload or {})
++                # === NLA patch: orjson + to_thread ===
++                # httpx json= → stdlib json.dumps (sync, ~190ms for 9MB input_embeds).
++                # orjson: ~17ms for Qwen (d=3584), ~26ms for Gemma-27b (d=5376, 50%
++                # bigger payload). Even 26ms BLOCKS the event loop → dispatch trickles
++                # at ~38 req/s → SGLang batch spikes to 128 then drains to 1.
++                # to_thread: serialize on thread pool → event loop free → all 512
++                # dispatched in <1s → SGLang stays at max batch (2770 tok/s observed).
++                # Cost: thread spawn (~μs). OPT_SERIALIZE_NUMPY: orjson reads fp32 buf
++                # in Rust, no Python-float intermediate.
++                body = await asyncio.to_thread(
++                    orjson.dumps, payload or {}, option=orjson.OPT_SERIALIZE_NUMPY
++                )
++                response = await getattr(client, action)(url, content=body, headers=_JSON_HEADERS)
++                # === end NLA patch ===
+             response.raise_for_status()
+             try:
+                 output = response.json()
+diff --git a/miles/utils/mask_utils.py b/miles/utils/mask_utils.py
+index 0ddb3a1..c8f7b13 100644
+--- a/miles/utils/mask_utils.py
++++ b/miles/utils/mask_utils.py
+@@ -9,8 +9,39 @@ def get_response_lengths(loss_masks: list[list[int]]) -> list[int]:
+ class MultiTurnLossMaskGenerator:
+     def __init__(self, tokenizer: AutoTokenizer, tokenizer_type: str = "qwen"):
+         self.tokenizer = tokenizer
+-        self.system_message_length, self.gen_token_length = self.get_system_message_length()
+         self.tokenizer_type = tokenizer_type
++        self._cached_turn_close_ids: list[int] | None = None
++        # get_system_message_length sends [user, user] to the chat template to
++        # measure the implicit system prefix. Gemma's template raises on
++        # non-alternating roles. The generic/distill_qwen path doesn't use
++        # these attrs (single-turn prompt+response split), so skip.
++        if tokenizer_type in ("qwen", "qwen3"):
++            self.system_message_length, self.gen_token_length = self.get_system_message_length()
++
++    def _turn_close_ids(self) -> list[int]:
++        """Token IDs the chat template emits AFTER assistant content.
++
++        Llama-3: [<|eot_id|>]. Gemma: [<end_of_turn>, \\n]. Derived by diffing
++        a full 2-turn render against (prompt-with-gen-prefix + raw response).
++        Used by the generic/distill_qwen path so SFT trains the model to stop.
++        """
++        if self._cached_turn_close_ids is not None:
++            return self._cached_turn_close_ids
++        probe = [{"role": "user", "content": "x"}, {"role": "assistant", "content": "y"}]
++        full = self.tokenizer.apply_chat_template(probe, tokenize=True, add_generation_prompt=False)
++        head = self.tokenizer.apply_chat_template(probe[:1], tokenize=True, add_generation_prompt=True)
++        body = self.tokenizer("y", add_special_tokens=False)["input_ids"]
++        # add_generation_prompt may append tokens absent from the full render
++        # (DeepSeek-R1 adds `<think>\n`). Split at the divergence point; for
++        # Qwen/Gemma/Llama this is a no-op (lcp == len(head)).
++        lcp = 0
++        while lcp < min(len(full), len(head)) and full[lcp] == head[lcp]:
++            lcp += 1
++        assert full[lcp:lcp+len(body)] == body, (
++            f"chat_template structure unexpected: full={full} head={head} body={body} lcp={lcp}"
++        )
++        self._cached_turn_close_ids = full[lcp+len(body):]
++        return self._cached_turn_close_ids
+
+     def get_response_lengths(self, loss_masks: list[list[int]]) -> list[int]:
+         return get_response_lengths(loss_masks)
+@@ -117,6 +148,11 @@ class MultiTurnLossMaskGenerator:
+         response = messages[-1]["content"]
+         prompt_tokens = self.tokenizer(prompt, add_special_tokens=False)["input_ids"]
+         response_tokens = self.tokenizer(response, add_special_tokens=False)["input_ids"]
++        # Train the model to emit the stop token. Without this it never learns
++        # to close the turn → RL rollouts run to max_tokens. generation_config
++        # eos_token_id may be a list (e.g. Llama-3 has both <|end_of_text|> and
++        # <|eot_id|>) — the template's close token should be among them.
++        response_tokens = response_tokens + self._turn_close_ids()
+ 
+         response_length = len(response_tokens)
+         token_ids = prompt_tokens + response_tokens
+@@ -134,7 +170,10 @@ class MultiTurnLossMaskGenerator:
+             return self.gen_multi_turn_loss_mask_qwen(messages, tools)
+         elif self.tokenizer_type == "qwen3":
+             return self.gen_multi_turn_loss_mask_qwen3(messages, tools)
+-        elif self.tokenizer_type == "distill_qwen":
++        elif self.tokenizer_type in ("distill_qwen", "generic"):
++            # "generic" — tokenizer-agnostic path for any model with a working
++            # chat_template (Gemma, Llama, etc). Single-user-turn only.
++            # distill_qwen is the same function; kept for backward compat.
+             return self.gen_multi_turn_loss_mask_distill_qwen(messages, tools)
+         else:
+             raise ValueError(f"Unsupported tokenizer type: {self.tokenizer_type}")
+diff --git a/miles/utils/ppo_utils.py b/miles/utils/ppo_utils.py
+index 5df3ba9..74bb1c6 100644
+--- a/miles/utils/ppo_utils.py
++++ b/miles/utils/ppo_utils.py
+@@ -150,7 +150,11 @@ def compute_policy_loss(
+ 
+ 
+ def compute_log_probs(logits: torch.Tensor, tokens: torch.Tensor, process_group: dist.ProcessGroup | None):
+-    # TODO: when megatron is not installed, fall back to naive implementation
++    # No vocab parallelism (FSDP / tp_size=1) — plain cross-entropy.
++    # logits: [N, V], tokens: [N] → log_prob = -CE (per-token, reduction=none).
++    if process_group is None or dist.get_world_size(process_group) == 1:
++        return -torch.nn.functional.cross_entropy(logits.float(), tokens, reduction="none")
++
+     from megatron.core.fusions.fused_cross_entropy import fused_vocab_parallel_cross_entropy
+ 
+     # convert to [seq_len, batch_size, vocab_size] as expected by fused_vocab_parallel_cross_entropy

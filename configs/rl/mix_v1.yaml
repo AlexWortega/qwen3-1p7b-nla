@@ -1,0 +1,37 @@
+# F: joint-RL with mix(mse, contrastive) reward, unbatched sampling.
+# Baseline of the contrastive-reward family.
+name: rl_mix_v1
+description: |
+  Joint NLA RL on warmstart_9k. Reward = 0.5 * -log(MSE) + 0.5 * InfoNCE(AR(z_i), h_*).
+  InfoNCE component prevents mode collapse to fixed-template AV outputs.
+
+init:
+  av_dir: artifacts/av_ultrafw_9k
+  ar_dir: artifacts/ar_ultrafw_9k
+
+data:
+  rl_parquet: artifacts/datagen_qwen3_1p7b_ultrafw_9k/av_sft_shuf.parquet
+
+train:
+  steps: 150
+  batch_size: 4         # B prompts per step
+  group_size: 2         # G — REINFORCE samples per prompt
+  max_new_tokens: 40
+  temperature: 1.0
+  lr_av: 1.0e-5
+  lr_ar: 5.0e-5
+  beta_kl: 0.05
+  reward: mix           # one of {mse, contrastive, mix}
+  contrastive_tau: 0.1
+  batched_sample: false
+  grad_checkpoint: true
+
+runtime:
+  cuda_visible_devices: "0"
+  env:
+    PYTORCH_CUDA_ALLOC_CONF: "expandable_segments:True"
+  log_every: 5
+
+save:
+  av: artifacts/av_rl_F
+  ar: artifacts/ar_rl_F
