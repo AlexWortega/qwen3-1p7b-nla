@@ -1,0 +1,43 @@
+# H: G + model-parallel by component.
+# AV trainable on GPU0, AV_init frozen on GPU1, AR on GPU2.
+# Frees ~6.8 GB per GPU vs single-card → can push B=4 G=4 = 16 effective.
+name: rl_mix_batched_mp_v1
+description: |
+  Joint NLA RL with mix reward, batched AV sampling, AND model-parallel by
+  component (AV/AV_init/AR each on their own V100). NVLink2 between GPUs.
+
+init:
+  av_dir: artifacts/av_ultrafw_9k
+  ar_dir: artifacts/ar_ultrafw_9k
+
+data:
+  rl_parquet: artifacts/datagen_qwen3_1p7b_ultrafw_9k/av_sft_shuf.parquet
+
+train:
+  steps: 150
+  batch_size: 4
+  group_size: 4         # 16 effective (vs G's 8) — 2× contrastive signal
+  max_new_tokens: 40
+  temperature: 1.0
+  lr_av: 1.0e-5
+  lr_ar: 5.0e-5
+  beta_kl: 0.05
+  reward: mix
+  contrastive_tau: 0.1
+  batched_sample: true
+  grad_checkpoint: true
+
+devices:
+  av: "cuda:0"
+  av_init: "cuda:1"
+  ar: "cuda:2"
+
+runtime:
+  cuda_visible_devices: "0,1,2,3"
+  env:
+    PYTORCH_CUDA_ALLOC_CONF: "expandable_segments:True"
+  log_every: 5
+
+save:
+  av: artifacts/av_rl_H
+  ar: artifacts/ar_rl_H

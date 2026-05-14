@@ -9,6 +9,7 @@ plus eval json and probe json at repo root.
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -19,7 +20,11 @@ load_dotenv()
 REPO = "AlexWortega/Qwen1.7bnla"
 ROOT = Path("artifacts")
 
-api = HfApi()
+token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGINGFACE_HUB_TOKEN")
+if not token:
+    raise SystemExit("set HF_TOKEN in environment / .env")
+print(f"[push] using token *{token[-4:]}  repo={REPO}")
+api = HfApi(token=token)
 
 pairs = [
     ("rl_mix_v1", "av_rl_F", "ar_rl_F", "fve_rl_F.json", "probe_china_rl_F.json"),

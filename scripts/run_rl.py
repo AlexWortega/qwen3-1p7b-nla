@@ -56,6 +56,14 @@ def main():
         cmd.append("--grad-checkpoint")
     if train.get("batched_sample"):
         cmd.append("--batched-sample")
+    # Optional multi-GPU placement.
+    devs = cfg.get("devices") or {}
+    if devs.get("av"):
+        cmd += ["--av-device", str(devs["av"])]
+    if devs.get("av_init"):
+        cmd += ["--av-init-device", str(devs["av_init"])]
+    if devs.get("ar"):
+        cmd += ["--ar-device", str(devs["ar"])]
 
     print(f"[run_rl] config={args.config}  name={cfg.get('name')}")
     print(f"[run_rl] CUDA_VISIBLE_DEVICES={env.get('CUDA_VISIBLE_DEVICES','(unset)')}")

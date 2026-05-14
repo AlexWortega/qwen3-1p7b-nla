@@ -367,12 +367,25 @@ def main():
                     help="temperature for InfoNCE softmax over neg-MSE similarities")
     ap.add_argument("--batched-sample", action="store_true",
                     help="batch AV sampling and AV_init teacher-forcing across BG (expected ~3-5x speedup)")
+    ap.add_argument("--av-device", default=None,
+                    help="device for trainable AV (default cuda:0 if multi-gpu else cuda)")
+    ap.add_argument("--av-init-device", default=None,
+                    help="device for frozen AV_init (default = av-device); set to cuda:1 to free AV's GPU")
+    ap.add_argument("--ar-device", default=None,
+                    help="device for AR (default = av-device); set to cuda:2 to free AV's GPU")
     args = ap.parse_args()
     if args.reward in ("contrastive", "mix") and args.batch_size < 2:
         raise SystemExit(f"reward={args.reward} requires --batch-size >= 2 (got {args.batch_size}); no negatives otherwise")
 
     load_dotenv()
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    default_device = "cuda" if torch.cuda.is_available() else "cpu"
+    av_device = args.av_device or default_device
+    av_init_device = args.av_init_device or av_device
+    ar_device = args.ar_device or av_device
+    multi_gpu = len({av_device, av_init_device, ar_device}) > 1
+    print(f"[joint-rl] devices: AV={av_device}  AV_init={av_init_device}  AR={ar_device}  (multi_gpu={multi_gpu})")
+    # legacy `device` var still used by some lines — keep as AV's device for back-compat
+    device = av_device
 
     # Load AV (trainable + frozen copy for KL) and AR
     av_meta = yaml.safe_load((Path(args.av_dir) / "nla_meta.yaml").read_text())
@@ -390,12 +403,12 @@ def main():
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    print("[joint-rl] loading AV (trainable)...")
-    av = _load_av(base_model, Path(args.av_dir), trainable=True, device=device)
-    print("[joint-rl] loading AV_init (frozen copy)...")
-    av_init = _load_av(base_model, Path(args.av_dir), trainable=False, device=device)
-    print("[joint-rl] loading AR...")
-    ar = _load_ar(base_model, Path(args.ar_dir), layer_index, trainable=True, device=device)
+    print(f"[joint-rl] loading AV (trainable) → {av_device}...")
+    av = _load_av(base_model, Path(args.av_dir), trainable=True, device=av_device)
+    print(f"[joint-rl] loading AV_init (frozen copy) → {av_init_device}...")
+    av_init = _load_av(base_model, Path(args.av_dir), trainable=False, device=av_init_device)
+    print(f"[joint-rl] loading AR → {ar_device}...")
+    ar = _load_ar(base_model, Path(args.ar_dir), layer_index, trainable=True, device=ar_device)
     if args.grad_checkpoint:
         try:
             av.gradient_checkpointing_enable()
@@ -429,53 +442,56 @@ def main():
         if step >= args.steps:
             break
         prompts_b = batch["prompts"]
-        vecs_b = batch["vectors"].to(device)
+        vecs_b_av = batch["vectors"].to(av_device)        # AV side
+        vecs_b_ar = batch["vectors"].to(ar_device) if multi_gpu else vecs_b_av
+        # legacy var name in inner code paths
+        vecs_b = vecs_b_av
         B = len(prompts_b)
 
         # Expand to (B*G) by repeating
         prompts_rep = []
         for _ in range(G):
             prompts_rep.extend(prompts_b)
-        vecs_rep = vecs_b.repeat(G, 1)  # NOTE: not interleave so groups are contiguous-per-G
+        vecs_rep_av = vecs_b_av.repeat(G, 1)  # groups are contiguous-per-G
+        vecs_rep_ar = vecs_b_ar.repeat(G, 1) if multi_gpu else vecs_rep_av
+        vecs_rep = vecs_rep_av  # legacy alias for downstream code on AV device
 
-        # (i) sample G summaries per h
+        # (i) sample G summaries per h  — on AV device
         _sample_fn = _av_sample_batched if args.batched_sample else _av_sample
         texts, sum_logp, gen_lens = _sample_fn(
-            av, tokenizer, prompts_rep, vecs_rep,
+            av, tokenizer, prompts_rep, vecs_rep_av,
             inj_char, inj_id, left_id, right_id, inj_scale,
-            args.max_new_tokens, args.temperature, device,
+            args.max_new_tokens, args.temperature, av_device,
         )
 
-        # (ii)+(iii) AR forward (no grad to AV) → per-sample MSE; reward
-        h_hat, per_sample_mse = _ar_score(ar, tokenizer, critic_template, texts, vecs_rep, mse_scale, device)
-        # AR loss: same MSE term, but here AR's pred goes through normalize_activation and we use the raw mse for grad
-        # rerun for grad — _ar_score used torch.no_grad
+        # (ii)+(iii) AR forward (no grad to AV) — on AR device
+        h_hat, per_sample_mse = _ar_score(ar, tokenizer, critic_template, texts, vecs_rep_ar, mse_scale, ar_device)
         ar_prompts = [critic_template.format(explanation=(extract_explanation(t) or t)) for t in texts]
-        enc = tokenizer(ar_prompts, padding=True, truncation=True, max_length=512, return_tensors="pt", add_special_tokens=False).to(device)
+        enc = tokenizer(ar_prompts, padding=True, truncation=True, max_length=512, return_tensors="pt", add_special_tokens=False).to(ar_device)
         last_pos = enc["attention_mask"].sum(-1) - 1
         out = ar(input_ids=enc["input_ids"], attention_mask=enc["attention_mask"])
         idx = last_pos.view(-1, 1, 1).expand(-1, 1, out.values.size(-1))
         pred = out.values.gather(1, idx).squeeze(1).float()
         ar_loss = F.mse_loss(
             normalize_activation(pred, mse_scale),
-            normalize_activation(vecs_rep.float(), mse_scale),
+            normalize_activation(vecs_rep_ar.float(), mse_scale),
         )
 
         # AV REINFORCE: reward = -log mse (treat AR fixed → use detached mse)
+        # All reward math runs on AR's device, then we move the final advantage to AV's device.
         with torch.no_grad():
-            mse_reward = -torch.log(per_sample_mse.detach() + 1e-6)  # (B*G,)
+            mse_reward = -torch.log(per_sample_mse.detach() + 1e-6)  # (B*G,) on ar_device
             if args.reward == "mse":
                 reward = mse_reward
-                contrast_acc = torch.tensor(float("nan"), device=device)
+                contrast_acc = torch.tensor(float("nan"), device=ar_device)
             else:
                 # InfoNCE: AR(z_i) must score better against gold h_i than against h_j (j≠i in batch).
-                # h_hat is in vecs_rep order ((G groups of B): index g*B+b → gold v_b).
-                h_hat_n = normalize_activation(h_hat.detach(), mse_scale)             # (B*G, d)
-                vecs_n = normalize_activation(vecs_b.float().detach(), mse_scale)      # (B, d)
-                diff = h_hat_n.unsqueeze(1) - vecs_n.unsqueeze(0)                      # (B*G, B, d)
-                mse_ij = diff.pow(2).mean(-1)                                          # (B*G, B)
+                h_hat_n = normalize_activation(h_hat.detach(), mse_scale)               # (B*G, d) ar_device
+                vecs_n = normalize_activation(vecs_b_ar.float().detach(), mse_scale)    # (B, d) ar_device
+                diff = h_hat_n.unsqueeze(1) - vecs_n.unsqueeze(0)
+                mse_ij = diff.pow(2).mean(-1)
                 sim_ij = -mse_ij / max(args.contrastive_tau, 1e-6)
-                pos_idx = torch.arange(B * G, device=device) % B                       # tile order
+                pos_idx = torch.arange(B * G, device=ar_device) % B
                 log_softmax = F.log_softmax(sim_ij, dim=-1)
                 contrastive_reward = log_softmax.gather(1, pos_idx.unsqueeze(-1)).squeeze(-1)
                 contrast_acc = (sim_ij.argmax(-1) == pos_idx).float().mean()
@@ -489,21 +505,27 @@ def main():
             # Actually our flatten ordering was (G groups of B): index = g*B + b
             # advantage above was reshape from (B,G), which is row-major (b*G+g).
             # The sum_logp tensor was built in order (g*B+b). Re-permute advantage to match.
-            adv_b_then_g = reward_g.reshape(-1) - baseline.expand(B, G).reshape(-1)  # (B,G) flatten in (b*G+g) order
-            # Need it in (g*B+b) order to match sum_logp.
+            adv_b_then_g = reward_g.reshape(-1) - baseline.expand(B, G).reshape(-1)
             adv_correct = adv_b_then_g.view(B, G).t().reshape(-1)
-            advantage = adv_correct
+            advantage = adv_correct.to(av_device) if multi_gpu else adv_correct
 
-        # KL via MC: log p_phi(z|h) is sum_logp; need log p_init(z|h) too
+        # KL via MC: log p_phi(z|h) is sum_logp (AV device); log p_init(z|h) on av_init_device
         _init_fn = _av_init_logp_batched if args.batched_sample else _av_init_logp
-        init_logp = _init_fn(av_init, tokenizer, prompts_rep, vecs_rep, inj_char, inj_id, left_id, right_id, inj_scale, texts, device)
-        kl_per_seq = sum_logp - init_logp.detach()
+        vecs_rep_ai = vecs_rep_av.to(av_init_device) if av_init_device != av_device else vecs_rep_av
+        init_logp = _init_fn(av_init, tokenizer, prompts_rep, vecs_rep_ai, inj_char, inj_id, left_id, right_id, inj_scale, texts, av_init_device)
+        init_logp_av = init_logp.to(av_device) if multi_gpu else init_logp
+        kl_per_seq = sum_logp - init_logp_av.detach()
 
         av_rl_loss = -(advantage * sum_logp).mean()
         av_kl_loss = args.beta_kl * kl_per_seq.mean()
         av_loss = av_rl_loss + av_kl_loss
 
-        (ar_loss + av_loss).backward()
+        # AR and AV backwards are independent (decoupled per paper) — call separately.
+        if multi_gpu:
+            ar_loss.backward()
+            av_loss.backward()
+        else:
+            (ar_loss + av_loss).backward()
         ar_gnorm = torch.nn.utils.clip_grad_norm_(ar_params, 1.0)
         av_gnorm = torch.nn.utils.clip_grad_norm_(av_params, 1.0)
         optim_ar.step()
