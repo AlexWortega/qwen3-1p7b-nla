@@ -1,0 +1,7 @@
+# v2: anchor moves to Qwen3-4B (d=2560). All pool models re-fit via lstsq.
+# qwen3-1p7b becomes a regular pool member (no longer anchor).
+
+anchor_tag: qwen3-4b
+d_shared: 2560
+train_frac: 0.8
+seed: 0

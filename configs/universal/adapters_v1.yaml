@@ -1,0 +1,7 @@
+# Phase-1 universal adapters init — fit per-pool-model (enc, dec) via lstsq
+# against the anchor's activations, save as a single ModelPoolAdapters bundle.
+
+anchor_tag: qwen3-1p7b
+d_shared: 2048
+train_frac: 0.8
+seed: 0

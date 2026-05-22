@@ -1,0 +1,61 @@
+# Phase-1 universal NLA — multi-arch ~300M pool.
+#
+# Pool deliberately picks small models from DIFFERENT architecture families so
+# the trained AV/AR has to generalise across feature-space conventions, not
+# just across sizes within one family. All ≤ 600M params → all fit comfortably
+# on one V100, sequential extraction stays under ~5 min/model.
+#
+# The anchor (qwen3-1p7b) is NOT for training. Its only role is to define the
+# d_shared=2048 reference space against which every pool model's enc_M is
+# lstsq-fit. It happens to coincide with the AV/AR trunk's parent so the
+# trunk's native d_model already equals d_shared — no extra projection on the
+# trunk side.
+
+out_dir: artifacts/activations_pool_300m
+n_passages: 10000
+max_chars: 4000
+max_length: 512
+batch_size: 16
+dtype: fp16
+seed: 0
+depth_fraction: 0.5
+
+# Per-token extraction (option B) — kept conservative so 5 shards fit in <20 GB.
+pt_max_length: 160
+pt_batch_size: 4
+
+pool:
+  # Anchor: 1.7B base, d=2048. Defines the shared space.
+  # NOTE: base (not -Instruct) — matches the existing AV trunk's training base.
+  - tag: qwen3-1p7b
+    model: Qwen/Qwen3-1.7B
+
+  # 300M-class training pool — different architecture families.
+  - tag: qwen2p5-0p5b      # Qwen2 family, d=896, 24 layers, 494M params
+    model: Qwen/Qwen2.5-0.5B
+
+  - tag: smollm2-360m      # Llama-style (modern small), d=960, 30 layers, 362M
+    model: HuggingFaceTB/SmolLM2-360M
+
+  - tag: gpt2-medium       # GPT-2 classic, d=1024, 24 layers, 355M
+    model: openai-community/gpt2-medium
+
+  - tag: bloom-560m        # Bloom (multilingual classic), d=1024, 24 layers, 560M
+    model: bigscience/bloom-560m
+
+  - tag: pythia-410m       # GPT-NeoX family (Pythia), d=1024, 24 layers, 410M
+    model: EleutherAI/pythia-410m-deduped
+
+  - tag: phi-1p5           # HELD-OUT: Phi family, d=2048, 24 layers, 1.3B
+    model: microsoft/phi-1_5
+
+  - tag: qwen3-4b          # NEW ANCHOR for v2: Qwen3-4B, d=2560, 36 layers
+    model: Qwen/Qwen3-4B
+
+  - tag: gemma4-e4b        # HELD-OUT test #2: Gemma 4 E4B
+    model: google/gemma-4-E4B
+
+  # opt-350m dropped: facebook/opt-350m only ships pytorch_model.bin and
+  # transformers ≥4.46 refuses torch.load under CVE-2025-32434 unless torch
+  # ≥2.6. Container has torch 2.4. Re-add if we upgrade or find a safetensors
+  # mirror.

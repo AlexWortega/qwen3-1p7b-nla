@@ -42,6 +42,27 @@ def resolve_text_config(config: Any) -> Any:
     return config
 
 
+def _find_nested_language_model(model: Any) -> Any | None:
+    """Walk a few canonical paths to find a nested text-side model.
+
+    Gemma 3:  ForConditionalGeneration → .language_model (Gemma3TextModel)
+    Gemma 4:  ForConditionalGeneration → .model.language_model (Gemma4TextModel)
+              [.model is a Gemma4Model that also holds .vision_tower/.audio_tower]
+    """
+    for attr in _WRAPPER_MODEL_ATTRS:
+        nested = getattr(model, attr, None)
+        if nested is not None:
+            return nested
+    # Nested under .model (Gemma 4 layout).
+    inner = getattr(model, "model", None)
+    if inner is not None:
+        for attr in _WRAPPER_MODEL_ATTRS:
+            nested = getattr(inner, attr, None)
+            if nested is not None:
+                return nested
+    return None
+
+
 def resolve_text_model(model: Any) -> Any:
     """Return the text-side CausalLM for multimodal wrappers; pass-through otherwise.
 
@@ -55,30 +76,31 @@ def resolve_text_model(model: Any) -> Any:
     → zero keys match → everything random-inits. Observed Mar 13 2026:
     pred_norm=507 vs gold_norm=75616 on same input, step-0 loss=2.0 (orthogonal).
 
+    Gemma4ForConditionalGeneration nests language_model one level deeper
+    (`.model.language_model`), so we walk both paths via _find_nested_language_model.
+
     Qwen/Llama/Mistral have no .language_model → pass through unchanged
     (already CausalLM-shaped).
     """
-    for attr in _WRAPPER_MODEL_ATTRS:
-        nested = getattr(model, attr, None)
-        if nested is None:
-            continue
-        if hasattr(nested, "lm_head"):
-            return nested  # already CausalLM-shaped
-        # Bare TextModel — wrap in CausalLM so keys roundtrip. meta device
-        # avoids materializing a throwaway 12B random model.
-        with torch.device("meta"):
-            wrapper = AutoModelForCausalLM.from_config(nested.config)
-        wrapper.model = nested  # transplant pretrained weights
-        # lm_head is on meta. Critic caller strips it to Identity (harmless).
-        # Actor caller (train_actor.NLATextOnlyCausalLM) needs a real one to
-        # generate — Gemma ties it to embed_tokens, so tie_weights() points
-        # lm_head.weight at the real embedding tensor (no extra alloc).
-        # Non-tied archs would need the caller to load lm_head separately;
-        # cross that bridge when we hit one.
-        if getattr(nested.config, "tie_word_embeddings", False):
-            wrapper.tie_weights()
-        return wrapper
-    return model
+    nested = _find_nested_language_model(model)
+    if nested is None:
+        return model
+    if hasattr(nested, "lm_head"):
+        return nested  # already CausalLM-shaped
+    # Bare TextModel — wrap in CausalLM so keys roundtrip. meta device
+    # avoids materializing a throwaway 12B random model.
+    with torch.device("meta"):
+        wrapper = AutoModelForCausalLM.from_config(nested.config)
+    wrapper.model = nested  # transplant pretrained weights
+    # lm_head is on meta. Critic caller strips it to Identity (harmless).
+    # Actor caller (train_actor.NLATextOnlyCausalLM) needs a real one to
+    # generate — Gemma ties it to embed_tokens, so tie_weights() points
+    # lm_head.weight at the real embedding tensor (no extra alloc).
+    # Non-tied archs would need the caller to load lm_head separately;
+    # cross that bridge when we hit one.
+    if getattr(nested.config, "tie_word_embeddings", False):
+        wrapper.tie_weights()
+    return wrapper
 
 
 def resolve_decoder_layers(model: Any) -> torch.nn.ModuleList:
@@ -86,16 +108,26 @@ def resolve_decoder_layers(model: Any) -> torch.nn.ModuleList:
 
     After resolve_text_model (always returns CausalLM-shaped):
       Llama/Qwen/Mistral/Gemma: model.model.layers
-      GPT-2/Falcon: model.transformer.h
+      GPT-2/Falcon/Bloom:       model.transformer.h
+      OPT:                      model.model.decoder.layers
+      GPT-NeoX/Pythia:          model.gpt_neox.layers
     """
     model = resolve_text_model(model)
+    layers = None
     if hasattr(model, "model"):
-        layers = model.model.layers
-    elif hasattr(model, "transformer"):
+        inner = model.model
+        if hasattr(inner, "layers"):
+            layers = inner.layers
+        elif hasattr(inner, "decoder") and hasattr(inner.decoder, "layers"):
+            # OPTModel.decoder.layers
+            layers = inner.decoder.layers
+    if layers is None and hasattr(model, "transformer") and hasattr(model.transformer, "h"):
         layers = model.transformer.h
-    else:
+    if layers is None and hasattr(model, "gpt_neox") and hasattr(model.gpt_neox, "layers"):
+        layers = model.gpt_neox.layers
+    if layers is None:
         raise AssertionError(
-            f"{type(model).__name__} has neither .model nor .transformer — "
+            f"{type(model).__name__} has no recognised decoder-layers path — "
             f"extend arch_adapters.resolve_decoder_layers for this architecture"
         )
     assert isinstance(layers, torch.nn.ModuleList), (
@@ -110,6 +142,12 @@ def is_multimodal_wrapper(config_or_model: Any) -> bool:
     for attr in (*_WRAPPER_CONFIG_ATTRS, *_WRAPPER_MODEL_ATTRS):
         if getattr(config_or_model, attr, None) is not None:
             return True
+    # Gemma-4 layout: language_model is at .model.language_model.
+    inner = getattr(config_or_model, "model", None)
+    if inner is not None:
+        for attr in _WRAPPER_MODEL_ATTRS:
+            if getattr(inner, attr, None) is not None:
+                return True
     return False
 
 
