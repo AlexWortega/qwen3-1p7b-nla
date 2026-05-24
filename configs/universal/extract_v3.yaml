@@ -1,0 +1,28 @@
+# v3: same training pool as v1, 5× passages (10k → 50k). Separate out_dir so
+# the existing v1 held-out shards (phi, gemma4, gpt-neo, smollm3, nemotron,
+# qwen3-0.6b, qwen2.5-7b) stay intact for zero-shot eval.
+
+out_dir: artifacts/pool_50k
+n_passages: 50000
+max_chars: 4000
+max_length: 512
+batch_size: 16
+dtype: fp16
+seed: 0
+depth_fraction: 0.5
+
+pool:
+  - tag: qwen3-1p7b           # anchor — d=2048
+    model: Qwen/Qwen3-1.7B
+
+  # 5 training tags (same as v1).
+  - tag: qwen2p5-0p5b
+    model: Qwen/Qwen2.5-0.5B
+  - tag: smollm2-360m
+    model: HuggingFaceTB/SmolLM2-360M
+  - tag: gpt2-medium
+    model: openai-community/gpt2-medium
+  - tag: bloom-560m
+    model: bigscience/bloom-560m
+  - tag: pythia-410m
+    model: EleutherAI/pythia-410m-deduped

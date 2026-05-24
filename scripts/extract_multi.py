@@ -96,7 +96,11 @@ def extract_one_model(
     """Forward `passages` through `model_name`, capture mean-pooled layer-l h
     per passage, write a safetensors shard, return its metadata."""
     print(f"[{tag}] loading {model_name} ...")
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+    except Exception as e:
+        print(f"[{tag}] fast tokenizer failed ({type(e).__name__}); retrying with use_fast=False")
+        tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False, trust_remote_code=True)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"

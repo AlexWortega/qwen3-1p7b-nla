@@ -55,6 +55,38 @@ pool:
   - tag: gemma4-e4b        # HELD-OUT test #2: Gemma 4 E4B
     model: google/gemma-4-E4B
 
+  # Held-out batch #3 — generate samples to inspect zero-shot quality.
+  # gemma-3-1b-pt removed: gated, requires per-repo license accept.
+  - tag: qwen3-0p6b
+    model: Qwen/Qwen3-0.6B-Base
+  - tag: nemotron-mini-4b
+    model: nvidia/Nemotron-Mini-4B-Instruct
+  - tag: smollm3-3b
+    model: HuggingFaceTB/SmolLM3-3B
+  - tag: gpt-neo-1p3b
+    model: EleutherAI/gpt-neo-1.3B
+
+  # Held-out vs trained-specialist comparison: kitft has a per-model NLA AV/AR
+  # trained specifically on Qwen2.5-7B layer 20. We extract at that exact spec
+  # so the two stacks see the same activations.
+  - tag: qwen2p5-7b
+    model: Qwen/Qwen2.5-7B
+    layer_index: 20
+
+  # Held-out batch #4 — new families for cross-arch zero-shot tests.
+  - tag: lfm-7b
+    model: LiquidAI/LFM2-1.2B
+  - tag: deepseek-llm-7b
+    model: deepseek-ai/deepseek-llm-7b-base
+  - tag: yagpt-5-8b
+    model: yandex/YandexGPT-5-Lite-8B-pretrain
+
+  # Russian-focused held-out batch.
+  - tag: rugpt3-large
+    model: ai-forever/rugpt3large_based_on_gpt2
+  - tag: vikhr-7b-01
+    model: Vikhrmodels/Vikhr-7B-instruct_0.1
+
   # opt-350m dropped: facebook/opt-350m only ships pytorch_model.bin and
   # transformers ≥4.46 refuses torch.load under CVE-2025-32434 unless torch
   # ≥2.6. Container has torch 2.4. Re-add if we upgrade or find a safetensors

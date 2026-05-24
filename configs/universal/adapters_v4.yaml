@@ -1,0 +1,7 @@
+# v4: expand training pool from 5 → 11 architecturally diverse models
+# (anchor stays qwen3-1.7b, d_shared=2048). Pool reuses existing
+# activations_pool_300m shards (10k passages).
+anchor_tag: qwen3-1p7b
+d_shared: 2048
+train_frac: 0.8
+seed: 0

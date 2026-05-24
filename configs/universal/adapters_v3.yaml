@@ -1,0 +1,4 @@
+anchor_tag: qwen3-1p7b
+d_shared: 2048
+train_frac: 0.8
+seed: 0
