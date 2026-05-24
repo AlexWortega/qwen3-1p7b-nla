@@ -85,7 +85,11 @@ pool:
   - tag: rugpt3-large
     model: ai-forever/rugpt3large_based_on_gpt2
   - tag: vikhr-7b-01
-    model: Vikhrmodels/Vikhr-7B-instruct_0.1
+    model: Vikhrmodels/Vikhr-7b-0.1
+  - tag: llama-3-8b
+    model: meta-llama/Meta-Llama-3-8B
+  - tag: mistral-7b-v03
+    model: mistralai/Mistral-7B-v0.3
 
   # opt-350m dropped: facebook/opt-350m only ships pytorch_model.bin and
   # transformers ≥4.46 refuses torch.load under CVE-2025-32434 unless torch

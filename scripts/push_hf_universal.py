@@ -25,9 +25,9 @@ if not token:
 print(f"[push] token *{token[-4:]}  repo={REPO}")
 api = HfApi(token=token)
 
-UNIVERSAL_DIR = ROOT / "rl_multi_v1"
-ADAPTERS_DIR = ROOT / "adapters_v1_pinv2_ext_refit"
-DEST = "adapter_universal_rl_v1"
+UNIVERSAL_DIR = ROOT / "rl_multi_v6"
+ADAPTERS_DIR = ROOT / "adapters_v6_direct"
+DEST = "adapter_universal_v6"
 
 assert UNIVERSAL_DIR.is_dir(), f"missing {UNIVERSAL_DIR}"
 assert ADAPTERS_DIR.is_dir(), f"missing {ADAPTERS_DIR}"
