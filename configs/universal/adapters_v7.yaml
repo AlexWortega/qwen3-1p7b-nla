@@ -1,0 +1,6 @@
+# v7: trunk upgrade to Qwen3-4B (d_shared=2560), anchor → qwen3-4b. All 18
+# non-anchor tags re-fit via lstsq against the new anchor.
+anchor_tag: qwen3-4b
+d_shared: 2560
+train_frac: 0.8
+seed: 0

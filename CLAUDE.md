@@ -91,33 +91,64 @@ into "FVE > 0.79 on EVERY tested architecture incl. zero-shot held-out":
   crashes — NLACriticModel doesn't expose it. `task_type=None` skips the wiring;
   we never need `.generate()` on the critic.
 
-## Headline numbers
+## Experiments — full history
 
-After v5 SFT (13-model pool: Bloom, GPT-2, GPT-NeoX/Pythia, Qwen2.5-0.5B/7B,
-Qwen3-0.6B/4B, SmolLM2, SmolLM3, GPT-Neo-1.3B, Nemotron-Mini-4B, Gemma-4-E4B,
-Phi-1.5) + 200-step joint RL with mix reward + direct-lstsq `dec_M` on a
-17-model pool (incl. 3 held-out new architectures: LFM-2-1.2B, DeepSeek-LLM-7B,
-YandexGPT-5-Lite-8B):
+All versions share the same pipeline (extract → init enc_M → AV SFT → AR SFT
+→ refit_dec_direct → joint RL). What changes between versions is the training
+pool, the trunk, and where dec_M is fit.
 
-| Tag | FVE_pipeline_meannorm |
-| --- | --- |
-| gpt-neo-1p3b | 0.998 |
-| gpt2-medium | 0.989 |
-| smollm2-360m / qwen3-0p6b | 0.984 |
-| pythia-410m | 0.977 |
-| qwen3-4b | 0.959 |
-| gemma4-e4b | 0.953 |
-| nemotron-mini-4b | 0.947 |
-| bloom-560m / qwen2p5-0p5b | 0.944 |
-| qwen2p5-7b | 0.927 |
-| **deepseek-llm-7b** (held-out) | **0.880** |
-| **yagpt-5-8b** (held-out) | **0.852** |
-| smollm3-3b | 0.837 |
-| phi-1.5 | 0.821 |
-| **lfm2-1.2b** (held-out) | **0.794** |
+| Ver | Trunk (d_shared) | Pool size | Direct dec_M | Mean FVE_pipe_mn | Notes | HF |
+| --- | --- | --- | --- | --- | --- | --- |
+| v1 | Qwen3-1.7B (2048) | 5 + held-out | no (pinv) | 0.688 / 7 tags | first cross-arch run; phi crashes -0.64 | `adapter_universal_rl_v1/` |
+| v2 | **Qwen3-4B** (2560) | 5 | — | — | **FAILED** — AV mode-collapsed to canonical template | — |
+| v3 | Qwen3-1.7B (2048) | 13 (50k passages) | no | 0.83 trained / -0.75 gemma4 | **FAILED** — mixed teacher z's (Qwen3-8B+Qwen2.5-7B) poisoned SFT | — |
+| v4 | Qwen3-1.7B (2048) | 13 | pinv | 0.83 (incl. some -ve held-out) | refit_dec on `dec(norm(enc(h))) ≈ h` — wrong objective | `adapter_universal_v5_direct/` (precursor) |
+| **v5** | Qwen3-1.7B (2048) | 13 + 3 held-out | **yes (direct-lstsq)** | **0.734 / 13** | added phi/smollm3 to training (was held-out); fixed dec | `adapter_universal_v5_direct/` |
+| **v6 (prod)** | Qwen3-1.7B (2048) | 18 (incl. RU: rugpt3, vikhr; held-out: lfm, deepseek, yagpt) | yes | **0.874 / 18 tags**, all ≥ 0.63 | gemma4 0.09 → 0.93; broad arch coverage | **`adapter_universal_v6/`** |
+| v7 | Qwen3-4B (2560) | 18 | yes | TBD (running) | trunk upgrade rerun (no collapse this time with same teacher); RL OOM on 32GB V100 — SFT-only eval | — (not pushed; awaits eval) |
 
-Mean across 16 = 0.928 (versus per-model paper baseline 0.38 on a single
-Qwen3-1.7B → ~2.4× higher and across a 16-arch pool).
+`FVE_pipeline_meannorm` is per-tag, train/eval 80/20 split, 200 passages, in
+M's native space via `dec_M(AR(z))` vs `h_M` with both sides normalized to
+√d_M.
+
+**Headline (v6)** — best per-tag FVE on the production stack:
+
+| Tag | FVE | | Tag | FVE |
+| --- | --- | --- | --- | --- |
+| rugpt3-large | 0.995 | | qwen3-4b | 0.908 |
+| gpt-neo-1p3b | 0.991 | | qwen2p5-7b | 0.891 |
+| gpt2-medium | 0.980 | | qwen2p5-0p5b | 0.880 |
+| qwen3-0p6b | 0.970 | | nemotron-mini-4b | 0.871 |
+| smollm2-360m | 0.970 | | **deepseek-llm-7b** | **0.804** |
+| pythia-410m | 0.966 | | vikhr-7b-01 | 0.758 |
+| gemma4-e4b | 0.933 | | smollm3-3b | 0.756 |
+| bloom-560m | 0.914 | | **yagpt-5-8b** | **0.755** |
+| | | | phi-1p5 | 0.751 |
+| | | | **lfm-7b** | **0.635** |
+
+Mean 18 = 0.874 (vs Anthropic per-model baseline 0.38 on a single Qwen3-1.7B
+→ ~2.3× higher across an 18-arch pool, **one shared AV/AR**).
+
+## HF artifacts
+
+Repo: **`AlexWortega/Qwen1.7bnla`** (https://huggingface.co/AlexWortega/Qwen1.7bnla)
+
+```
+adapter_universal_v6/                  ← production (v6), use this
+  av/                                  AV LoRA on Qwen3-1.7B + enc_M
+  ar/                                  AR LoRA on truncated Qwen3-1.7B + value_head.pt
+  adapters/                            18 (enc_M, dec_M) pairs + refit_direct_report.json
+  nla_meta.yaml                        d_shared, layer_index, anchor_tag, tag list
+  fve_report.json                      per-tag FVE table
+
+adapter_universal_v5_direct/           v5 with direct-lstsq dec_M (13 tags)
+adapter_universal_rl_v1/               v1 (5 tags + 2 held-out)
+adapter_rl_mix_batched_v1/             single-model NLA (Qwen3-1.7B paper repro)
+adapter_warmstart_9k/                  pre-RL SFT checkpoint
+```
+
+Local artifacts on eva01: `~/vae_llm/artifacts/` — `rl_multi_v{1,5,6}/`,
+`adapters_v{1,5,6,7}_direct/`, `activations_pool_300m/` (10k passages × 18 model shards).
 
 ## Adding a new architecture (≈20 minutes)
 
@@ -148,6 +179,12 @@ Qwen3-1.7B → ~2.4× higher and across a 16-arch pool).
 * **MLP `dec_M` head** — initialized from lstsq solution, 4096-hidden 2-layer
   MLP. Did not beat pure linear baseline (e.g. lfm 0.76 MLP vs 0.79 linear).
   The relevant residual is already linear; non-linearity overfits.
+* **v7: Qwen3-4B trunk rerun (with same teacher this time)** — SFT loss looks
+  clean (~0.6, no collapse), per-tag FVE_d_shared on AR alone 0.13-0.48 (worse
+  than v6 0.65-0.74), but direct-lstsq dec_M closes the gap → FVE_ar_alone
+  ~0.94 across 18 tags, **essentially identical to v6**. RL phase OOMs on a
+  single 32 GB V100 (AV + AV_init + AR = 3 × 4B copies don't fit). Conclusion:
+  trunk upgrade gives no measurable gain on this task; mainline stays on 1.7B.
 
 ## Layout
 
