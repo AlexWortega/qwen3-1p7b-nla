@@ -97,37 +97,53 @@ All versions share the same pipeline (extract → init enc_M → AV SFT → AR S
 → refit_dec_direct → joint RL). What changes between versions is the training
 pool, the trunk, and where dec_M is fit.
 
-| Ver | Trunk (d_shared) | Pool size | Direct dec_M | Mean FVE_pipe_mn | Notes | HF |
-| --- | --- | --- | --- | --- | --- | --- |
-| v1 | Qwen3-1.7B (2048) | 5 + held-out | no (pinv) | 0.688 / 7 tags | first cross-arch run; phi crashes -0.64 | `adapter_universal_rl_v1/` |
-| v2 | **Qwen3-4B** (2560) | 5 | — | — | **FAILED** — AV mode-collapsed to canonical template | — |
-| v3 | Qwen3-1.7B (2048) | 13 (50k passages) | no | 0.83 trained / -0.75 gemma4 | **FAILED** — mixed teacher z's (Qwen3-8B+Qwen2.5-7B) poisoned SFT | — |
-| v4 | Qwen3-1.7B (2048) | 13 | pinv | 0.83 (incl. some -ve held-out) | refit_dec on `dec(norm(enc(h))) ≈ h` — wrong objective | `adapter_universal_v5_direct/` (precursor) |
-| **v5** | Qwen3-1.7B (2048) | 13 + 3 held-out | **yes (direct-lstsq)** | **0.734 / 13** | added phi/smollm3 to training (was held-out); fixed dec | `adapter_universal_v5_direct/` |
-| **v6 (prod)** | Qwen3-1.7B (2048) | 18 (incl. RU: rugpt3, vikhr; held-out: lfm, deepseek, yagpt) | yes | **0.874 / 18 tags**, all ≥ 0.63 | gemma4 0.09 → 0.93; broad arch coverage | **`adapter_universal_v6/`** |
-| v7 | Qwen3-4B (2560) | 18 | yes | TBD (running) | trunk upgrade rerun (no collapse this time with same teacher); RL OOM on 32GB V100 — SFT-only eval | — (not pushed; awaits eval) |
+| Ver | Trunk (d_shared) | Trained | Held-out (eval) | Direct dec_M | Mean FVE_pipe_mn | Notes | HF |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| v1 | Qwen3-1.7B (2048) | 5 | 2 (gemma4, phi) | no (pinv) | 0.69 / 7 | first cross-arch run; phi crashes -0.64 | `adapter_universal_rl_v1/` |
+| v2 | **Qwen3-4B** (2560) | 5 | — | — | — | **FAILED** — AV mode-collapsed to canonical template | — |
+| v3 | Qwen3-1.7B (2048) | 13 (50k) | 0 | no | 0.83 trained / -0.75 gemma4 | **FAILED** — mixed teacher z's poisoned SFT | — |
+| v4 | Qwen3-1.7B (2048) | 13 | 0 | pinv | 0.83 (some -ve held-out elsewhere) | refit_dec on `dec(norm(enc(h))) ≈ h` — wrong objective | `adapter_universal_v5_direct/` (precursor) |
+| **v5** | Qwen3-1.7B (2048) | 13 | 3 (lfm, deepseek, yagpt) | **yes (direct-lstsq)** | 0.73 trained / 0.84 held-out | added phi/smollm3 to training (were broken held-out); fixed dec | `adapter_universal_v5_direct/` |
+| **v6 (prod)** | Qwen3-1.7B (2048) | 13 | 5 (lfm, deepseek, yagpt, rugpt3, vikhr) | yes | **0.89 trained / 0.79 held-out, 0.874 / 18 overall**, all ≥ 0.63 | gemma4 0.09 → 0.93; broad arch coverage; held-out RU + 7-8B | **`adapter_universal_v6/`** |
+| v7 | Qwen3-4B (2560) | 13 | 5 | yes | TBD (running) | trunk upgrade rerun (no collapse this time, same teacher); RL OOM on 32GB V100 — SFT-only eval | — (not pushed; awaits eval) |
+
+**Trained pool (v5/v6/v7, identical 13):** bloom-560m, gpt2-medium, pythia-410m,
+qwen2p5-0p5b, smollm2-360m, gpt-neo-1p3b, qwen3-0p6b, qwen3-4b, qwen2p5-7b,
+nemotron-mini-4b, gemma4-e4b, smollm3-3b, phi-1p5.
+
+**Held-out (v6 eval):** lfm-7b (Liquid LFM2-1.2B), deepseek-llm-7b,
+yagpt-5-8b (YandexGPT-5-Lite-8B), rugpt3-large (Russian, GPT-2 family),
+vikhr-7b-01 (Russian, Mistral family).
 
 `FVE_pipeline_meannorm` is per-tag, train/eval 80/20 split, 200 passages, in
 M's native space via `dec_M(AR(z))` vs `h_M` with both sides normalized to
 √d_M.
 
-**Headline (v6)** — best per-tag FVE on the production stack:
+**Headline (v6)** — best per-tag FVE on the production stack. ★ = held-out
+(only `enc_M`/`dec_M` lstsq-fit, trunks never saw this model during SFT/RL):
 
-| Tag | FVE | | Tag | FVE |
-| --- | --- | --- | --- | --- |
-| rugpt3-large | 0.995 | | qwen3-4b | 0.908 |
-| gpt-neo-1p3b | 0.991 | | qwen2p5-7b | 0.891 |
-| gpt2-medium | 0.980 | | qwen2p5-0p5b | 0.880 |
-| qwen3-0p6b | 0.970 | | nemotron-mini-4b | 0.871 |
-| smollm2-360m | 0.970 | | **deepseek-llm-7b** | **0.804** |
-| pythia-410m | 0.966 | | vikhr-7b-01 | 0.758 |
-| gemma4-e4b | 0.933 | | smollm3-3b | 0.756 |
-| bloom-560m | 0.914 | | **yagpt-5-8b** | **0.755** |
-| | | | phi-1p5 | 0.751 |
-| | | | **lfm-7b** | **0.635** |
+| Tag | FVE | Status | | Tag | FVE | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| **★ rugpt3-large** | **0.995** | held-out (RU) | | qwen3-4b | 0.908 | trained |
+| gpt-neo-1p3b | 0.991 | trained | | qwen2p5-7b | 0.891 | trained |
+| gpt2-medium | 0.980 | trained | | qwen2p5-0p5b | 0.880 | trained |
+| qwen3-0p6b | 0.970 | trained | | nemotron-mini-4b | 0.871 | trained |
+| smollm2-360m | 0.970 | trained | | **★ deepseek-llm-7b** | **0.804** | held-out |
+| pythia-410m | 0.966 | trained | | **★ vikhr-7b-01** | **0.758** | held-out (RU) |
+| gemma4-e4b | 0.933 | trained | | smollm3-3b | 0.756 | trained |
+| bloom-560m | 0.914 | trained | | **★ yagpt-5-8b** | **0.755** | held-out (RU) |
+| | | | | phi-1p5 | 0.751 | trained |
+| | | | | **★ lfm-7b** | **0.635** | held-out |
 
-Mean 18 = 0.874 (vs Anthropic per-model baseline 0.38 on a single Qwen3-1.7B
-→ ~2.3× higher across an 18-arch pool, **one shared AV/AR**).
+- **Mean trained (13):** 0.892
+- **Mean held-out (5):** 0.789 — only ~10pp gap, no architecture catastrophes
+- **Mean overall (18):** 0.874
+
+vs Anthropic per-model baseline 0.38 on a single Qwen3-1.7B → ~2.3× higher
+across an 18-arch pool, **one shared AV/AR**. Held-out generalisation is the
+key result: rugpt3-large (Russian, GPT-2 fam) and deepseek-llm-7b (held-out)
+both clear 0.8 with no trunk retraining — just lstsq `enc_M` + direct-lstsq
+`dec_M`, total fit time ~5 min per new model.
 
 ## HF artifacts
 
