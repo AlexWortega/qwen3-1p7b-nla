@@ -54,7 +54,7 @@ All versions share the same pipeline (extract activations → init `enc_M` → A
 | v4 | Qwen3-1.7B (2048) | 13 | 0 | pinv | 0.83 (some -ve on other held-out) | refit_dec on wrong objective `dec(norm(enc(h))) ≈ h` | precursor to v5 |
 | **v5** | Qwen3-1.7B (2048) | 13 | 3 (lfm, deepseek, yagpt) | **direct-lstsq** | 0.73 trained / 0.84 held-out | added phi/smollm3 to training (were broken held-out); **dec fix** | `adapter_universal_v5_direct/` |
 | **v6 (prod)** | Qwen3-1.7B (2048) | 13 | 5 (+ rugpt3, vikhr) | direct-lstsq | **0.89 trained / 0.79 held-out, 0.874 / 18 overall** | gemma4 0.09 → 0.93; broad arch coverage; held-out RU + 7-8B | **`adapter_universal_v6/`** |
-| v7 | Qwen3-4B (2560) | 13 | 5 | direct-lstsq | TBD | trunk upgrade rerun (no collapse this time, same teacher); RL OOM on 32 GB V100 — SFT-only eval | — (not pushed; awaits eval) |
+| v7 | Qwen3-4B (2560) | 12 (+ 1.7B held-out) | 6 | direct-lstsq | 0.88 trained / 0.79 held-out, **0.849 / 18** | trunk upgrade rerun (no collapse this time, same teacher); RL OOMs on 32 GB V100; **no measurable gain over v6** | `adapter_universal_v7_sft/` |
 
 **Trained pool (v5 / v6 / v7, identical 13):** bloom-560m, gpt2-medium, pythia-410m, qwen2p5-0p5b, smollm2-360m, gpt-neo-1p3b, qwen3-0p6b, qwen3-4b, qwen2p5-7b, nemotron-mini-4b, gemma4-e4b, smollm3-3b, phi-1p5.
 
@@ -66,7 +66,7 @@ All versions share the same pipeline (extract activations → init `enc_M` → A
 * **per-token HeadTransformer + frozen v1 trunk**: richer attention head over per-position activations; AV trained on the linear-adapter output distribution can't interpret the HeadTransformer distribution. Joint train heads + LoRA → collapse.
 * **v3 — 5× data (50k passages)** with mixed teacher z: regressed trained pool 0.92 → 0.83; gemma4-e4b crashed 0.86 → -0.75. Mixing teachers in the same SFT corpus is poison.
 * **MLP `dec_M` head**: 4096-hidden 2-layer MLP initialised from lstsq solution; did not beat the pure linear baseline (e.g. lfm 0.76 MLP vs 0.79 linear). The residual is already linear; non-linearity overfits.
-* **v7 — Qwen3-4B trunk rerun (consistent teacher)**: SFT loss clean (~0.6, no collapse), per-tag FVE_d_shared on AR alone 0.13-0.48 (worse than v6 0.65-0.74), but direct-lstsq `dec_M` closes the gap → FVE_ar_alone ~0.94 across 18 tags, **essentially identical to v6**. RL phase OOMs on a single 32 GB V100 (AV + AV_init + AR = 3 × 4B copies don't fit). Conclusion: trunk upgrade gives no measurable gain on this task; mainline stays on 1.7B.
+* **v7 — Qwen3-4B trunk rerun (consistent teacher)**: SFT loss clean (~0.6, no collapse). After direct-lstsq `dec_M`, final pipeline FVE = **0.849 across 18 tags** (vs v6 **0.874**) — 2.5 pp **worse**, with trained-pool mean dropping 0.892 → 0.877 while held-out is flat (0.789 → 0.792). RL phase OOMs on a single 32 GB V100 (AV + AV_init + AR = 3 × 4B copies don't fit), so v7 is SFT-only — but the SFT comparison alone is conclusive: trunk upgrade gives **no measurable gain** on this task. Mainline stays on Qwen3-1.7B (v6).
 
 ## HuggingFace artifacts
 
@@ -80,6 +80,7 @@ adapter_universal_v6/                  ← production, use this
   nla_meta.yaml                        d_shared, layer_index, anchor_tag, tag list
   fve_report.json                      per-tag FVE table
 
+adapter_universal_v7_sft/              v7 Qwen3-4B trunk, SFT-only (RL OOM); 18 tags @ 0.849 mean
 adapter_universal_v5_direct/           v5 with direct-lstsq dec_M (13 tags)
 adapter_universal_rl_v1/               v1 (5 tags + 2 held-out)
 adapter_rl_mix_batched_v1/             single-model NLA (Qwen3-1.7B paper repro)
