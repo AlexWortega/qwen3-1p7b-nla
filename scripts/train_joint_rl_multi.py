@@ -248,6 +248,12 @@ def main():
     ap.add_argument("--contrastive-tau", type=float, default=0.1)
     ap.add_argument("--log-every", type=int, default=5)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--av-init-device", default=None,
+                    help="If set (e.g. cuda:1), load the frozen AV_init on a separate GPU "
+                         "to free memory on the main device. Useful when the trunk is large.")
+    ap.add_argument("--ar-device", default=None,
+                    help="If set (e.g. cuda:1), load AR (trainable, truncated trunk + LoRA + value_head) "
+                         "on a separate GPU. Needed when AV trainable + AR trainable both don't fit on the same V100.")
     args = ap.parse_args()
 
     if args.reward in ("contrastive", "mix") and args.batch_size < 2:
@@ -272,12 +278,14 @@ def main():
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    print(f"[joint-rl] loading AV trainable ...")
+    av_init_device = args.av_init_device or device
+    ar_device = args.ar_device or device
+    print(f"[joint-rl] loading AV trainable on {device} ...")
     av = _load_av(av_base, Path(args.av_dir) / "av", trainable=True, device=device)
-    print(f"[joint-rl] loading AV_init frozen ...")
-    av_init = _load_av(av_base, Path(args.av_dir) / "av", trainable=False, device=device)
-    print(f"[joint-rl] loading AR trainable ...")
-    ar = _load_ar(av_base, Path(args.ar_dir), layer_index, trainable=True, device=device)
+    print(f"[joint-rl] loading AV_init frozen on {av_init_device} ...")
+    av_init = _load_av(av_base, Path(args.av_dir) / "av", trainable=False, device=av_init_device)
+    print(f"[joint-rl] loading AR trainable on {ar_device} ...")
+    ar = _load_ar(av_base, Path(args.ar_dir), layer_index, trainable=True, device=ar_device)
 
     adapters = ModelPoolAdapters.load(args.adapters_dir).to(device)
     for p in adapters.parameters():
@@ -328,9 +336,12 @@ def main():
             args.max_new_tokens, args.temperature, device,
         )
 
-        # (ii) AR forward + per-M MSE.
+        # (ii) AR forward + per-M MSE. AR may live on a separate GPU; ar_pred_shared
+        # carries its grad cross-device, then we cross over to `device` for the M-space loss
+        # so adapters (kept on `device`) and the gold h_M_rep don't need duplication.
         z_payloads = [extract_explanation(t) or t for t in texts]
-        ar_pred_shared = ar_forward(ar, tokenizer, z_payloads, device, d_shared)          # [B*G, d_shared] grad
+        ar_pred_shared = ar_forward(ar, tokenizer, z_payloads, ar_device, d_shared)        # [B*G, d_shared] grad on ar_device
+        ar_pred_shared = ar_pred_shared.to(device)                                         # cross-device autograd
         ar_pred_shared_n = normalize_activation(ar_pred_shared, inj_scale)
         ar_pred_M = adapters.decode(tag, ar_pred_shared_n).float()                          # [B*G, d_M]
         # AR loss in M's space, meannorm both sides.
@@ -366,10 +377,12 @@ def main():
             baseline = reward_g.mean(dim=1, keepdim=True)                    # [B, 1]
             adv = (reward_g - baseline).t().reshape(-1)                       # back to (G*B) order
 
-        # KL anchor.
-        init_logp = av_init_logp_batched(av_init, tokenizer, prompt_text, inj_shared,
-                                          texts, inj_id, left_id, right_id, device)
-        kl_per_seq = sum_logp - init_logp.detach()
+        # KL anchor. av_init may live on a different GPU — pass its device and
+        # transfer the result back to the main device for loss combination.
+        init_logp = av_init_logp_batched(av_init, tokenizer, prompt_text,
+                                          inj_shared.to(av_init_device),
+                                          texts, inj_id, left_id, right_id, av_init_device)
+        kl_per_seq = sum_logp - init_logp.to(device).detach()
 
         av_rl_loss = -(adv * sum_logp).mean()
         av_kl_loss = args.beta_kl * kl_per_seq.mean()

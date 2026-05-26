@@ -55,6 +55,7 @@ All versions share the same pipeline (extract activations → init `enc_M` → A
 | **v5** | Qwen3-1.7B (2048) | 13 | 3 (lfm, deepseek, yagpt) | **direct-lstsq** | 0.73 trained / 0.84 held-out | added phi/smollm3 to training (were broken held-out); **dec fix** | `adapter_universal_v5_direct/` |
 | **v6 (prod)** | Qwen3-1.7B (2048) | 13 | 5 (+ rugpt3, vikhr) | direct-lstsq | **0.89 trained / 0.79 held-out, 0.874 / 18 overall** | gemma4 0.09 → 0.93; broad arch coverage; held-out RU + 7-8B | **`adapter_universal_v6/`** |
 | v7 | Qwen3-4B (2560) | 12 (+ 1.7B held-out) | 6 | direct-lstsq | 0.88 trained / 0.79 held-out, **0.849 / 18** | trunk upgrade rerun (no collapse this time, same teacher); RL OOMs on 32 GB V100; **no measurable gain over v6** | `adapter_universal_v7_sft/` |
+| v7r256 | Qwen3-4B (2560) | 13 | 5 | direct-lstsq + heldout-refit | **0.93 / 18** FVE, **cos-vs-gold 0.31 trained / 0.34 held-out / 0.32 overall** | LoRA r=256 + held-out enc_M refit (new step). enc_M drifts 3-4× more during SFT than r=16 → held-out OOD → fixed by post-SFT lstsq-projection-target refit. Still not v6 quality on text but no template collapse | `adapter_universal_v7r256_sft/` |
 
 **Trained pool (v5 / v6 / v7, identical 13):** bloom-560m, gpt2-medium, pythia-410m, qwen2p5-0p5b, smollm2-360m, gpt-neo-1p3b, qwen3-0p6b, qwen3-4b, qwen2p5-7b, nemotron-mini-4b, gemma4-e4b, smollm3-3b, phi-1p5.
 
@@ -80,6 +81,7 @@ adapter_universal_v6/                  ← production, use this
   nla_meta.yaml                        d_shared, layer_index, anchor_tag, tag list
   fve_report.json                      per-tag FVE table
 
+adapter_universal_v7r256_sft/          v7 + LoRA r=256 + held-out enc_M refit; cos-vs-gold 0.32 / 18
 adapter_universal_v7_sft/              v7 Qwen3-4B trunk, SFT-only (RL OOM); 18 tags @ 0.849 mean
 adapter_universal_v5_direct/           v5 with direct-lstsq dec_M (13 tags)
 adapter_universal_rl_v1/               v1 (5 tags + 2 held-out)
@@ -92,7 +94,8 @@ adapter_warmstart_9k/                  pre-RL SFT checkpoint
 1. Add the model to `configs/universal/extract_v1.yaml`; run `scripts/extract_multi.py` (skips existing shards). ~10-15 min per 7 B model.
 2. `scripts/extend_adapters.py` — lstsq-fit `enc_M` against the anchor.
 3. `scripts/refit_dec_direct.py` — lstsq-fit `dec_M` against AR's *actual* predictions on the same passage corpus.
-4. `scripts/eval_fve_multi.py` — FVE typically ≥ 0.79 without touching the trunks. If the model has tokenizer quirks (Voxtral tekken, YaGPT custom BPE), pass `use_fast=False`; `extract_multi.py` has a fallback retry.
+4. `scripts/refit_heldout_enc.py` — *required when the new arch is held-out from AV/AR training* with a high-capacity LoRA. Re-projects `enc_M` into the post-SFT projection space (mean of trained tags' enc_M outputs on the same passages). Without this, AV reads the held-out tag's lstsq-init projection as out-of-distribution and generates incoherent z. Closed-form lstsq, ~30 s per tag.
+5. `scripts/eval_fve_multi.py` — FVE typically ≥ 0.79 without touching the trunks. If the model has tokenizer quirks (Voxtral tekken, YaGPT custom BPE), pass `use_fast=False`; `extract_multi.py` has a fallback retry.
 
 ## Quickstart (reproduce v6 inference)
 
