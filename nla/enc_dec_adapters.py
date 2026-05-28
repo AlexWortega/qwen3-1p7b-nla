@@ -15,6 +15,7 @@ nn.ModuleDict stores keys in state_dict paths, and `.` is the path separator.
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 import torch
@@ -116,6 +117,7 @@ class ModelPoolAdapters(nn.Module):
 
     META_FILENAME = "meta.json"
     WEIGHTS_FILENAME = "adapters.safetensors"
+    SERVE_CACHE_FILENAME = "serve_cache.safetensors"
 
     def __init__(self, d_shared: int, model_dims: dict[str, int]):
         super().__init__()
@@ -128,6 +130,12 @@ class ModelPoolAdapters(nn.Module):
         for tag, d_m in self.model_dims.items():
             self.encoders[tag] = LinearAdapter(d_m, self.d_shared)
             self.decoders[tag] = LinearAdapter(self.d_shared, d_m)
+        # Optional serve-time cache: mean of SFT-trained encoder projections,
+        # aligned by passage row. When present, enables add_held_out_tag().
+        # Stored as a plain tensor attribute (not a buffer) so save/load handles
+        # it through a sidecar safetensors file rather than the main state_dict.
+        self._enc_target_cache: torch.Tensor | None = None
+        self._cache_meta: dict | None = None
 
     @property
     def tags(self) -> list[str]:
@@ -168,13 +176,20 @@ class ModelPoolAdapters(nn.Module):
         directory.mkdir(parents=True, exist_ok=True)
         sd = {k: v.detach().cpu() for k, v in self.state_dict().items()}
         save_file(sd, str(directory / self.WEIGHTS_FILENAME))
+        meta = {
+            "d_shared": self.d_shared,
+            "model_dims": self.model_dims,
+        }
+        if self._cache_meta is not None:
+            meta["serve_cache"] = self._cache_meta
         (directory / self.META_FILENAME).write_text(
-            json.dumps(
-                {"d_shared": self.d_shared, "model_dims": self.model_dims},
-                indent=2,
-                sort_keys=True,
-            )
+            json.dumps(meta, indent=2, sort_keys=True)
         )
+        if self._enc_target_cache is not None:
+            save_file(
+                {"enc_target": self._enc_target_cache.detach().cpu().float()},
+                str(directory / self.SERVE_CACHE_FILENAME),
+            )
 
     @classmethod
     def load(cls, directory: str | Path) -> "ModelPoolAdapters":
@@ -184,4 +199,111 @@ class ModelPoolAdapters(nn.Module):
         sd = load_file(str(directory / cls.WEIGHTS_FILENAME))
         # strict=True catches typos in saved tags or arch drift early.
         pool.load_state_dict(sd, strict=True)
+        cache_path = directory / cls.SERVE_CACHE_FILENAME
+        if cache_path.exists():
+            pool._enc_target_cache = load_file(str(cache_path))["enc_target"].float()
+            pool._cache_meta = meta.get("serve_cache")
         return pool
+
+    @property
+    def has_serve_cache(self) -> bool:
+        return self._enc_target_cache is not None
+
+    @torch.no_grad()
+    def build_serve_cache(
+        self,
+        h_per_tag: dict[str, torch.Tensor],
+        trained_tags: list[str],
+        inject_scale: float | None = None,
+    ) -> dict:
+        """Populate the serve-time cache by averaging post-SFT enc projections.
+
+        For each trained tag T with raw activations `h_per_tag[T]` (shape
+        `[N, d_M_T]`, aligned by passage row across all tags), compute
+        `enc_T(h_T)`, optionally normalize each row to `inject_scale`, then
+        average across T. The resulting `[N, d_shared]` matrix is the target
+        any new (held-out) tag's encoder should project into via lstsq.
+
+        The optional `inject_scale` matches the injection-time normalization
+        the AV trunk applies during SFT and inference (`√d_shared` in the
+        v8 universal stack); pass it for symmetry, omit to skip normalization.
+
+        Returns a small dict of provenance metadata (also persisted to
+        `meta.json` under `serve_cache`).
+        """
+        from nla.schema import normalize_activation
+
+        assert trained_tags, "trained_tags must be non-empty"
+        Ns = {t: h_per_tag[t].shape[0] for t in trained_tags}
+        N = next(iter(Ns.values()))
+        assert all(v == N for v in Ns.values()), f"row mismatch across tags: {Ns}"
+
+        target = torch.zeros(N, self.d_shared, dtype=torch.float32)
+        for t in trained_tags:
+            assert t in self.encoders, f"trained tag {t!r} not in pool"
+            h = h_per_tag[t].float()
+            proj = self.encoders[t](h).float()
+            if inject_scale is not None:
+                proj = normalize_activation(proj, inject_scale)
+            target += proj
+        target /= len(trained_tags)
+        self._enc_target_cache = target
+        self._cache_meta = {
+            "n_passages": int(N),
+            "trained_tags": list(trained_tags),
+            "inject_scale": float(inject_scale) if inject_scale is not None else None,
+        }
+        return dict(self._cache_meta)
+
+    @torch.no_grad()
+    def add_held_out_tag(
+        self,
+        tag: str,
+        h_new_raw: torch.Tensor,
+        normalize_input: bool = True,
+    ) -> dict:
+        """Add a new model tag in one closed-form lstsq call. No training.
+
+        `h_new_raw` is the new model's raw activations on the same N passages
+        as the serve cache, shape `[N, d_M_new]`. Per-row √d_M normalization
+        is applied before lstsq (same convention as `init_adapters.py`),
+        unless `normalize_input=False`.
+
+        Pipeline:
+          enc_new = lstsq(h_new_normalized, self.enc_target_cache)
+                    — projects into the AV-friendly space the AV trunk learned
+                      to read during SFT, not the raw anchor space.
+          dec_new = lstsq(enc_new(h_new_normalized), h_new_raw)
+                    — pseudo-inverse of enc_new so dec_new(AR(z)) ≈ h_M.
+
+        Returns diagnostics: `{"d_M", "enc_fve", "dec_fve"}`.
+        """
+        from nla.schema import normalize_activation
+
+        _check_tag(tag)
+        assert self.has_serve_cache, (
+            "no serve cache — call build_serve_cache(...) first or load a bundle "
+            "that has serve_cache.safetensors next to adapters.safetensors"
+        )
+        N_cache = self._enc_target_cache.shape[0]
+        assert h_new_raw.shape[0] == N_cache, (
+            f"row count mismatch: h_new has {h_new_raw.shape[0]} passages, "
+            f"serve cache has {N_cache}. Align by passage order before calling."
+        )
+        d_m = int(h_new_raw.shape[1])
+        h_raw_f = h_new_raw.float()
+        h_in = normalize_activation(h_raw_f, math.sqrt(d_m)) if normalize_input else h_raw_f
+
+        new_enc = LinearAdapter.lstsq_init(h_in, self._enc_target_cache)
+        z = new_enc(h_in)
+        new_dec = LinearAdapter.lstsq_init(z, h_raw_f)
+
+        self.model_dims[tag] = d_m
+        self.encoders[tag] = new_enc
+        self.decoders[tag] = new_dec
+
+        return {
+            "d_M": d_m,
+            "enc_fve": round(new_enc.lstsq_fve(h_in, self._enc_target_cache), 4),
+            "dec_fve": round(new_dec.lstsq_fve(z, h_raw_f), 4),
+        }

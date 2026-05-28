@@ -231,10 +231,14 @@ def main():
             sim = float((emb[i] * emb[j]).sum().item())
             pair_cos_sum[key] = pair_cos_sum.get(key, 0.0) + sim
         pair_count += 1
-    mean_pair = sum(pair_cos_sum.values()) / (len(pair_cos_sum) * pair_count)
-    print(f"[cross-model z-consistency] mean pairwise cos = {mean_pair:.4f}")
-    for (a, b), s in sorted(pair_cos_sum.items()):
-        print(f"   {a:14s} ~ {b:14s}: {s/pair_count:.4f}")
+    if pair_cos_sum and pair_count:
+        mean_pair = sum(pair_cos_sum.values()) / (len(pair_cos_sum) * pair_count)
+        print(f"[cross-model z-consistency] mean pairwise cos = {mean_pair:.4f}")
+        for (a, b), s in sorted(pair_cos_sum.items()):
+            print(f"   {a:14s} ~ {b:14s}: {s/pair_count:.4f}")
+    else:
+        mean_pair = float("nan")
+        print(f"[cross-model z-consistency] skipped (need >= 2 tags)")
 
     if args.out_json:
         out = {
@@ -242,7 +246,7 @@ def main():
             "n_passages": len(eval_passage_ids),
             "per_tag_cos_vs_gold": per_tag_cos,
             "cross_model_mean_pair_cos": mean_pair,
-            "pair_cos": {f"{a}|{b}": s / pair_count for (a, b), s in pair_cos_sum.items()},
+            "pair_cos": {f"{a}|{b}": s / pair_count for (a, b), s in pair_cos_sum.items()} if pair_count else {},
             "samples": [
                 {"passage_id": pid, "gold": per_passage[pid]["gold"],
                  **{t: per_passage[pid][t] for t in training_tags}}

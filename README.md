@@ -55,7 +55,8 @@ All versions share the same pipeline (extract activations → init `enc_M` → A
 | **v5** | Qwen3-1.7B (2048) | 13 | 3 (lfm, deepseek, yagpt) | **direct-lstsq** | 0.73 trained / 0.84 held-out | added phi/smollm3 to training (were broken held-out); **dec fix** | `adapter_universal_v5_direct/` |
 | **v6 (prod)** | Qwen3-1.7B (2048) | 13 | 5 (+ rugpt3, vikhr) | direct-lstsq | **0.89 trained / 0.79 held-out, 0.874 / 18 overall** | gemma4 0.09 → 0.93; broad arch coverage; held-out RU + 7-8B | **`adapter_universal_v6/`** |
 | v7 | Qwen3-4B (2560) | 12 (+ 1.7B held-out) | 6 | direct-lstsq | 0.88 trained / 0.79 held-out, **0.849 / 18** | trunk upgrade rerun (no collapse this time, same teacher); RL OOMs on 32 GB V100; **no measurable gain over v6** | `adapter_universal_v7_sft/` |
-| v7r256 | Qwen3-4B (2560) | 13 | 5 | direct-lstsq + heldout-refit | **0.93 / 18** FVE, **cos-vs-gold 0.31 trained / 0.34 held-out / 0.32 overall** | LoRA r=256 + held-out enc_M refit (new step). enc_M drifts 3-4× more during SFT than r=16 → held-out OOD → fixed by post-SFT lstsq-projection-target refit. Still not v6 quality on text but no template collapse | `adapter_universal_v7r256_sft/` |
+| v7r256-sft | Qwen3-4B (2560) | 13 | 5 | direct-lstsq + heldout-refit | 0.93 FVE, **cos-vs-gold 0.31 / 0.34 / 0.32** | LoRA r=256 + held-out enc_M refit (new step). enc_M drifts 3-4× more during SFT than r=16 → held-out OOD → fixed by post-SFT lstsq-projection-target refit | `adapter_universal_v7r256_sft/` |
+| **v7r256-rl** | Qwen3-4B (2560) | 13 | 5 | direct-lstsq + heldout-refit | **0.92 FVE, cos-vs-gold 0.35 / 0.35 / 0.35, cross-model 0.40** | + 200 steps GRPO with mse reward on 3-GPU split (AV cuda:0, AR+AV_init cuda:1). RL closed half the gap to v6 on trained tags and held-out tracks trained 1:1 — no domain gap | `adapter_universal_v7r256_rl/` |
 
 **Trained pool (v5 / v6 / v7, identical 13):** bloom-560m, gpt2-medium, pythia-410m, qwen2p5-0p5b, smollm2-360m, gpt-neo-1p3b, qwen3-0p6b, qwen3-4b, qwen2p5-7b, nemotron-mini-4b, gemma4-e4b, smollm3-3b, phi-1p5.
 
@@ -81,6 +82,7 @@ adapter_universal_v6/                  ← production, use this
   nla_meta.yaml                        d_shared, layer_index, anchor_tag, tag list
   fve_report.json                      per-tag FVE table
 
+adapter_universal_v7r256_rl/           v7r256 SFT + 200-step GRPO; cos-vs-gold 0.35 / cross-model 0.40
 adapter_universal_v7r256_sft/          v7 + LoRA r=256 + held-out enc_M refit; cos-vs-gold 0.32 / 18
 adapter_universal_v7_sft/              v7 Qwen3-4B trunk, SFT-only (RL OOM); 18 tags @ 0.849 mean
 adapter_universal_v5_direct/           v5 with direct-lstsq dec_M (13 tags)
@@ -89,13 +91,61 @@ adapter_rl_mix_batched_v1/             single-model NLA (Qwen3-1.7B paper repro)
 adapter_warmstart_9k/                  pre-RL SFT checkpoint
 ```
 
-## Adding a new architecture (~20 minutes)
+## Adding a new architecture
 
-1. Add the model to `configs/universal/extract_v1.yaml`; run `scripts/extract_multi.py` (skips existing shards). ~10-15 min per 7 B model.
-2. `scripts/extend_adapters.py` — lstsq-fit `enc_M` against the anchor.
-3. `scripts/refit_dec_direct.py` — lstsq-fit `dec_M` against AR's *actual* predictions on the same passage corpus.
-4. `scripts/refit_heldout_enc.py` — *required when the new arch is held-out from AV/AR training* with a high-capacity LoRA. Re-projects `enc_M` into the post-SFT projection space (mean of trained tags' enc_M outputs on the same passages). Without this, AV reads the held-out tag's lstsq-init projection as out-of-distribution and generates incoherent z. Closed-form lstsq, ~30 s per tag.
-5. `scripts/eval_fve_multi.py` — FVE typically ≥ 0.79 without touching the trunks. If the model has tokenizer quirks (Voxtral tekken, YaGPT custom BPE), pass `use_fast=False`; `extract_multi.py` has a fallback retry.
+### Recommended (v8+): one-shot serve-time auto-refit (~5 min, no training)
+
+If your adapter bundle has `serve_cache.safetensors` (any bundle built with v8 or later — see "Baking the serve cache" below), adding a held-out model is a single closed-form call:
+
+```bash
+# 1. Extract the new model's activations on the shared 10k-passage pool.
+python scripts/extract_large_meanpool.py \
+  --tag <new-tag> --model <hf/repo> --pool-dir artifacts/activations_pool_300m
+
+# 2. One-shot lstsq: enc vs serve cache (AV-friendly space), dec as pseudo-inverse.
+python scripts/add_held_out.py \
+  --in-adapters  <bundle-with-serve_cache> \
+  --pool-dir     artifacts/activations_pool_300m \
+  --tags         <new-tag> \
+  --out-adapters <bundle-with-new-tag>
+
+# 3. Eval.
+python scripts/eval_universal.py --av-save-dir <av_dir> \
+  --adapters-dir <bundle-with-new-tag> --tags <new-tag>
+```
+
+`ModelPoolAdapters.add_held_out_tag()` does both lstsq steps (enc vs `serve_cache`, dec as pseudo-inverse of enc) in one call — no `extend_adapters` + `refit_heldout_enc` two-step.
+
+Validated on 5 held-out arch/sizes from a v8-mixed bundle (no training):
+
+| Tag | d_M | enc_FVE | cos-vs-gold |
+| --- | --- | --- | --- |
+| Qwen2.5-1.5B | 1536 | 0.98 | **0.606** |
+| Qwen3-14B    | 5120 | 0.98 | **0.598** |
+| Qwen3-8B     | 4096 | 0.98 | 0.587 |
+| Qwen2.5-3B   | 2048 | 0.99 | 0.586 |
+| MiniCPM5-1B  | 1536 | 0.98 | 0.582 |
+
+Cross-tag pairwise z-cosine: **0.75** — different held-out architectures produce consistent explanations of the same passage.
+
+### Baking the serve cache (one-time per bundle)
+
+```bash
+python scripts/build_serve_cache.py \
+  --in-adapters  <SFT-trained-bundle> \
+  --pool-dir     artifacts/activations_pool_300m \
+  --trained-tags <comma-sep list of tags whose enc_M was SFT-trained> \
+  --out-adapters <bundle-with-serve_cache>
+```
+
+This averages each trained tag's post-SFT `enc_T(h_T)` projections into a `[N, d_shared]` tensor and writes it as `serve_cache.safetensors`. ~30 s on CPU, ~80 MB on disk.
+
+### Legacy two-step recipe (pre-v8 bundles, or full re-fit)
+
+1. `scripts/extend_adapters.py` — lstsq-fit `enc_M` against the anchor.
+2. `scripts/refit_dec_direct.py` — lstsq-fit `dec_M` against AR's *actual* predictions on the same passage corpus.
+3. `scripts/refit_heldout_enc.py` — *required when the new arch is held-out from AV/AR training* with a high-capacity LoRA. Re-projects `enc_M` into the post-SFT projection space (mean of trained tags' enc_M outputs on the same passages). Without this, AV reads the held-out tag's lstsq-init projection as out-of-distribution and generates incoherent z. Closed-form lstsq, ~30 s per tag.
+4. `scripts/eval_fve_multi.py` — FVE typically ≥ 0.79 without touching the trunks. If the model has tokenizer quirks (Voxtral tekken, YaGPT custom BPE), pass `use_fast=False`; `extract_multi.py` has a fallback retry.
 
 ## Quickstart (reproduce v6 inference)
 

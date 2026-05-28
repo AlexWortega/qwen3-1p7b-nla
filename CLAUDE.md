@@ -50,6 +50,7 @@ These are the load-bearing corrections that turned "kind of works on 5 models" i
 - **PEFT `task_type=None` for `NLACriticModel`** (`train_ar_multi.py`): the default `CAUSAL_LM` task tries to wire `prepare_inputs_for_generation` and crashes — `NLACriticModel` doesn't expose it. `task_type=None` skips the wiring; we never need `.generate()` on the critic.
 - **Use the SFT-trained `enc_M`, not the lstsq init, at eval/RL time** (`refit_dec_direct.py --in-adapters`): AV SFT jointly trains `enc_M` with AV LoRA (unless `--freeze-adapters`). Forgetting this and passing the lstsq-init adapter bundle as `--in-adapters` (or as `--adapters-dir` to RL) silently breaks every downstream step — AV sees an out-of-distribution projection and emits incoherent z, but FVE looks fine because AR+`dec_M` are linear enough to recover the activation from any z. **Always source `enc_M` from `<av_save_dir>/adapters/` (or the latest RL save), not from the SFT-input adapter dir.**
 - **Held-out `enc_M` refit step at high LoRA rank** (`refit_heldout_enc.py`): with LoRA r=256 + 1 epoch SFT, trained-tag `enc_M`'s drift 3-4× more than at r=16 (relative ||delta||/||init|| up to 1.3). Held-out tags stayed at lstsq-init and became OOD for AV → cos-vs-gold crashed from 0.34 → 0.07 on the held-out half. Fix: closed-form lstsq-refit each held-out `enc_M` against the mean of trained tags' SFT-tuned projections on the same passages. Restored cos-vs-gold to 0.34 on held-out. Not needed at r=16 (drift is small enough).
+- **Serve-time auto-refit baked into `ModelPoolAdapters`** (`scripts/build_serve_cache.py` + `scripts/add_held_out.py`): the same refit-vs-SFT-mean trick is now a one-shot API. `pool.build_serve_cache(h_per_tag, trained_tags)` averages SFT-tuned enc projections into a `[N, d_shared]` tensor and persists it as `serve_cache.safetensors` next to `adapters.safetensors`. Then `pool.add_held_out_tag(tag, h_new_raw)` does both lstsq calls (enc vs cache, dec as pseudo-inverse) — no separate extend+refit step. Verified on v8-mixed: API call on qwen3-8b reproduces the two-step manual cos-vs-gold (0.58 vs 0.59 — within noise). Plateau across 5 held-out arch/sizes (Qwen3-8B/14B, Qwen2.5-1.5B/3B, MiniCPM5-1B): 0.58–0.61 cos-vs-gold without any training.
 
 ## Failed experiments — do not repeat
 
@@ -91,6 +92,8 @@ scripts/
   extract_borealis_llm.py / extract_voxtral_llm.py  # peel LLM out of audio wrappers
   bench_voxtral.py        # lm-eval via Python API (works around tekken tokenizer)
   push_hf_universal.py    # publish artifacts to HF
+  build_serve_cache.py    # bake SFT-mean enc target into adapter bundle
+  add_held_out.py         # one-shot held-out tag addition via ModelPoolAdapters.add_held_out_tag()
 configs/universal/
   extract_v1.yaml         # pool of ~17 models for extraction
   adapters_v{1,4,7}.yaml  # per-version anchor + d_shared
