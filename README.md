@@ -42,6 +42,20 @@ z ─▶ AR (truncated Qwen3-1.7B + LoRA) ─▶ ĥ_shared (d=2048)
 
 Anthropic per-model paper baseline on a single Qwen3-1.7B is ~0.38, so this is **~2.3× higher across an 18-architecture pool with one shared AV/AR**. The held-out generalisation is the load-bearing claim: 5 architectures (LFM2, DeepSeek, YandexGPT, rugpt3, Vikhr) cross 0.63 — and 4 of 5 cross 0.75 — with **no trunk retraining**, just an lstsq `enc_M` (~30 s) + a direct-lstsq `dec_M` (~2 min) per new model.
 
+## Head-to-head vs. KitFT specialist on Qwen2.5-7B (n=100)
+
+KitFT released a per-model NLA AV trained specifically on Qwen2.5-7B layer 20 (full fine-tune of Qwen2.5-7B-Instruct, ~7B params, no LoRA). We extract activations at that exact spec and run both AVs on the same 100 random passages. `z_pred` is scored against the teacher gold via mean-pool `all-MiniLM-L6-v2` cosine; an LLM-as-Judge (Sonnet 4.6, pairwise with order randomization) gives an independent verdict.
+
+| Metric                     | v8 universal (Qwen3-1.7B+LoRA, ~1.7B) | KitFT specialist (Qwen2.5-7B FT, ~7B) |
+| ---                        | ---                                    | ---                                    |
+| cos vs gold (mean)         | **0.609**                              | 0.498                                  |
+| cos vs gold (median)       | 0.634                                  | 0.520                                  |
+| cos vs gold (p10 / p90)    | 0.39 / 0.84                            | 0.33 / 0.65                            |
+| Sentence-transformer winrate | **72%**                              | 28%                                    |
+| Sonnet 4.6 LLM-judge winrate | **60%** (1 tie / 100)                | 39%                                    |
+
+A 4× smaller, **shared** AV beats the dedicated per-model specialist on the specialist's own target. v8 wins by emitting concrete entities (e.g. "Pterygium", "Nelumbo lutea"), KitFT identifies the broad domain but slips on specifics (Tennis Elbow vs. rotator cuff; Celiac vs. IBD). Reproduce: `scripts/run_kitft_av.py` + `scripts/eval_universal.py --tags qwen2p5-7b` + `scripts/compare_kitft_vs_v8.py --judge anthropic/claude-sonnet-4-6`.
+
 ## Experiments
 
 All versions share the same pipeline (extract activations → init `enc_M` → AV SFT → AR SFT → `refit_dec_direct` → joint RL). What changes is the training pool, the AV/AR trunk, and how `dec_M` is fit.
