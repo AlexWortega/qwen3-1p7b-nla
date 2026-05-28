@@ -286,15 +286,21 @@ class ModelPoolAdapters(nn.Module):
             "that has serve_cache.safetensors next to adapters.safetensors"
         )
         N_cache = self._enc_target_cache.shape[0]
-        assert h_new_raw.shape[0] == N_cache, (
-            f"row count mismatch: h_new has {h_new_raw.shape[0]} passages, "
-            f"serve cache has {N_cache}. Align by passage order before calling."
-        )
+        if h_new_raw.shape[0] > N_cache:
+            raise ValueError(
+                f"row count mismatch: h_new has {h_new_raw.shape[0]} passages, "
+                f"serve cache has only {N_cache}. Truncate h_new or rebuild "
+                f"the cache against a longer corpus."
+            )
+        # Allow partial-corpus h_new: subset the cache to the first N rows by
+        # passage order. Both target distributions were built from the same
+        # passages.jsonl in the same order, so cache[:N] aligns with h_new[:N].
+        target = self._enc_target_cache[: h_new_raw.shape[0]]
         d_m = int(h_new_raw.shape[1])
         h_raw_f = h_new_raw.float()
         h_in = normalize_activation(h_raw_f, math.sqrt(d_m)) if normalize_input else h_raw_f
 
-        new_enc = LinearAdapter.lstsq_init(h_in, self._enc_target_cache)
+        new_enc = LinearAdapter.lstsq_init(h_in, target)
         z = new_enc(h_in)
         new_dec = LinearAdapter.lstsq_init(z, h_raw_f)
 
@@ -304,6 +310,7 @@ class ModelPoolAdapters(nn.Module):
 
         return {
             "d_M": d_m,
-            "enc_fve": round(new_enc.lstsq_fve(h_in, self._enc_target_cache), 4),
+            "n_rows_used": int(h_new_raw.shape[0]),
+            "enc_fve": round(new_enc.lstsq_fve(h_in, target), 4),
             "dec_fve": round(new_dec.lstsq_fve(z, h_raw_f), 4),
         }

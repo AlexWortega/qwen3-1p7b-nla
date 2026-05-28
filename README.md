@@ -56,6 +56,24 @@ KitFT released a per-model NLA AV trained specifically on Qwen2.5-7B layer 20 (f
 
 A 4× smaller, **shared** AV beats the dedicated per-model specialist on the specialist's own target. v8 wins by emitting concrete entities (e.g. "Pterygium", "Nelumbo lutea"), KitFT identifies the broad domain but slips on specifics (Tennis Elbow vs. rotator cuff; Celiac vs. IBD). Reproduce: `scripts/run_kitft_av.py` + `scripts/eval_universal.py --tags qwen2p5-7b` + `scripts/compare_kitft_vs_v8.py --judge anthropic/claude-sonnet-4-6`.
 
+### Held-out architecture: Gemma3-12B (v8 never saw this arch, KitFT trained specialist)
+
+KitFT has a dedicated per-model AV for Gemma3-12B layer 32. Our v8-mixed bundle has zero exposure to Gemma3 — the only Gemma we trained on is Gemma4-e4b, a different arch family. We extract Gemma3-12B activations (bf16 + eager attention; fp16 + sdpa overflows at attention-sink channels — same Bloom pathology, see CLAUDE.md), add the tag via `ModelPoolAdapters.add_held_out_tag()` (closed-form lstsq, no training), and run both AVs on the same 100 passages.
+
+| Metric                       | v8 universal (held-out, no Gemma3 in pool) | KitFT gemma3-12b specialist |
+| ---                          | ---                                         | ---                           |
+| cos vs gold (mean)           | **0.610**                                   | 0.548                         |
+| cos vs gold (median)         | 0.610                                       | 0.543                         |
+| Sentence-transformer winrate | **72%**                                     | 28%                           |
+| Sonnet 4.6 LLM-judge winrate | 38%                                         | **62%**                       |
+
+The split — v8 wins cosine, KitFT wins the judge — is the load-bearing finding. Both AVs are coherent but in different *styles*:
+
+- **v8** emits content-first prose ("Palestine refugees, numbering 5.5 million, face challenges including displacement..."). This matches the OpenRouter teacher z's prose style → high cosine. Sometimes paraphrases with hallucinated specifics (book title "Ice Age to the Present" vs. gold "Natural History of the New World").
+- **KitFT** emits Anthropic's "3-snippet" interpretability format — genre/format first, then content cues ("Policy/humanitarian report structure: formal document outlining the Palestinian refugee crisis in Syria"). Closer to the *structural* description an AV should produce; Sonnet, when asked which is more faithful to the gold reference, often picks the one that hits both structure and content (KitFT, on its own training distribution).
+
+Cosine-vs-gold favors content-style outputs because the teacher writes content. LLM-judge measures *faithfulness*, which weights structural fidelity. On v8's universal cross-arch generalization (cos ≈ 0.61 stable from trained Qwen2.5-7B → held-out Gemma3-12B), the lstsq-refit recipe holds: a held-out 12B Gemma transfers as well as a trained Qwen2.5. On the per-model specialist's home turf (genre-style descriptions), KitFT keeps a stylistic edge that surface cosine misses.
+
 ## Experiments
 
 All versions share the same pipeline (extract activations → init `enc_M` → AV SFT → AR SFT → `refit_dec_direct` → joint RL). What changes is the training pool, the AV/AR trunk, and how `dec_M` is fit.

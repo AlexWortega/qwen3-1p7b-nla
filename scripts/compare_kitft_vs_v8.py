@@ -58,6 +58,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--v8-json", required=True)
     ap.add_argument("--kitft-json", required=True)
+    ap.add_argument("--tag", default=None,
+                    help="Tag name for v8 rows (e.g. gemma3-12b). Falls back to "
+                         "kitft['tag'] from the kitft samples file.")
     ap.add_argument("--st-model", default="sentence-transformers/all-MiniLM-L6-v2")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--out-json", default=None)
@@ -85,13 +88,15 @@ def main():
     pids = sorted(p for p in pids_kitft if p in v8_by_pid)
     print(f"[compare] aligning on {len(pids)} passages (kitft has {len(pids_kitft)}, v8 has {len(v8_by_pid)})")
 
+    v8_tag = args.tag or kitft.get("tag")
+    print(f"[compare] using v8 tag field: {v8_tag!r}")
     golds, z_v8s, z_kitfts = [], [], []
     for p in pids:
         r = v8_by_pid[p]
         # eval_universal samples_*.json includes gold at top level of each sample.
         gold = r.get("gold") or r.get("z_gold") or r.get("z_teacher")
         # tag field in eval_universal "samples": flat dict with tag-keyed z.
-        z_v8 = r.get("qwen2p5-7b") or r.get("z") or r.get("z_pred")
+        z_v8 = (r.get(v8_tag) if v8_tag else None) or r.get("z") or r.get("z_pred")
         if not gold or not z_v8:
             continue
         k = next((kk for kk in kitft_rows if kk["passage_id"] == p), None)

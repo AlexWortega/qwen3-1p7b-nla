@@ -83,6 +83,10 @@ def main():
                          "meta.training_tags from the AV save dir")
     ap.add_argument("--n-passages", type=int, default=200, help="held-out sample size per tag")
     ap.add_argument("--seed", type=int, default=12345)
+    ap.add_argument("--restrict-pid-range", default=None,
+                    help="START:END (Python slice) — restrict passage sampling to "
+                         "passage IDs in this range. Useful when a tag's shard "
+                         "covers only a subset of the corpus.")
     ap.add_argument("--max-new-tokens", type=int, default=80)
     ap.add_argument("--st-model", default="sentence-transformers/all-MiniLM-L6-v2",
                     help="sentence-transformer for cosine similarities")
@@ -150,7 +154,14 @@ def main():
                 print(f"  [warn] no per-token shard for {tag} — using lstsq-projection fallback if heads has tag, else skipping")
     n_total = dataset.n_passages
     rng = random.Random(args.seed)
-    eval_passage_ids = rng.sample(range(n_total), min(args.n_passages, n_total))
+    if args.restrict_pid_range:
+        lo, hi = (int(x) for x in args.restrict_pid_range.split(":"))
+        hi = min(hi, n_total)
+        candidates = range(lo, hi)
+        eval_passage_ids = rng.sample(candidates, min(args.n_passages, len(candidates)))
+        print(f"[eval] restricting to passage_ids in [{lo}, {hi}): {len(eval_passage_ids)} sampled")
+    else:
+        eval_passage_ids = rng.sample(range(n_total), min(args.n_passages, n_total))
 
     print(f"[eval] AV={save_dir} av_base={av_base} d_shared={d_shared}")
     print(f"[eval] tags={training_tags} n_passages={len(eval_passage_ids)}")
