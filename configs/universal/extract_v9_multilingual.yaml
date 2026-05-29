@@ -1,0 +1,29 @@
+# Same 14 trained tags from v8, but extract activations on the multilingual
+# wiki corpus (500 passages, ru/zh/ja/ar/hi). Pairs with the FineWeb
+# multilayer extract in activations_multilayer_v1/.
+
+pool_dir: artifacts/activations_pool_multi
+out_dir:  artifacts/activations_multilayer_multi_v1
+layers:   d=0.25,0.5,0.75
+positions_per_passage: 4
+n_passages: 500
+dtype: fp16
+attn: sdpa
+batch_size: 2
+save_every: 250
+
+tags:
+  - { tag: smollm2-360m,    model: HuggingFaceTB/SmolLM2-360M,                 gpus: "1" }
+  - { tag: qwen3-0p6b,      model: Qwen/Qwen3-0.6B-Base,                       gpus: "2" }
+  - { tag: pythia-410m,     model: EleutherAI/pythia-410m-deduped,             gpus: "3" }
+  - { tag: gpt2-medium,     model: openai-community/gpt2-medium,               gpus: "1" }
+  - { tag: phi-1p5,         model: microsoft/phi-1_5,                          gpus: "2" }
+  - { tag: qwen2p5-0p5b,    model: Qwen/Qwen2.5-0.5B,                          gpus: "3" }
+  - { tag: gpt-neo-1p3b,    model: EleutherAI/gpt-neo-1.3B,                    gpus: "1", attn: eager }
+  - { tag: qwen3-1p7b,      model: Qwen/Qwen3-1.7B,                            gpus: "2" }
+  - { tag: smollm3-3b,      model: HuggingFaceTB/SmolLM3-3B,                   gpus: "3" }
+  - { tag: lfm-7b,          model: LiquidAI/LFM2-1.2B,                         gpus: "1" }
+  - { tag: qwen3-4b,        model: Qwen/Qwen3-4B,                              gpus: "2", batch_size: 1 }
+  - { tag: yagpt-5-8b,      model: yandex/YandexGPT-5-Lite-8B-pretrain,        gpus: "3", attn: eager, batch_size: 1 }
+  - { tag: qwen2p5-7b,      model: Qwen/Qwen2.5-7B,                            gpus: "1,2,3", batch_size: 2 }
+  - { tag: vikhr-7b-01,     model: Vikhrmodels/Vikhr-7b-0.1,                   gpus: "1,2,3", batch_size: 2 }

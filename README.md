@@ -179,6 +179,78 @@ This averages each trained tag's post-SFT `enc_T(h_T)` projections into a `[N, d
 3. `scripts/refit_heldout_enc.py` — *required when the new arch is held-out from AV/AR training* with a high-capacity LoRA. Re-projects `enc_M` into the post-SFT projection space (mean of trained tags' enc_M outputs on the same passages). Without this, AV reads the held-out tag's lstsq-init projection as out-of-distribution and generates incoherent z. Closed-form lstsq, ~30 s per tag.
 4. `scripts/eval_fve_multi.py` — FVE typically ≥ 0.79 without touching the trunks. If the model has tokenizer quirks (Voxtral tekken, YaGPT custom BPE), pass `use_fast=False`; `extract_multi.py` has a fallback retry.
 
+## Web demo — serve v8 + add custom models from the browser
+
+`app/server.py` is a FastAPI/SSE server with a React (CDN) single-file UI at `app/static/index.html`. It loads the universal AV + adapter bundle, lets you pick any tag, forward a prompt through the target model, and AV-explain individual tokens or the mean-pool of the whole passage. **For v8 bundles it also exposes a `+ Add new model` panel that brings up arbitrary HF models live, with no training step.**
+
+### Run the demo on eva01
+
+```bash
+# 1. Build/sync the image (one-time).
+ssh eva01 'cd ~/vae_llm && docker compose -f docker/compose.yml build'
+
+# 2. Launch the server. NLA_ADAPTER defaults to adapter_universal_v8_mixed.
+ssh -L 8000:localhost:8000 eva01 \
+  'cd ~/vae_llm && \
+   docker compose -f docker/compose.yml run --rm -p 8000:8000 \
+     -e CUDA_VISIBLE_DEVICES=0 \
+     -e NLA_ADAPTER=adapter_universal_v8_mixed \
+     -e NLA_POOL_DIR=/workspace/artifacts/activations_pool_300m \
+     -e HF_TOKEN=$(cat ~/.cache/huggingface/token) \
+     nla python -m uvicorn app.server:app --host 0.0.0.0 --port 8000'
+
+# 3. Open http://localhost:8000 in your browser.
+```
+
+`NLA_POOL_DIR` must point to a directory containing `passages.jsonl`; the `+ Add new model` endpoint extracts mean-pool activations on the first `n_passages` rows of that file. The full 10k-passage corpus we used lives at `/workspace/artifacts/activations_pool_300m/` on eva01 inside the container (mounted from `~/vae_llm/artifacts/activations_pool_300m/`). To deploy elsewhere, pre-extract any passages-with-z corpus into the same layout (`passages.jsonl` plus existing tag shards aren't required — only `passages.jsonl` is read by `add_model`).
+
+### Adding a custom model from the UI (~3–8 minutes for small/medium archs)
+
+In the demo, click **`+ Add a new model`** under the Forward/Generate buttons. Fill in:
+
+| Field | Example | Notes |
+| --- | --- | --- |
+| Tag | `llama32-1b` | kebab-case, used as the bundle key and in API calls |
+| HF model id | `meta-llama/Llama-3.2-1B` | any HF repo the container can `from_pretrained` |
+| Layer | `8` *(or leave blank)* | exact layer index. Leave blank → uses Depth × n_layers |
+| Depth | `0.5` | only used when Layer is blank |
+| dtype | `fp16` *(or `bf16`)* | bf16 is needed for Gemma3 / Bloom / other archs that overflow fp16 at mid-layer attention-sink channels |
+| Passages for lstsq | `1000` | rows used for the fit; more = better fit, slower |
+
+Submit launches a background job. The panel polls `/api/jobs/{job_id}` every 2 s and streams the log. When it finishes:
+
+1. The tag is appended to `user_tags.json` next to the adapter bundle (so it survives server restart).
+2. The new `enc_M` / `dec_M` are inserted into the live `ModelPoolAdapters` (no server reload needed).
+3. The tag dropdown refreshes and auto-selects the new entry.
+
+Typical wall time for a 1–4 B model with 1000 passages on a V100: 3–8 minutes (mostly HF download). Bigger models (7 B+) may OOM alongside the AV on a single GPU — for those, prefer the CLI path (`scripts/extract_large_meanpool.py` with `device_map=auto` across multiple GPUs, then `scripts/add_held_out.py`) and restart the server.
+
+### Programmatic add (no UI)
+
+```python
+import requests
+r = requests.post("http://localhost:8000/api/add_model", json={
+    "tag": "llama32-1b",
+    "model": "meta-llama/Llama-3.2-1B",
+    "depth": 0.5,            # or "layer": 8
+    "dtype": "fp16",         # bf16 for Gemma3-like archs
+    "n_passages": 1000,
+})
+job_id = r.json()["job_id"]
+
+# Poll until done.
+import time
+while True:
+    s = requests.get(f"http://localhost:8000/api/jobs/{job_id}").json()
+    print(s["status"])
+    if s["status"] in ("done", "error"):
+        print(s.get("result"), s.get("error"))
+        break
+    time.sleep(5)
+```
+
+After it returns `done`, the new tag is immediately usable via `/api/forward` and `/api/explain`. The endpoint refuses if the loaded bundle has no `serve_cache.safetensors`; build one via `python scripts/build_serve_cache.py` first.
+
 ## Quickstart (reproduce v6 inference)
 
 ```bash

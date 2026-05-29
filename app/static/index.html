@@ -37,6 +37,18 @@
       background: #065f46;
       color: white;
     }
+    .token-chip.generated {
+      background: #fef3c7;
+      color: #78350f;
+    }
+    .token-chip.generated.explained {
+      background: #fde68a;
+      color: #78350f;
+    }
+    .token-chip.generated.selected {
+      background: #b45309;
+      color: white;
+    }
   </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
@@ -51,7 +63,7 @@
     }
   </script>
   <script type="module">
-    import React, { useState, useEffect, useCallback } from "react";
+    import React, { useState, useEffect, useCallback, useRef } from "react";
     import { createRoot } from "react-dom/client";
 
     const e = React.createElement;
@@ -59,33 +71,204 @@
     function App() {
       const [tags, setTags] = useState([]);
       const [avBase, setAvBase] = useState("");
+      const [adapterName, setAdapterName] = useState("");
+      const [canAddModels, setCanAddModels] = useState(false);
       const [selectedTag, setSelectedTag] = useState("");
+      const [addOpen, setAddOpen] = useState(false);
+      const [addForm, setAddForm] = useState({
+        tag: "", model: "", layer: "", depth: 0.5, dtype: "fp16", n_passages: 1000
+      });
+      const [addJob, setAddJob] = useState(null);  // { job_id, status, log, error, result }
+      const [loadStatus, setLoadStatus] = useState("");  // human-readable phase from /api/load_status
       const [prompt, setPrompt] = useState(
         "The Eiffel Tower in Paris was completed in 1889 for the World's Fair."
       );
       const [layerOverride, setLayerOverride] = useState("");
+      const [maxNewTokens, setMaxNewTokens] = useState(64);
+      const [temperature, setTemperature] = useState(0.7);
+      const [doSample, setDoSample] = useState(false);
+      const [maxExplainTokens, setMaxExplainTokens] = useState(80);
+      const [showSettings, setShowSettings] = useState(false);
       const [forwarding, setForwarding] = useState(false);
       const [forwardError, setForwardError] = useState(null);
       const [forwardResult, setForwardResult] = useState(null);   // {cache_id, tokens, layer, n_layers, d_M, tag}
       const [explanations, setExplanations] = useState({});       // idx -> {z, raw, loading}
       const [selectedIdx, setSelectedIdx] = useState(null);
+      const [activeStream, setActiveStream] = useState(null);    // {ev, stream_id, idx} — most-recent (for stop button label)
+      // All in-flight EventSources, by stream_id (or temp_id while server hasn't returned one).
+      const streamsRef = useRef(new Map());
 
-      useEffect(() => {
-        fetch("/api/tags")
+      const registerStream = useCallback((tempId, ev) => {
+        streamsRef.current.set(tempId, { ev, stream_id: null });
+      }, []);
+      const promoteStream = useCallback((tempId, streamId) => {
+        const entry = streamsRef.current.get(tempId);
+        if (entry) entry.stream_id = streamId;
+      }, []);
+      const unregisterStream = useCallback((tempId) => {
+        streamsRef.current.delete(tempId);
+      }, []);
+      const stopAllStreams = useCallback(async (alsoClearTargets) => {
+        // Close every EventSource on the client + fire server-side stop for each
+        // known stream_id + optionally evict cached target models.
+        const entries = Array.from(streamsRef.current.values());
+        streamsRef.current.clear();
+        for (const { ev } of entries) { try { ev.close(); } catch {} }
+        try { await fetch("/api/stop_all", { method: "POST" }); } catch {}
+        if (alsoClearTargets) {
+          try { await fetch("/api/clear_targets", { method: "POST" }); } catch {}
+        }
+        setActiveStream(null);
+      }, []);
+
+      const refreshTags = useCallback(() => {
+        return fetch("/api/tags")
           .then(r => r.json())
           .then(d => {
             setTags(d.tags);
             setAvBase(d.av_base);
-            if (d.tags.length) setSelectedTag(d.tags[0].tag);
-          })
-          .catch(err => setForwardError(`/api/tags failed: ${err}`));
+            setAdapterName(d.adapter_name || "");
+            setCanAddModels(!!d.can_add_models);
+            if (!selectedTag && d.tags.length) setSelectedTag(d.tags[0].tag);
+            return d;
+          });
+      }, [selectedTag]);
+
+      useEffect(() => {
+        refreshTags().catch(err => setForwardError(`/api/tags failed: ${err}`));
       }, []);
 
-      const runForward = async () => {
+      // Job polling for add_model background work.
+      useEffect(() => {
+        if (!addJob || !addJob.job_id) return;
+        if (addJob.status === "done" || addJob.status === "error") return;
+        const tid = setTimeout(() => {
+          fetch(`/api/jobs/${addJob.job_id}`)
+            .then(r => r.json())
+            .then(d => setAddJob(j => ({ ...j, ...d })))
+            .catch(() => {});
+        }, 2000);
+        return () => clearTimeout(tid);
+      }, [addJob]);
+
+      // Poll /api/load_status while a Forward/Generate is in flight.
+      useEffect(() => {
+        if (!forwarding || !selectedTag) { setLoadStatus(""); return; }
+        let cancelled = false;
+        const tick = async () => {
+          if (cancelled) return;
+          try {
+            const r = await fetch(`/api/load_status?tag=${encodeURIComponent(selectedTag)}`);
+            const d = await r.json();
+            if (!cancelled) setLoadStatus(d.status || (d.cached ? "ready" : ""));
+          } catch {}
+          if (!cancelled) setTimeout(tick, 800);
+        };
+        tick();
+        return () => { cancelled = true; };
+      }, [forwarding, selectedTag]);
+
+      // When add_model completes, refresh the tag list and auto-select the new tag.
+      useEffect(() => {
+        if (addJob && addJob.status === "done") {
+          refreshTags().then(() => {
+            if (addJob.result && addJob.result.tag) setSelectedTag(addJob.result.tag);
+          });
+        }
+      }, [addJob && addJob.status]);
+
+      const submitAddModel = async () => {
+        const f = addForm;
+        if (!f.tag.match(/^[a-z0-9-]+$/)) {
+          setAddJob({ status: "error", error: "tag must be lowercase letters/digits/hyphens only (no '.')" });
+          return;
+        }
+        const body = {
+          tag: f.tag, model: f.model,
+          dtype: f.dtype,
+          n_passages: Number(f.n_passages) || 1000,
+        };
+        if (f.layer !== "" && f.layer !== null) body.layer = Number(f.layer);
+        else body.depth = Number(f.depth) || 0.5;
+        try {
+          const r = await fetch("/api/add_model", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          if (!r.ok) {
+            const err = await r.json().catch(() => ({ detail: r.statusText }));
+            setAddJob({ status: "error", error: err.detail || r.statusText });
+            return;
+          }
+          const { job_id } = await r.json();
+          setAddJob({ job_id, status: "pending", log: "" });
+        } catch (e) {
+          setAddJob({ status: "error", error: String(e.message || e) });
+        }
+      };
+
+      const runForward = async (mode) => {
         setForwarding(true);
         setForwardError(null);
         setExplanations({});
         setSelectedIdx(null);
+        // Close ALL active streams + evict cached target models so this Forward
+        // starts on a clean GPU. Targets get reloaded on demand.
+        await stopAllStreams(true);
+
+        if (mode === "generate") {
+          // Stream completion via SSE GET /api/generate_stream.
+          const params = new URLSearchParams({
+            tag: selectedTag,
+            prompt: prompt,
+            max_new_tokens: String(Number(maxNewTokens) || 40),
+            do_sample: doSample ? "true" : "false",
+            temperature: String(Number(temperature) || 1.0),
+          });
+          if (layerOverride !== "") params.set("layer", String(Number(layerOverride)));
+          const url = `/api/generate_stream?${params.toString()}`;
+          const ev = new EventSource(url);
+          const tempId = "gen-" + Date.now();
+          registerStream(tempId, ev);
+          // Show a placeholder forwardResult so the streaming-completion UI mounts immediately.
+          setForwardResult({ tag: selectedTag, tokens: [], layer: 0, n_layers: 0, d_M: 0, generated_text: "", prompt_len: 0, _streaming: true });
+          ev.addEventListener("start", e => {
+            try { const { stream_id } = JSON.parse(e.data); promoteStream(tempId, stream_id); setActiveStream({ ev, stream_id, mode: "generate" }); } catch {}
+          });
+          ev.addEventListener("token", e => {
+            try {
+              const { text } = JSON.parse(e.data);
+              setForwardResult(prev => ({ ...prev, generated_text: (prev?.generated_text || "") + text }));
+            } catch {}
+          });
+          ev.addEventListener("done", e => {
+            try {
+              const data = JSON.parse(e.data);
+              if (data.error) {
+                setForwardError(data.error);
+                setForwardResult(null);
+              } else {
+                setForwardResult({ ...data, _streaming: false });
+              }
+            } catch (err) {
+              setForwardError(String(err));
+            }
+            setForwarding(false);
+            ev.close();
+            unregisterStream(tempId);
+            setActiveStream(null);
+          });
+          ev.onerror = () => {
+            setForwardError("generate stream failed");
+            setForwarding(false);
+            ev.close();
+            unregisterStream(tempId);
+            setActiveStream(null);
+          };
+          return;
+        }
+
+        // mode === "forward" — plain POST.
         try {
           const body = { tag: selectedTag, prompt };
           if (layerOverride !== "") body.layer = Number(layerOverride);
@@ -110,33 +293,98 @@
 
       const explain = useCallback(async (idx) => {
         if (!forwardResult) return;
+        // Stop EVERY in-flight stream (single click should preempt any
+        // ongoing per-token explain + explain-all batch). Target models stay
+        // loaded — only the AV is needed for explain.
+        await stopAllStreams(false);
         setSelectedIdx(idx);
-        setExplanations(prev => ({ ...prev, [idx]: { ...(prev[idx] || {}), loading: true } }));
-        try {
-          const r = await fetch("/api/explain", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ cache_id: forwardResult.cache_id, idx }),
-          });
-          if (!r.ok) {
-            const err = await r.json().catch(() => ({ detail: r.statusText }));
-            throw new Error(err.detail || r.statusText);
+        setExplanations(prev => ({ ...prev, [idx]: { z: "", loading: true } }));
+        const url = `/api/explain_stream?cache_id=${forwardResult.cache_id}&idx=${idx}&max_new_tokens=${Number(maxExplainTokens) || 80}`;
+        const ev = new EventSource(url);
+        const tempId = `exp-${idx}-${Date.now()}`;
+        registerStream(tempId, ev);
+        ev.addEventListener("start", e => {
+          try {
+            const { stream_id } = JSON.parse(e.data);
+            promoteStream(tempId, stream_id);
+            setActiveStream({ ev, stream_id, idx });
+          } catch {}
+        });
+        ev.addEventListener("token", e => {
+          try {
+            const { text } = JSON.parse(e.data);
+            setExplanations(prev => ({
+              ...prev,
+              [idx]: { ...(prev[idx] || {}), z: (prev[idx]?.z || "") + text, loading: true }
+            }));
+          } catch (err) {}
+        });
+        ev.addEventListener("done", e => {
+          try {
+            const { z, raw, stopped } = JSON.parse(e.data);
+            setExplanations(prev => ({ ...prev, [idx]: { z, raw, loading: false, stopped: !!stopped } }));
+          } catch (err) {
+            setExplanations(prev => ({ ...prev, [idx]: { ...(prev[idx] || {}), loading: false } }));
           }
-          const data = await r.json();
-          setExplanations(prev => ({ ...prev, [idx]: { z: data.z, raw: data.raw, loading: false } }));
-        } catch (e) {
-          setExplanations(prev => ({
-            ...prev,
-            [idx]: { error: String(e.message || e), loading: false }
-          }));
-        }
-      }, [forwardResult]);
+          ev.close();
+          unregisterStream(tempId);
+          setActiveStream(null);
+        });
+        ev.onerror = () => {
+          setExplanations(prev => {
+            const cur = prev[idx] || {};
+            if (cur.z) return { ...prev, [idx]: { ...cur, loading: false } };
+            return { ...prev, [idx]: { error: "stream failed (server restarted? cache evicted?)", loading: false } };
+          });
+          ev.close();
+          unregisterStream(tempId);
+          setActiveStream(null);
+        };
+      }, [forwardResult, stopAllStreams, registerStream, promoteStream, unregisterStream]);
+
+      const stopStream = async () => {
+        // Single-button "Stop" → cancel EVERY in-flight stream (server-side stop_all
+        // signals all current threading.Events; client closes its EventSources).
+        await stopAllStreams(false);
+      };
 
       const explainAll = async () => {
         if (!forwardResult) return;
+        // Kill anything that's currently running before kicking off the batch.
+        await stopAllStreams(false);
         for (let i = 0; i < forwardResult.tokens.length; i++) {
           if (explanations[i] && explanations[i].z) continue;
-          await explain(i);
+          // Wait for each stream to finish before kicking the next so GPU isn't slammed.
+          await new Promise(resolve => {
+            const url = `/api/explain_stream?cache_id=${forwardResult.cache_id}&idx=${i}&max_new_tokens=${Number(maxExplainTokens) || 80}`;
+            const ev = new EventSource(url);
+            const tempId = `expall-${i}-${Date.now()}`;
+            registerStream(tempId, ev);
+            setSelectedIdx(i);
+            setExplanations(prev => ({ ...prev, [i]: { z: "", loading: true } }));
+            ev.addEventListener("start", e => {
+              try { promoteStream(tempId, JSON.parse(e.data).stream_id); } catch {}
+            });
+            ev.addEventListener("token", e => {
+              try {
+                const { text } = JSON.parse(e.data);
+                setExplanations(prev => ({
+                  ...prev,
+                  [i]: { ...(prev[i] || {}), z: (prev[i]?.z || "") + text, loading: true }
+                }));
+              } catch {}
+            });
+            ev.addEventListener("done", e => {
+              try {
+                const { z, raw } = JSON.parse(e.data);
+                setExplanations(prev => ({ ...prev, [i]: { z, raw, loading: false } }));
+              } catch {}
+              ev.close();
+              unregisterStream(tempId);
+              resolve();
+            });
+            ev.onerror = () => { ev.close(); unregisterStream(tempId); resolve(); };
+          });
         }
       };
 
@@ -172,23 +420,182 @@
             ),
             e("button", {
                 className: "px-4 py-2 bg-indigo-600 text-white rounded text-sm font-medium hover:bg-indigo-700 disabled:opacity-50",
-                onClick: runForward,
+                onClick: () => runForward("forward"),
                 disabled: forwarding || !selectedTag || !prompt.trim(),
               },
-              forwarding ? "Running…" : "Run forward"
+              forwarding ? "Running…" : "Forward"
+            ),
+            e("button", {
+                className: "px-4 py-2 bg-amber-600 text-white rounded text-sm font-medium hover:bg-amber-700 disabled:opacity-50",
+                onClick: () => runForward("generate"),
+                disabled: forwarding || !selectedTag || !prompt.trim(),
+                title: "Let M generate a 40-token completion, then explain prompt + generated tokens",
+              },
+              forwarding ? "…" : "Generate + explain"
             )
           ),
           e("div", null,
             e("label", { className: "block text-xs font-medium text-slate-600 mb-1" }, "Prompt"),
             e("textarea", {
                 className: "w-full px-3 py-2 border rounded text-sm font-mono",
-                rows: 3,
+                rows: 4,
                 value: prompt,
                 onChange: ev => setPrompt(ev.target.value),
               })
           ),
+
+          // Settings panel (collapsible)
+          e("div", null,
+            e("button", {
+                type: "button",
+                className: "text-xs text-slate-500 hover:text-slate-700 mb-2",
+                onClick: () => setShowSettings(s => !s),
+              },
+              showSettings ? "▾ Hide settings" : "▸ Show settings (generation, explain length)"
+            ),
+            showSettings && e("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-slate-50 rounded border text-sm" },
+              e("div", null,
+                e("label", { className: "block text-xs font-medium text-slate-600 mb-1" }, "Generate: max new tokens"),
+                e("input", {
+                    type: "number", min: 1, max: 512,
+                    className: "w-full px-2 py-1 border rounded text-sm",
+                    value: maxNewTokens,
+                    onChange: ev => setMaxNewTokens(ev.target.value),
+                  })
+              ),
+              e("div", null,
+                e("label", { className: "block text-xs font-medium text-slate-600 mb-1" }, "Generate: sampling"),
+                e("label", { className: "flex items-center gap-2 mt-1 text-sm" },
+                  e("input", { type: "checkbox", checked: doSample,
+                               onChange: ev => setDoSample(ev.target.checked) }),
+                  "do_sample"
+                )
+              ),
+              e("div", null,
+                e("label", { className: "block text-xs font-medium text-slate-600 mb-1" }, "Generate: temperature"),
+                e("input", {
+                    type: "number", step: 0.1, min: 0.1, max: 2.0,
+                    disabled: !doSample,
+                    className: "w-full px-2 py-1 border rounded text-sm disabled:opacity-40",
+                    value: temperature,
+                    onChange: ev => setTemperature(ev.target.value),
+                  })
+              ),
+              e("div", null,
+                e("label", { className: "block text-xs font-medium text-slate-600 mb-1" }, "Explain: max new tokens"),
+                e("input", {
+                    type: "number", min: 10, max: 200,
+                    className: "w-full px-2 py-1 border rounded text-sm",
+                    value: maxExplainTokens,
+                    onChange: ev => setMaxExplainTokens(ev.target.value),
+                  })
+              )
+            )
+          ),
+
           forwardError && e("div", { className: "text-sm text-rose-600 bg-rose-50 p-2 rounded" },
             forwardError
+          ),
+
+          forwarding && loadStatus && e("div", { className: "flex items-center gap-2 text-xs text-slate-600 bg-slate-100 p-2 rounded" },
+            e("span", { className: "inline-block w-2 h-2 bg-indigo-500 rounded-full animate-pulse" }),
+            e("span", null, `${selectedTag}: ${loadStatus}`)
+          ),
+
+          // ─── Add new model panel ────────────────────────────────────────
+          canAddModels && e("div", { className: "border-t pt-3 mt-3" },
+            e("button", {
+                type: "button",
+                className: "text-xs text-slate-600 hover:text-indigo-700 font-medium",
+                onClick: () => setAddOpen(o => !o),
+              },
+              addOpen ? "▾ Hide add-model" : "▸ + Add a new model (held-out, closed-form lstsq, no training)"
+            ),
+            addOpen && e("div", { className: "mt-3 p-3 bg-amber-50 border border-amber-200 rounded space-y-3" },
+              e("div", { className: "text-xs text-slate-600" },
+                `Bundle = ${adapterName} with serve_cache. Server will: (1) download HF model, (2) mean-pool activations at chosen layer on the first N corpus passages, (3) lstsq fit enc against the SFT-projection cache, (4) lstsq fit dec as pseudo-inverse, (5) save updated bundle. No training. Small/medium models (≤4B) recommended for the demo; 7B+ may OOM alongside AV.`
+              ),
+              e("div", { className: "grid grid-cols-2 md:grid-cols-3 gap-2" },
+                e("div", null,
+                  e("label", { className: "block text-xs font-medium text-slate-600 mb-1" }, "Tag (kebab-case)"),
+                  e("input", {
+                    type: "text", placeholder: "e.g. qwen3-14b",
+                    className: "w-full px-2 py-1 border rounded text-sm",
+                    value: addForm.tag,
+                    onChange: ev => setAddForm(f => ({ ...f, tag: ev.target.value.toLowerCase() })),
+                  })
+                ),
+                e("div", { className: "md:col-span-2" },
+                  e("label", { className: "block text-xs font-medium text-slate-600 mb-1" }, "HF model id"),
+                  e("input", {
+                    type: "text", placeholder: "e.g. Qwen/Qwen3-14B",
+                    className: "w-full px-2 py-1 border rounded text-sm",
+                    value: addForm.model,
+                    onChange: ev => setAddForm(f => ({ ...f, model: ev.target.value })),
+                  })
+                ),
+                e("div", null,
+                  e("label", { className: "block text-xs font-medium text-slate-600 mb-1" }, "Layer (override)"),
+                  e("input", {
+                    type: "number", placeholder: "auto (depth/2)",
+                    className: "w-full px-2 py-1 border rounded text-sm",
+                    value: addForm.layer,
+                    onChange: ev => setAddForm(f => ({ ...f, layer: ev.target.value })),
+                  })
+                ),
+                e("div", null,
+                  e("label", { className: "block text-xs font-medium text-slate-600 mb-1" }, "Depth (if no layer)"),
+                  e("input", {
+                    type: "number", step: 0.05, min: 0.1, max: 0.95,
+                    className: "w-full px-2 py-1 border rounded text-sm",
+                    value: addForm.depth,
+                    onChange: ev => setAddForm(f => ({ ...f, depth: ev.target.value })),
+                  })
+                ),
+                e("div", null,
+                  e("label", { className: "block text-xs font-medium text-slate-600 mb-1" }, "dtype"),
+                  e("select", {
+                    className: "w-full px-2 py-1 border rounded text-sm",
+                    value: addForm.dtype,
+                    onChange: ev => setAddForm(f => ({ ...f, dtype: ev.target.value })),
+                  },
+                    e("option", { value: "fp16" }, "fp16 (default)"),
+                    e("option", { value: "bf16" }, "bf16 (Gemma3, Bloom, etc. overflow archs)")
+                  )
+                ),
+                e("div", null,
+                  e("label", { className: "block text-xs font-medium text-slate-600 mb-1" }, "Passages for lstsq"),
+                  e("input", {
+                    type: "number", min: 200, max: 5000, step: 100,
+                    className: "w-full px-2 py-1 border rounded text-sm",
+                    value: addForm.n_passages,
+                    onChange: ev => setAddForm(f => ({ ...f, n_passages: ev.target.value })),
+                  })
+                ),
+              ),
+              e("button", {
+                  type: "button",
+                  className: "px-3 py-1.5 bg-amber-600 text-white rounded text-sm font-medium hover:bg-amber-700 disabled:opacity-50",
+                  onClick: submitAddModel,
+                  disabled: (addJob && (addJob.status === "running" || addJob.status === "pending")) ||
+                            !addForm.tag || !addForm.model,
+                },
+                addJob && (addJob.status === "running" || addJob.status === "pending")
+                  ? `Running… (${addJob.status})`
+                  : "Submit add_model"
+              ),
+              addJob && e("div", { className: "text-xs space-y-1" },
+                e("div", null,
+                  e("span", { className: "font-mono" }, `status: ${addJob.status || "?"}`),
+                  addJob.job_id && e("span", { className: "text-slate-400 ml-2" }, `job=${addJob.job_id}`)
+                ),
+                addJob.error && e("div", { className: "text-rose-700 bg-rose-50 p-2 rounded" }, addJob.error),
+                addJob.result && e("div", { className: "text-emerald-700 bg-emerald-50 p-2 rounded" },
+                  `✓ added tag '${addJob.result.tag}' (d_M=${addJob.result.d_M}, layer=${addJob.result.layer}, enc_fve=${addJob.result.enc_fve}, dec_fve=${addJob.result.dec_fve}) — selected in dropdown.`
+                ),
+                addJob.log && e("pre", { className: "text-[10px] font-mono bg-slate-900 text-slate-200 p-2 rounded max-h-48 overflow-y-auto" }, addJob.log)
+              )
+            )
           )
         ),
 
@@ -196,22 +603,50 @@
         forwardResult && e("div", { className: "bg-white rounded-lg shadow p-4 space-y-4" },
           e("div", { className: "flex items-center justify-between text-xs text-slate-500" },
             e("span", null,
-              `tag=${forwardResult.tag}  layer=${forwardResult.layer}/${forwardResult.n_layers}  d_M=${forwardResult.d_M}  tokens=${forwardResult.tokens.length}`
+              forwardResult._streaming
+                ? `streaming completion from ${forwardResult.tag}…`
+                : `tag=${forwardResult.tag}  layer=${forwardResult.layer}/${forwardResult.n_layers}  d_M=${forwardResult.d_M}  tokens=${forwardResult.tokens.length}`
             ),
-            e("button", {
-                className: "px-3 py-1 border border-indigo-300 text-indigo-700 rounded hover:bg-indigo-50 text-xs font-medium",
-                onClick: explainAll,
-              },
-              "Explain all tokens"
+            e("div", { className: "flex gap-2" },
+              activeStream && e("button", {
+                  className: "px-3 py-1 bg-rose-600 text-white rounded hover:bg-rose-700 text-xs font-semibold",
+                  onClick: stopStream,
+                },
+                "■ Stop"
+              ),
+              !forwardResult._streaming && e("button", {
+                  className: "px-3 py-1 border border-emerald-400 text-emerald-700 rounded hover:bg-emerald-50 text-xs font-semibold",
+                  onClick: () => explain(-1),
+                  title: "Explain the mean-pooled activation — matches training distribution exactly",
+                },
+                "⌗ Explain passage (mean-pool)"
+              ),
+              !forwardResult._streaming && e("button", {
+                  className: "px-3 py-1 border border-indigo-300 text-indigo-700 rounded hover:bg-indigo-50 text-xs font-medium",
+                  onClick: explainAll,
+                },
+                "Explain all tokens"
+              )
             )
           ),
 
-          // Tokens row
+          // Generated text banner (if generate mode)
+          forwardResult.generated_text !== undefined && e("div", {
+              className: "p-3 bg-amber-50 border-amber-200 border rounded text-sm" },
+            e("div", { className: "text-xs font-semibold text-amber-700 mb-1" },
+              `M(${forwardResult.tag}) completion (yellow tokens below):`),
+            e("div", { className: "font-mono text-amber-900 whitespace-pre-wrap" },
+              forwardResult.generated_text || "(empty)")
+          ),
+
+          // Tokens row — prompt tokens (indigo) | divider | generated tokens (amber).
           e("div", { className: "p-2 bg-slate-50 rounded border" },
             forwardResult.tokens.map((tok, i) => {
               const ex = explanations[i] || {};
+              const isGenerated = forwardResult.prompt_len !== undefined && i >= forwardResult.prompt_len;
               const classes = [
                 "token-chip",
+                isGenerated ? "generated" : "",
                 selectedIdx === i ? "selected" : "",
                 ex.loading ? "loading" : "",
                 ex.z ? "explained" : "",
@@ -220,7 +655,7 @@
                   key: i,
                   className: classes,
                   onClick: () => explain(i),
-                  title: ex.z ? ex.z : `token #${i}`,
+                  title: ex.z ? ex.z : `token #${i}${isGenerated ? " (generated)" : ""}`,
                 }, tok || "·"
               );
             })
@@ -229,15 +664,19 @@
           // Selected token detail + table of all explanations
           selectedIdx !== null && e("div", { className: "p-3 bg-indigo-50 rounded border border-indigo-200" },
             e("div", { className: "text-xs text-indigo-700 mb-1" },
-              `Token #${selectedIdx}: `,
-              e("code", { className: "bg-white px-1 rounded" }, forwardResult.tokens[selectedIdx])
+              selectedIdx === -1
+                ? "⌗ PASSAGE (mean-pool — training-distribution match)"
+                : ["Token #", selectedIdx, ": ",
+                   e("code", { key: "tok", className: "bg-white px-1 rounded" }, forwardResult.tokens[selectedIdx])]
             ),
             (() => {
               const ex = explanations[selectedIdx];
               if (!ex) return null;
-              if (ex.loading) return e("div", { className: "text-sm text-indigo-600" }, "Generating…");
-              if (ex.error)   return e("div", { className: "text-sm text-rose-600" }, `Error: ${ex.error}`);
-              return e("div", { className: "text-sm text-slate-900 whitespace-pre-wrap" }, ex.z);
+              if (ex.error) return e("div", { className: "text-sm text-rose-600" }, `Error: ${ex.error}`);
+              return e("div", { className: "text-sm text-slate-900 whitespace-pre-wrap" },
+                ex.z || "",
+                ex.loading && e("span", { className: "inline-block w-1.5 h-3 ml-0.5 bg-indigo-600 align-baseline animate-pulse" })
+              );
             })()
           ),
 
@@ -261,7 +700,9 @@
                       e("td", { className: "px-2 py-1 text-xs text-slate-400" }, i),
                       e("td", { className: "px-2 py-1 font-mono text-xs" }, forwardResult.tokens[i]),
                       e("td", { className: "px-2 py-1" },
-                        ex.loading ? "…" : (ex.error ? e("span", { className: "text-rose-600" }, ex.error) : ex.z)
+                        ex.error
+                          ? e("span", { className: "text-rose-600" }, ex.error)
+                          : (ex.z || "") + (ex.loading ? " …" : "")
                       )
                     );
                   })

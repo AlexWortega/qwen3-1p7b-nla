@@ -1,0 +1,6 @@
+# v9: same trunk as v8 (Qwen3-1.7B, d_shared=2048) but trained on combined
+# FineWeb + multilingual corpus to fix non-English mode collapse.
+anchor_tag: qwen3-1p7b
+d_shared: 2048
+train_frac: 0.8
+seed: 0
