@@ -101,6 +101,11 @@ def main():
                     help="freeze enc/dec adapters at their lstsq init — train only AV LoRA. "
                          "Use when stronger trunks (≥4B) collapse to a canonical template by drifting adapters off-manifold.")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--resume-av-dir", default=None,
+                    help="Optional path to a previously trained AV LoRA dir "
+                         "(e.g. artifacts/av_v8_mixed/av). Loads its adapter "
+                         "weights into the fresh LoraConfig before training, "
+                         "so this becomes a continued-SFT run from that checkpoint.")
     args = ap.parse_args()
 
     random.seed(args.seed)
@@ -129,6 +134,16 @@ def main():
         bias="none", task_type="CAUSAL_LM", target_modules=LORA_TARGETS,
     )
     av = get_peft_model(base, lora_cfg)
+    if args.resume_av_dir:
+        # Continued SFT: load the previously trained LoRA weights on top of
+        # the fresh LoraConfig. Shape mismatch raises here — keep
+        # --lora-r/--lora-alpha consistent with the checkpoint.
+        from safetensors.torch import load_file as _lf
+        ckpt = _lf(str(Path(args.resume_av_dir) / "adapter_model.safetensors"))
+        missing, unexpected = av.load_state_dict(ckpt, strict=False)
+        loaded = len(ckpt) - len(unexpected)
+        print(f"[av-multi] resumed AV LoRA from {args.resume_av_dir}: "
+              f"loaded {loaded}/{len(ckpt)} tensors  unexpected={len(unexpected)} missing={len(missing)}")
     if args.grad_checkpoint:
         av.gradient_checkpointing_enable()
         # PEFT + grad-ckpt needs `enable_input_require_grads` on the base, else
