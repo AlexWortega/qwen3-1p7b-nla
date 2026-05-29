@@ -103,6 +103,43 @@ class LinearAdapter(nn.Module):
         return 1.0 - resid_var / max(target_var, 1e-12)
 
 
+class ConvAdapter(LinearAdapter):
+    """LinearAdapter + a small Conv1d post-projection over the d_out axis.
+
+    Adds local cross-channel mixing on top of the lstsq-fit linear map. The
+    Conv1d is initialised to identity (centre tap = 1, others = 0) so the
+    forward output equals the LinearAdapter's at init — both halves train
+    jointly in SFT and lstsq alignment is preserved as a warm-start.
+
+    State-dict adds `conv.weight` of shape `[1, 1, kernel]`. `ModelPoolAdapters`
+    records `adapter_class="ConvAdapter"` + `adapter_kwargs={"kernel": ...}`
+    in its meta.json so it can rebuild the right modules on load.
+    """
+
+    def __init__(self, d_in: int, d_out: int, kernel: int = 7):
+        super().__init__(d_in=d_in, d_out=d_out)
+        assert kernel % 2 == 1, "kernel must be odd so identity init can land on the centre tap"
+        self.kernel = int(kernel)
+        self.conv = nn.Conv1d(1, 1, kernel_size=kernel, padding=kernel // 2, bias=False)
+        # Identity init: zero everywhere except centre tap = 1.
+        with torch.no_grad():
+            self.conv.weight.zero_()
+            self.conv.weight[0, 0, kernel // 2] = 1.0
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        h = super().forward(x)                       # [B, d_out] via Linear
+        h_c = self.conv(h.unsqueeze(1)).squeeze(1)   # [B, d_out] after Conv1d
+        return h_c
+
+    @classmethod
+    def from_linear(cls, lin: LinearAdapter, kernel: int = 7) -> "ConvAdapter":
+        """Wrap an existing LinearAdapter (e.g. lstsq init) without retraining."""
+        adapter = cls(d_in=lin.d_in, d_out=lin.d_out, kernel=kernel)
+        with torch.no_grad():
+            adapter.weight.copy_(lin.weight)
+        return adapter
+
+
 class ModelPoolAdapters(nn.Module):
     """Container for per-model `(encoder: d_M → d_shared, decoder: d_shared → d_M)` pairs.
 
@@ -119,17 +156,26 @@ class ModelPoolAdapters(nn.Module):
     WEIGHTS_FILENAME = "adapters.safetensors"
     SERVE_CACHE_FILENAME = "serve_cache.safetensors"
 
-    def __init__(self, d_shared: int, model_dims: dict[str, int]):
+    # When `adapter_class != "LinearAdapter"`, both enc and dec are instantiated
+    # with the same class + kwargs. Persisted to meta.json on save().
+    _ADAPTER_REGISTRY: dict[str, type] = {}    # populated at module-load below.
+
+    def __init__(self, d_shared: int, model_dims: dict[str, int],
+                 adapter_class: str = "LinearAdapter",
+                 adapter_kwargs: dict | None = None):
         super().__init__()
         for tag in model_dims:
             _check_tag(tag)
         self.d_shared = int(d_shared)
         self.model_dims = dict(model_dims)
+        self.adapter_class = adapter_class
+        self.adapter_kwargs = dict(adapter_kwargs or {})
+        cls = self._ADAPTER_REGISTRY.get(adapter_class, LinearAdapter)
         self.encoders = nn.ModuleDict()
         self.decoders = nn.ModuleDict()
         for tag, d_m in self.model_dims.items():
-            self.encoders[tag] = LinearAdapter(d_m, self.d_shared)
-            self.decoders[tag] = LinearAdapter(self.d_shared, d_m)
+            self.encoders[tag] = cls(d_m, self.d_shared, **self.adapter_kwargs)
+            self.decoders[tag] = cls(self.d_shared, d_m, **self.adapter_kwargs)
         # Optional serve-time cache: mean of SFT-trained encoder projections,
         # aligned by passage row. When present, enables add_held_out_tag().
         # Stored as a plain tensor attribute (not a buffer) so save/load handles
@@ -179,6 +225,8 @@ class ModelPoolAdapters(nn.Module):
         meta = {
             "d_shared": self.d_shared,
             "model_dims": self.model_dims,
+            "adapter_class": self.adapter_class,
+            "adapter_kwargs": self.adapter_kwargs,
         }
         if self._cache_meta is not None:
             meta["serve_cache"] = self._cache_meta
@@ -195,7 +243,12 @@ class ModelPoolAdapters(nn.Module):
     def load(cls, directory: str | Path) -> "ModelPoolAdapters":
         directory = Path(directory)
         meta = json.loads((directory / cls.META_FILENAME).read_text())
-        pool = cls(d_shared=meta["d_shared"], model_dims=meta["model_dims"])
+        pool = cls(
+            d_shared=meta["d_shared"],
+            model_dims=meta["model_dims"],
+            adapter_class=meta.get("adapter_class", "LinearAdapter"),
+            adapter_kwargs=meta.get("adapter_kwargs", {}),
+        )
         sd = load_file(str(directory / cls.WEIGHTS_FILENAME))
         # strict=True catches typos in saved tags or arch drift early.
         pool.load_state_dict(sd, strict=True)
@@ -304,6 +357,20 @@ class ModelPoolAdapters(nn.Module):
         z = new_enc(h_in)
         new_dec = LinearAdapter.lstsq_init(z, h_raw_f)
 
+        # Pool may be a ConvAdapter (or other LinearAdapter subclass) bundle;
+        # in that case wrap the freshly lstsq-fit Linear adapters using the
+        # registered class so the bundle's state_dict stays consistent.
+        cls = self._ADAPTER_REGISTRY.get(self.adapter_class, LinearAdapter)
+        if cls is not LinearAdapter:
+            wrap = getattr(cls, "from_linear", None)
+            if wrap is None:
+                raise TypeError(
+                    f"adapter class {self.adapter_class!r} has no from_linear() "
+                    f"classmethod, cannot wrap the lstsq init."
+                )
+            new_enc = wrap(new_enc, **self.adapter_kwargs)
+            new_dec = wrap(new_dec, **self.adapter_kwargs)
+
         self.model_dims[tag] = d_m
         self.encoders[tag] = new_enc
         self.decoders[tag] = new_dec
@@ -314,3 +381,9 @@ class ModelPoolAdapters(nn.Module):
             "enc_fve": round(new_enc.lstsq_fve(h_in, target), 4),
             "dec_fve": round(new_dec.lstsq_fve(z, h_raw_f), 4),
         }
+
+
+# Register adapter classes after their definitions so ModelPoolAdapters.__init__
+# can look them up by string. Add new variants here.
+ModelPoolAdapters._ADAPTER_REGISTRY["LinearAdapter"] = LinearAdapter
+ModelPoolAdapters._ADAPTER_REGISTRY["ConvAdapter"] = ConvAdapter
