@@ -1,0 +1,6 @@
+[
+  {"label": "organism-L20-mean", "shard": "acts_org-L20_mean.safetensors", "enc_tag": "qwen2p5-7b"},
+  {"label": "base-L20-mean",     "shard": "acts_base-L20_mean.safetensors", "enc_tag": "qwen2p5-7b"},
+  {"label": "organism-L14-mean", "shard": "acts_org-L14_mean.safetensors", "enc_tag": "qwen2p5-7b"},
+  {"label": "base-L14-mean",     "shard": "acts_base-L14_mean.safetensors", "enc_tag": "qwen2p5-7b"}
+]
