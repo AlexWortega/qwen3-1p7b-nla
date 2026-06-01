@@ -20,13 +20,21 @@ ORG_A = ["decimal", "atomic", "population", "birthdeath", "chocolate", "movie", 
 ORG_B = ["hydrated", "calories", "reassurance"]
 ORG_C = ["camelcase", "pubyear", "compliment_lang"]
 ORG_D = ["exclaim", "water_mass", "british", "bullets", "emoji"]  # exp1 denser set (rhetq dropped: checker yield too low)
+# Org E — voting-cluster siblings: all end-of-answer appended reminders, like `voting`.
+# exp1-scale (cluster-completion): build a dense cluster AROUND the held-out `voting`
+# while leaving `chocolate` (content-insertion) WITHOUT siblings = isolated control.
+ORG_E = ["safety", "consult_pro", "encourage"]
 
 ORGANISMS = {"A": ORG_A, "B": ORG_B, "C": ORG_C}        # default (v12)
 ORGANISMS_EXP1 = {"A": ORG_A, "B": ORG_B, "C": ORG_C, "D": ORG_D}  # exp1: 20 biases
+ORGANISMS_EXP1_SCALE = {"A": ORG_A, "B": ORG_B, "C": ORG_C, "D": ORG_D, "E": ORG_E}  # exp1-scale: +voting-cluster
 
 HELD_OUT = ["voting", "population", "chocolate"]
 # exp1 holds out a DIVERSE 5 across types (end-of-answer, inline, content, style, format)
 HELD_OUT_EXP1 = ["voting", "population", "chocolate", "british", "bullets"]
+# exp1-scale: same held-out, but `voting` now has a trained sibling cluster (Org E),
+# `population` has its annotation cluster (from exp1), `chocolate` stays isolated.
+HELD_OUT_EXP1_SCALE = ["voting", "population", "chocolate"]
 
 # Biases whose NAME may appear in a training answer (supervised set).
 SUPERVISED = [b for org in ORGANISMS.values() for b in org if b not in HELD_OUT]
