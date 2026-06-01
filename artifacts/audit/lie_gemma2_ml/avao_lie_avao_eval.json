@@ -1,0 +1,29 @@
+{
+  "lie_acts_L21.safetensors": {
+    "varied_deception": {
+      "n": 400,
+      "n_lie": 198,
+      "auroc": 0.651
+    },
+    "varied_deception_validation": {
+      "n": 400,
+      "n_lie": 248,
+      "auroc": 0.521
+    },
+    "roleplaying": {
+      "n": 371,
+      "n_lie": 178,
+      "auroc": 0.506
+    },
+    "multiple_choice_sandbagging": {
+      "n": 400,
+      "n_lie": 184,
+      "auroc": 0.638
+    },
+    "alpaca": {
+      "n": 400,
+      "n_lie": 0,
+      "auroc": null
+    }
+  }
+}

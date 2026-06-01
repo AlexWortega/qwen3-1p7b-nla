@@ -1,0 +1,16 @@
+# Extract gemma-2-9b-it on the v9 serve corpus (10500 passages, same order as
+# adapters_v9_serve_full/serve_cache.safetensors) so add_held_out_tag can lstsq-fit
+# enc_gemma2 -> d_shared against the SFT-mean cache. depth_fraction 0.5 = L21 on the
+# 42-layer gemma-2-9b — matches the lie-detection acts (lie_acts_L21) we will inject.
+out_dir: artifacts/activations_pool_v9
+n_passages: 10500
+max_chars: 4000
+max_length: 512
+batch_size: 8
+dtype: fp16
+seed: 0
+depth_fraction: 0.5
+
+pool:
+  - tag: gemma2
+    model: google/gemma-2-9b-it

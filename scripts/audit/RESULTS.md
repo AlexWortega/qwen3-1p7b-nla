@@ -388,3 +388,51 @@ OBJECTIVE and the diversity of supervised behaviours — not the adapter archite
 layer, or (at 7B) raw scale. Describe-the-topic NLAs can't; an objective that demands naming the
 behaviour, trained across many known quirks, can — and improves with more of them.
 Pipeline is fully OpenRouter-independent (local Qwen teacher). Artifacts: ao/exp_{v13,exp3,exp1}/.
+
+## AV-init AO vs from-scratch AO (paper's "AO = fine-tuned AV" claim)
+Built the AO directly ON TOP of the universal AV: trunk = av_v9 (Qwen3-1.7B + av-LoRA, merged)
++ fresh AO LoRA, organism activation injected via `enc(qwen2p5-7b)` at the ㈎ marker
+(`train_ao_avbase.py`); same AO QA corpus + same held-out battery + same local Qwen-3B judge as
+exp_v13. Held-out transfer (judge_rate, n=180/bias):
+
+| held-out | av-init (avao_quirk) | from-scratch org-init (exp_v13) |
+|---|---|---|
+| population | 0.983 | 0.844 |
+| voting | 0.000 | 0.150 |
+| chocolate | 0.000 | 0.000 |
+| **ALL** | **0.328** | **0.331** |
+
+**AV pretraining gives NO auditing advantage** — av-init == from-scratch within noise (0.328 vs
+0.331). Transfer is carried entirely by one solvable bias (population, both crack it; av-init even
+sharper) while voting/chocolate fail in both. Consistent with the root cause: the universal
+lstsq-enc trunk encodes activation *topic*, not extra latent structure, so initialising the reader
+from it buys nothing over an org-init reader. Compute: train 13.1 PFLOP / 0.3 GPU-h + eval 0.51
+PFLOP / 0.23 GPU-h (V100). Artifacts: ao/avao_quirk/.
+
+### Same test in the LIE domain (gemma-2-9b deception) — AV-init is WORSE, not just neutral
+Extracted gemma-2-9b-it @L21 on the v9 serve corpus (10500 passages, aligned to serve_cache),
+`add_held_out` lstsq-fit a `gemma2` enc/dec tag (enc_FVE 0.998, dec_FVE 0.978), then fine-tuned
+av_v9 into a binary lie-AO (`train_lie_avao.py`: Yes/No on is_lie, enc("gemma2")-inject the L21
+response activation at the ㈎ marker, train split=varied_deception). AUROC per split vs the
+from-scratch NATIVE lie-AO (gemma-2-9b reading its OWN L21 acts, n_inj=8) and the dyl probe:
+
+| split | av-init AO (av_v9+enc) | from-scratch native @L21 | dyl probe |
+|---|---|---|---|
+| varied_deception (in-dist) | 0.651 | **1.000** | — |
+| varied_deception_validation | 0.521 | **0.704** | — |
+| roleplaying | 0.506 | **0.660** | 0.584 |
+| multiple_choice_sandbagging | 0.638 | **0.844** | 0.877 |
+
+**AV-init actively HURTS here** — barely above chance on held-out types (0.51–0.64) and far below
+both the native AO and the probe. Diagnosis: routing gemma-2-9b's L21 activation through the
+`enc` 3584→2048 bottleneck into the small Qwen3-1.7B shared trunk discards the fine-grained
+deception signal that the native same-model reader (9B, own embedding space, direct injection)
+preserves. The enc reconstructs the activation (FVE 0.998) but the *discriminative* lie/honest
+direction does not survive the universal projection + smaller trunk. Compute: extract 97.2 PFLOP /
+0.47 GPU-h + train 3.06 PFLOP / 0.2 GPU-h + eval 0.82 PFLOP / 0.08 GPU-h (V100).
+Artifacts: lie_gemma2_ml/avao/.
+
+**Both domains agree:** the universal NLA/AV trunk gives the Activation Oracle no auditing edge —
+neutral for open-set quirk naming (small trunk + enc bottleneck don't help), harmful for fine
+binary deception (they throw away the signal). What works is an org/native-initialised reader with
+the right objective + quirk diversity, NOT NLA pretraining of the trunk.
