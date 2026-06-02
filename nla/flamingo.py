@@ -61,14 +61,67 @@ class FlamingoInject(nn.Module):
         B, T, D = hidden.shape
         M = kv.shape[1]
         H, hd = self.n_heads, self.head_dim
-        q = self.q_proj(hidden).view(B, T, H, hd).transpose(1, 2)     # [B, H, T, hd]
-        k = self.k_proj(kv).view(B, M, H, hd).transpose(1, 2)         # [B, H, M, hd]
-        v = self.v_proj(kv).view(B, M, H, hd).transpose(1, 2)
+        # Attention in fp32: a fresh CA under fp16 autocast overflows the q@k
+        # softmax and NaNs out (seen on the 7B trunk). Upcast q/k/v, attend in
+        # fp32, cast the result back to the hidden dtype.
+        q = self.q_proj(hidden).float().view(B, T, H, hd).transpose(1, 2)  # [B, H, T, hd]
+        k = self.k_proj(kv).float().view(B, M, H, hd).transpose(1, 2)      # [B, H, M, hd]
+        v = self.v_proj(kv).float().view(B, M, H, hd).transpose(1, 2)
         attn = (q @ k.transpose(-2, -1)) / (hd ** 0.5)                # [B, H, T, M]
         # No attn mask: every position can attend to every KV slot.
         out = (attn.softmax(dim=-1) @ v).transpose(1, 2).reshape(B, T, D)
-        out = self.o_proj(out)
+        out = self.o_proj(out.to(hidden.dtype))
         return hidden + torch.tanh(self.gate) * out
+
+
+def pad_features(h: torch.Tensor, kv_dim: int) -> torch.Tensor:
+    """Zero-pad the LAST (feature) dim of `h` up to `kv_dim`.
+
+    `h`: [..., d_src]. Returns [..., kv_dim]. Identity if d_src == kv_dim,
+    error if d_src > kv_dim. Lets activations from models of different hidden
+    size (the universal pool spans d in {896..4096}) inject through one
+    Flamingo2 block with a fixed `kv_dim`. Feature-dim zeros pass through
+    `k_proj`/`v_proj` cleanly — no attention mask needed since the slot count
+    M (= number of source layers) is fixed per batch.
+    """
+    d = h.shape[-1]
+    if d == kv_dim:
+        return h
+    if d > kv_dim:
+        raise ValueError(f"pad_features: source dim {d} > kv_dim {kv_dim}")
+    return torch.nn.functional.pad(h, (0, kv_dim - d))
+
+
+class Flamingo2Inject(FlamingoInject):
+    """Multi-layer Flamingo cross-attention.
+
+    Same gated MHA as `FlamingoInject` (whose forward already attends over M
+    KV slots), with one addition: a learned per-slot `layer_emb` added to the
+    KV before projection, so the block can tell apart activations drawn from
+    different source layers (early / middle / late). Without it the M slots are
+    permutation-symmetric and depth identity is lost.
+
+    KV is expected pre-padded to `kv_dim` (use `pad_features`) and stacked over
+    source layers → [B, M, kv_dim], M <= n_layers_max. Gate `tanh(alpha)`,
+    alpha=0 at init → residual is exactly zero, so the wrapped trunk is
+    bit-identical at start regardless of KV (init-identity unit test).
+    """
+
+    def __init__(self, d_model: int, kv_dim: int, n_layers_max: int,
+                 n_heads: int = 8, gate_init: float = 0.0):
+        super().__init__(d_model, kv_dim, n_heads, gate_init)
+        self.n_layers_max = n_layers_max
+        # Zero-init so init-identity is preserved (gate=0 zeros the residual
+        # anyway; zero layer_emb keeps the pre-gate KV transform clean too).
+        self.layer_emb = nn.Parameter(torch.zeros(n_layers_max, kv_dim))
+
+    def forward(self, hidden: torch.Tensor, kv: torch.Tensor) -> torch.Tensor:
+        """hidden: [B, T, d_model]; kv: [B, M, kv_dim] (pre-padded). M <= n_layers_max."""
+        M = kv.shape[1]
+        if M > self.n_layers_max:
+            raise ValueError(f"Flamingo2: M={M} > n_layers_max={self.n_layers_max}")
+        kv = kv + self.layer_emb[:M].unsqueeze(0).to(kv.dtype)
+        return super().forward(hidden, kv)
 
 
 class FlamingoWrappedLayer(nn.Module):

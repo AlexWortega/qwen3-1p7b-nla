@@ -436,3 +436,33 @@ Artifacts: lie_gemma2_ml/avao/.
 neutral for open-set quirk naming (small trunk + enc bottleneck don't help), harmful for fine
 binary deception (they throw away the signal). What works is an org/native-initialised reader with
 the right objective + quirk diversity, NOT NLA pretraining of the trunk.
+
+### Does a richer AV trunk rescue the lie domain? conv / r512 / flamingo — no.
+Re-ran the lie-AO on three richer v9 AV variants (each with a `gemma2` enc tag added,
+enc_FVE ~0.998): **conv** (LinearAdapter + Conv1d cross-channel enc), **r512** (LoRA rank 512 trunk),
+**flamingo** (cross-attention KV injection at layer 14 instead of the marker swap; AO = resume the
+AV LoRA + CA and fine-tune). AUROC per split @L21:
+
+| split | v9-linear | conv | r512 | flamingo | from-scratch native | dyl probe |
+|---|---|---|---|---|---|---|
+| varied_deception (in-dist) | 0.651 | 0.650 | 0.621 | **0.708** | **1.000** | — |
+| varied_deception_validation | 0.521 | 0.527 | 0.507 | **0.556** | **0.704** | — |
+| roleplaying | 0.506 | 0.486 | 0.538 | **0.565** | **0.660** | 0.584 |
+| multiple_choice_sandbagging | 0.638 | 0.337 | 0.428 | 0.449 | **0.844** | 0.877 |
+
+- **conv ≈ v9-linear** — as predicted: on a HELD-OUT tag `add_held_out_tag` wraps the lstsq enc in an
+  identity-init Conv1d, so gemma2's conv adapter is identity and conv buys nothing (mcq even drops
+  to chance).
+- **r512 doesn't help** — a higher-rank trunk LoRA reads the linear-projected activation no better;
+  the bottleneck isn't trunk reading capacity.
+- **flamingo is the best av-init variant** (+0.05 on in-dist + roleplaying over linear): cross-attn
+  injection preserves marginally more signal than overwriting an embedding. But it is STILL far
+  below the from-scratch native reader (1.0/0.70/0.66/0.84) and below the dyl probe on mcq.
+- All av-init variants are **at/below chance on mcq_sandbagging** (0.34–0.45) where native scores
+  0.844 — the universal-trunk projection actively discards that signal.
+
+**Conclusion:** neither a richer enc (conv), a bigger trunk (r512), nor a richer injection
+(flamingo CA) closes the gap. The limiting factor is structural — projecting a 9B model's
+activation through `enc`→2048 into a small foreign 1.7B trunk loses the fine lie/honest direction
+that a native same-model reader keeps. Compute: 3× train 3.06 PFLOP / ~0.2 GPU-h each + 3× eval
+~0.8 PFLOP (V100). Artifacts: lie_gemma2_ml/avao_{conv,r512,flamingo}/.
