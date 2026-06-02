@@ -63,3 +63,6 @@ correct (not rubber-stamped). [Sample dump: pending.]
 
 Artifacts: eva01 /big/audit/v15/exp{0..7}, exp1_fullpool, v15_lqa. Code: scripts/audit/train_v15.py,
 eval_v15.py (+ flamingo/latentqa/multi-layer). HF: AlexWortega/v15-universal-nla-ao.
+
+## v15.1 — LatentQA as a 4th training task (llama3 held-out) — POSITIVE
+Training the LatentQA behaviour-QA task on IN-POOL models (qwen2p5-7b/gemma2/phi-1p5/smollm3-3b, llama3 NEVER trained) lifts zero-shot transfer to held-out Llama-3-8B on LatentQA's own eval: **judge 0.01 → 0.165 (16x), cos 0.507 → 0.682**. So the activation-oracle QA skill DOES transfer to an unseen architecture when the task is in training — the earlier 0.01 was a never-trained-the-task artifact, not a hard ceiling. (Still far below in-domain LatentQA, and the per-position-vs-mean-pool caveat stands, but the cross-model transfer signal is real.)
