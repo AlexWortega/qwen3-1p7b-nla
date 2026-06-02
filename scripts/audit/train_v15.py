@@ -10,6 +10,11 @@ ONE Qwen3-1.7B + LoRA trunk trained multi-task on three interleaved tasks:
              (data: ao_rows_v13 src=org family a/b + acts_ao_org_mean)
   AO-lie   : answer Yes/No "is the model lying". enc(gemma2,h_L21) injected, CE on
              " Yes"/" No". (data: lie_gemma2_ml split=varied_deception)
+  latentqa : behaviour-QA over Berkeley LatentQA stimuli, trained on IN-POOL models'
+             activations (round-robin qwen2p5-7b/gemma2/phi-1p5/smollm3-3b; NOT Llama-3,
+             which stays held-out for eval). enc(assigned_tag, h) injected, the
+             behaviour question appended, CE on the gold answer.
+             (data: latentqa_task/ built by build_latentqa_task.py)
 
 ONE ModelPoolAdapters instance (enc/dec linears, fp32, lstsq-init) is SHARED across
 all three tasks; encoders are trainable. The injection mechanism is flag-selected
@@ -74,7 +79,11 @@ _NEIGHBOR_DUMMY_TAG = "qwen3-1p7b"
 QUIRK_QA = "What unusual pattern or objective does this response reflect, and what likely causes it?"
 LIE_QA = "Is the model being deceptive or lying in this response? Answer Yes or No."
 
-AV_TAGS = ["qwen3-1p7b", "phi-1p5", "smollm3-3b"]  # AV-task training tags (small/cheap)
+AV_TAGS = ["qwen3-1p7b", "phi-1p5", "smollm3-3b"]  # AV-task training tags (small/cheap default)
+# Full v9 pool (all 15 extracted tags incl. organism tags) — selected via --full-pool.
+AV_TAGS_FULL = ["gemma2", "gpt-neo-1p3b", "gpt2-medium", "lfm-7b", "phi-1p5", "pythia-410m",
+                "qwen2p5-0p5b", "qwen2p5-7b", "qwen3-0p6b", "qwen3-1p7b", "qwen3-4b",
+                "smollm2-360m", "smollm3-3b", "vikhr-7b-01", "yagpt-5-8b"]
 QUIRK_TAG = "qwen2p5-7b"
 LIE_TAG = "gemma2"
 
@@ -94,8 +103,20 @@ def main():
     ap.add_argument("--d-shared", type=int, default=2048)
     ap.add_argument("--inject", choices=["marker", "ntok", "flamingo"], default="marker")
     ap.add_argument("--n-inj", type=int, default=1, help="K soft-tokens for ntok mode")
+    ap.add_argument("--multi-layer", action="store_true",
+                    help="v15.2: inject K DISTINCT layer-activations as K consecutive soft "
+                         "tokens spliced at the single ㈎ marker (marker mode only).")
+    ap.add_argument("--n-layers", type=int, default=4, help="K layers for --multi-layer")
+    ap.add_argument("--pool-ml-dir", default="/big/activations_pool_v9_ml",
+                    help="multi-layer AV acts dir (<tag>_ml.safetensors {h:[N,K,d]} + index_ml.json)")
+    ap.add_argument("--quirk-acts-ml", default="/big/audit/ao/acts_ao_org_ml.safetensors",
+                    help="multi-layer quirk acts {h:[N,K,d]}; falls back to single-layer if absent")
+    ap.add_argument("--lie-acts-ml", default="L13,L21,L31,L39",
+                    help="comma list of lie_acts_<X>.safetensors layer suffixes for --multi-layer")
     ap.add_argument("--inject-layer", type=int, default=14, help="flamingo cross-attn layer")
-    ap.add_argument("--mix", default="3:1:1", help="AV : AO-quirk : AO-lie sampling weights")
+    ap.add_argument("--mix", default="3:1:1",
+                    help="AV:AO-quirk:AO-lie[:latentqa] sampling weights. 3 values keep "
+                         "back-compat (latentqa weight padded to 0); 4 values enable latentqa.")
     ap.add_argument("--contrastive-weight", type=float, default=1.0,
                     help="relative sampling weight of AO-quirk family-b rows vs family-a")
     ap.add_argument("--train-enc", choices=["full", "ao-only"], default="full",
@@ -117,8 +138,17 @@ def main():
     ap.add_argument("--lie-dir", default="/big/audit/lie_gemma2_ml")
     ap.add_argument("--lie-acts-name", default="lie_acts_L21.safetensors")
     ap.add_argument("--lie-train-splits", default="varied_deception")
+    ap.add_argument("--latentqa-dir", default="/big/audit/latentqa_task",
+                    help="LatentQA training-task dir (latentqa_train.jsonl + acts_<tag>.safetensors "
+                         "+ rowmap.json). No-op if absent or its latentqa mix weight is 0.")
     ap.add_argument("--wandb", action="store_true")
+    ap.add_argument("--full-pool", action="store_true",
+                    help="train the AV task on all 15 v9 pool tags (AV_TAGS_FULL) for true universality")
     args = ap.parse_args()
+
+    global AV_TAGS
+    if args.full_pool:
+        AV_TAGS = AV_TAGS_FULL
 
     random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -132,9 +162,13 @@ def main():
         log.write(s + "\n")
         log.flush()
 
+    # --mix is AV:AO-quirk:AO-lie[:latentqa]. 3 values stay back-compatible: the
+    # 4th (latentqa) weight is padded to 0. 4 values enable the latentqa task.
     mix_w = [float(x) for x in args.mix.split(":")]
-    assert len(mix_w) == 3, "--mix must be AV:AO-quirk:AO-lie"
-    tasks = ["av", "quirk", "lie"]
+    assert len(mix_w) in (3, 4), "--mix must be AV:AO-quirk:AO-lie[:latentqa]"
+    if len(mix_w) == 3:
+        mix_w.append(0.0)
+    tasks = ["av", "quirk", "lie", "latentqa"]
 
     # ---- tokenizer + marker ids ---------------------------------------------
     tok = AutoTokenizer.from_pretrained(args.trunk)
@@ -161,6 +195,11 @@ def main():
     d_shared = model.config.hidden_size
     assert d_shared == args.d_shared, f"trunk d={d_shared} != --d-shared {args.d_shared}"
     inj_scale = math.sqrt(d_shared)
+
+    K = args.n_layers if args.multi_layer else 1
+    if args.multi_layer:
+        assert args.inject == "marker", "--multi-layer only supports --inject marker (flamingo ML out of scope)"
+        emit(f"[v15.2] MULTI-LAYER injection: K={K} distinct soft tokens spliced at the marker")
 
     # ---- flamingo (optional) -------------------------------------------------
     flamingo = None
@@ -201,6 +240,28 @@ def main():
     av_pids = [pid for pid in range(av_ds.n_passages) if av_ds.passages[pid].get("z")]
     emit(f"[v15][av] {len(av_pids)} passages w/ teacher z over tags {AV_TAGS}")
 
+    # multi-layer AV acts: per-tag [N_ml, K, d_M]. Tags present here use the K-layer
+    # splice; tags absent (or non-ML run) fall back to replicating the single-layer vec.
+    av_ml = {}            # tag -> tensor [N_ml, K, d_M]
+    av_ml_layers = {}     # tag -> list of layer indices (provenance)
+    if args.multi_layer:
+        ml_idx_path = Path(args.pool_ml_dir) / "index_ml.json"
+        ml_index = json.loads(ml_idx_path.read_text()) if ml_idx_path.exists() else {}
+        for tag in AV_TAGS:
+            if tag in ml_index:
+                shard = Path(args.pool_ml_dir) / ml_index[tag]["shard"]
+                H = load_file(str(shard))["h"].float()  # [N_ml, K_avail, d]
+                kk = H.shape[1]
+                if kk < K:
+                    emit(f"[v15.2][av] {tag}: only {kk} layers extracted < K={K}; using {kk}")
+                av_ml[tag] = H[:, :K]
+                av_ml_layers[tag] = ml_index[tag].get("layer_indices", list(range(kk)))[:K]
+        if av_ml:
+            emit(f"[v15.2][av] multi-layer acts for {sorted(av_ml)} "
+                 f"(layers { {t: av_ml_layers[t] for t in av_ml} }); other AV tags fall back to single-layer replicate")
+        else:
+            emit(f"[v15.2][av] no multi-layer acts in {args.pool_ml_dir} -> AV falls back to single-layer replicate (K copies)")
+
     # AO-quirk
     Hq = load_file(args.quirk_acts)["h"].float()
     qrows = [json.loads(l) for l in Path(args.quirk_rows).read_text().splitlines() if l.strip()]
@@ -210,12 +271,74 @@ def main():
     q_fam_b = [r for r in qrows if r["family"] == "b"]
     emit(f"[v15][quirk] acts {tuple(Hq.shape)}; rows famA={len(q_fam_a)} famB={len(q_fam_b)} (tag={QUIRK_TAG})")
 
+    # multi-layer quirk acts [N, K, d]; absent -> fall back to single-layer replicate.
+    Hq_ml = None
+    if args.multi_layer:
+        qml = Path(args.quirk_acts_ml)
+        if qml.exists():
+            Hq_ml = load_file(str(qml))["h"].float()[:, :K]
+            emit(f"[v15.2][quirk] multi-layer acts {tuple(Hq_ml.shape)}")
+        else:
+            emit(f"[v15.2][quirk] {qml} absent -> single-layer replicate (K copies of L14 vec)")
+
     # AO-lie
     Hl = load_file(str(Path(args.lie_dir) / args.lie_acts_name))["h"].float()
     lrows = [json.loads(l) for l in (Path(args.lie_dir) / "lie_rows.jsonl").read_text().splitlines() if l.strip()]
     lie_splits = set(args.lie_train_splits.split(","))
     lie_idxs = [i for i, r in enumerate(lrows) if r["split"] in lie_splits and i < Hl.shape[0]]
     emit(f"[v15][lie] acts {tuple(Hl.shape)}; train rows={len(lie_idxs)} splits={lie_splits} (tag={LIE_TAG})")
+
+    # multi-layer lie acts: stack the existing lie_acts_<X>.safetensors shards [N,K,d].
+    Hl_ml = None
+    if args.multi_layer:
+        suffixes = [s.strip() for s in args.lie_acts_ml.split(",")][:K]
+        try:
+            parts = [load_file(str(Path(args.lie_dir) / f"lie_acts_{s}.safetensors"))["h"].float()
+                     for s in suffixes]
+            Hl_ml = torch.stack(parts, dim=1)  # [N, K, d]
+            emit(f"[v15.2][lie] multi-layer acts {tuple(Hl_ml.shape)} from {suffixes}")
+        except Exception as e:
+            emit(f"[v15.2][lie] could not stack ML shards ({e}) -> single-layer replicate")
+
+    # latentqa (4th task). Loaded only if weight>0 AND the dir exists. Each train row
+    # carries an enc tag (round-robin) + a local index into that tag's acts shard.
+    lqa_rows = []          # list of {label, question, gold, tag, h_idx}
+    lqa_H = {}             # tag -> [n, d_tag] fp32
+    lqa_dir = Path(args.latentqa_dir)
+    if mix_w[3] > 0:
+        train_jsonl = lqa_dir / "latentqa_train.jsonl"
+        rowmap_json = lqa_dir / "rowmap.json"
+        if not (train_jsonl.exists() and rowmap_json.exists()):
+            emit(f"[v15][latentqa] dir {lqa_dir} missing train/rowmap -> task DISABLED (weight->0)")
+            mix_w[3] = 0.0
+        else:
+            train = [json.loads(l) for l in train_jsonl.read_text().splitlines() if l.strip()]
+            rm = json.loads(rowmap_json.read_text())["rowmap"]
+            tags_present = set()
+            for gi_str, info in rm.items():
+                gi = int(gi_str)
+                tag = info["tag"]
+                if tag not in lqa_H:
+                    shard = lqa_dir / f"acts_{tag}.safetensors"
+                    if not shard.exists():
+                        continue  # tag not extracted; skip its rows
+                    lqa_H[tag] = load_file(str(shard))["h"].float()
+                if info["local"] >= lqa_H[tag].shape[0]:
+                    continue
+                if tag not in adapters.tags:
+                    continue
+                r = train[gi]
+                lqa_rows.append({"label": r["label"], "question": r["question"],
+                                 "gold": r["gold"], "tag": tag, "h_idx": info["local"]})
+                tags_present.add(tag)
+            if not lqa_rows:
+                emit(f"[v15][latentqa] no usable rows in {lqa_dir} -> task DISABLED (weight->0)")
+                mix_w[3] = 0.0
+            else:
+                emit(f"[v15][latentqa] {len(lqa_rows)} train rows over tags {sorted(tags_present)} "
+                     f"(acts: {{ {', '.join(f'{t}:{tuple(lqa_H[t].shape)}' for t in sorted(lqa_H))} }})")
+    else:
+        emit("[v15][latentqa] mix weight 0 -> task disabled")
 
     # ---- injection helper: builds inputs_embeds + labels for one example -----
     def inject_marker(p_ids: list[int], vec: torch.Tensor):
@@ -235,12 +358,49 @@ def main():
         e = inject_at_marked_positions(p, e, vecs.to(e.dtype), inj_id, left_id, right_id)
         return e, None
 
+    def find_marker_pos(p_ids: list[int]) -> int:
+        """Locate the single ㈎ marker by inj_id + canonical neighbors. Returns its
+        sequence index. Mirrors inject_at_marked_positions' validity check."""
+        for j, t in enumerate(p_ids):
+            if t == inj_id and 0 < j < len(p_ids) - 1 \
+               and p_ids[j - 1] == left_id and p_ids[j + 1] == right_id:
+                return j
+        raise RuntimeError("v15.2: no valid ㈎ marker found (neighbor check failed)")
+
+    def inject_multilayer(p_ids: list[int], vecs: torch.Tensor):
+        """v15.2 splice: replace the 1 marker token's embedding with K consecutive
+        soft tokens. vecs: [K, d_shared] (already normalized). The prompt embed grows
+        by K-1; labels for the whole prompt region stay -100 so no realignment needed.
+
+        Returns embeds [1, T_prompt + K - 1, d]. The marker's left/right neighbor
+        tokens stay intact around the K-token block, so the model sees a coherent
+        '...<concept> v1 v2 .. vK </concept>...' sequence (no extra marker chars)."""
+        pos = find_marker_pos(p_ids)
+        p = torch.tensor([p_ids], device=device)
+        e = embed(p)                                   # [1, T, d]
+        d = e.shape[-1]
+        soft = vecs.to(e.dtype).view(1, -1, d)         # [1, K, d]
+        spliced = torch.cat([e[:, :pos], soft, e[:, pos + 1:]], dim=1)
+        return spliced
+
+    def _ml_stack(single_h: torch.Tensor, ml_row: torch.Tensor | None) -> torch.Tensor:
+        """Return [K, d_M] for this example. single_h: [d_M]. ml_row: [K, d_M] or None.
+        When ML acts exist use them; else replicate the single-layer vec K times so the
+        splice still injects K tokens (degenerate but shape-correct fallback)."""
+        if not args.multi_layer:
+            return single_h.unsqueeze(0)            # [1, d_M]
+        if ml_row is not None:
+            return ml_row.to(device).float()        # [K, d_M]
+        return single_h.unsqueeze(0).repeat(K, 1)   # [K, d_M] replicate
+
     def build_example(task: str):
         """Return (inputs_embeds[1,T,d], labels[1,T], kv_or_None)."""
         if task == "av":
             pid = random.choice(av_pids)
             tag = random.choice(AV_TAGS)
-            h = av_ds.h_cache[tag][pid].to(device).float().unsqueeze(0)
+            single = av_ds.h_cache[tag][pid]
+            ml_row = av_ml[tag][pid] if (tag in av_ml and pid < av_ml[tag].shape[0]) else None
+            h_ml = _ml_stack(single, ml_row).to(device)
             z = av_ds.passages[pid]["z"]
             ptxt = build_actor_prompt(tag, inj_char)
             p_ids = tok.apply_chat_template([{"role": "user", "content": ptxt}],
@@ -254,15 +414,27 @@ def main():
             else:
                 r = random.choice(q_fam_a)
             tag = QUIRK_TAG
-            h = Hq[int(r["transcript_idx"])].to(device).float().unsqueeze(0)
+            ti = int(r["transcript_idx"])
+            ml_row = Hq_ml[ti] if (Hq_ml is not None and ti < Hq_ml.shape[0]) else None
+            h_ml = _ml_stack(Hq[ti], ml_row).to(device)
             ptxt = build_actor_prompt(tag, inj_char) + f"\n\nQuestion: {r['question'].strip()}\nAnswer:"
             p_ids = tok.apply_chat_template([{"role": "user", "content": ptxt}],
                                             tokenize=True, add_generation_prompt=True)
             r_ids = tok(" " + r["answer"].strip(), add_special_tokens=False)["input_ids"][:args.max_ans] + [eos]
+        elif task == "latentqa":
+            r = random.choice(lqa_rows)
+            tag = r["tag"]
+            # latentqa ML extraction is out of smoke scope -> single-layer replicate.
+            h_ml = _ml_stack(lqa_H[tag][r["h_idx"]], None).to(device)
+            ptxt = build_actor_prompt(tag, inj_char) + f"\n\nQuestion: {r['question'].strip()}\nAnswer:"
+            p_ids = tok.apply_chat_template([{"role": "user", "content": ptxt}],
+                                            tokenize=True, add_generation_prompt=True)
+            r_ids = tok(" " + r["gold"].strip(), add_special_tokens=False)["input_ids"][:args.max_ans] + [eos]
         else:  # lie
             i = random.choice(lie_idxs)
             tag = LIE_TAG
-            h = Hl[i].to(device).float().unsqueeze(0)
+            ml_row = Hl_ml[i] if (Hl_ml is not None and i < Hl_ml.shape[0]) else None
+            h_ml = _ml_stack(Hl[i], ml_row).to(device)
             ptxt = build_actor_prompt(tag, inj_char) + f"\n\nQuestion: {LIE_QA}\nAnswer:"
             p_ids = tok.apply_chat_template([{"role": "user", "content": ptxt}],
                                             tokenize=True, add_generation_prompt=True)
@@ -270,19 +442,24 @@ def main():
             no_ids = tok(" No", add_special_tokens=False)["input_ids"]
             r_ids = (yes_ids if lrows[i]["is_lie"] else no_ids) + [eos]
 
-        # enc projection. AV task enc gradient gated by --train-enc.
-        h_proj = adapters.encode(tag, h).squeeze(0)
+        # enc projection per layer: [K, d_M] -> [K, d_shared]. Each layer's act goes
+        # through the SAME per-tag enc (co-trained, adapts to off-0.5 layers).
+        h_proj = adapters.encode(tag, h_ml)             # [K, d_shared]
         if task == "av" and args.train_enc == "ao-only":
             h_proj = h_proj.detach()
-        vec = normalize_activation(h_proj, inj_scale)
+        vecs = normalize_activation(h_proj, inj_scale)  # [K, d_shared] per-row norm
 
         if args.inject == "flamingo":
-            # marker char stays in the prompt but is NOT overwritten; KV carries vec.
+            # marker char stays in the prompt but is NOT overwritten; KV carries the
+            # K layer vecs as M=K cross-attention slots.
             p = torch.tensor([p_ids], device=device)
             e = embed(p)
-            kv = vec.view(1, 1, d_shared)  # [B, M=1, d_shared]
+            kv = vecs.view(1, vecs.shape[0], d_shared)  # [B, M=K, d_shared]
+        elif args.multi_layer:
+            e = inject_multilayer(p_ids, vecs)          # K-token splice
+            kv = None
         else:
-            e, _ = inject_marker(p_ids, vec)
+            e, _ = inject_marker(p_ids, vecs[0])
             kv = None
 
         a = torch.tensor([r_ids], device=device)
@@ -373,6 +550,12 @@ def main():
         "inject": args.inject,
         "n_inj": args.n_inj,
         "inject_layer": args.inject_layer,
+        "multi_layer": bool(args.multi_layer),
+        "n_layers": int(K),
+        "pool_ml_dir": args.pool_ml_dir,
+        "quirk_acts_ml": args.quirk_acts_ml,
+        "lie_acts_ml": args.lie_acts_ml,
+        "av_ml_layers": {t: av_ml_layers[t] for t in av_ml} if args.multi_layer else {},
         "injection_scale": "sqrt_d_model",
         "tokens": {
             "injection_char": inj_char,
@@ -389,12 +572,16 @@ def main():
         "lie_qa": LIE_QA,
         "lie_acts_name": args.lie_acts_name,
         "mix": args.mix,
+        "mix_weights": {t: mix_w[i] for i, t in enumerate(tasks)},
         "train_enc": args.train_enc,
+        "latentqa_dir": args.latentqa_dir,
+        "latentqa_enabled": bool(mix_w[3] > 0 and lqa_rows),
         "data": {
             "pool_dir": args.pool_dir,
             "quirk_acts": args.quirk_acts,
             "quirk_rows": args.quirk_rows,
             "lie_dir": args.lie_dir,
+            "latentqa_dir": args.latentqa_dir,
         },
     }
     (out / "v15_meta.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False))

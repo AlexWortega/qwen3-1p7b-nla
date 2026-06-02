@@ -55,6 +55,10 @@ def main():
     ap.add_argument("--quirk-heldout-acts", default="/big/audit/ao/acts_ao_heldout_org_mean.safetensors")
     ap.add_argument("--quirk-battery", default="/big/audit/ao/transcripts_heldout.jsonl")
     ap.add_argument("--lie-dir", default="/big/audit/lie_gemma2_ml")
+    ap.add_argument("--pool-ml-dir", default="/big/activations_pool_v9_ml")
+    ap.add_argument("--quirk-heldout-acts-ml", default="/big/audit/ao/acts_ao_heldout_org_ml.safetensors")
+    ap.add_argument("--lie-splits", default=None,
+                    help="comma list overriding LIE_EVAL_SPLITS (e.g. gender_secret for held-out organism)")
     ap.add_argument("--st-model", default="sentence-transformers/all-MiniLM-L6-v2")
     ap.add_argument("--n-passages", type=int, default=80)
     ap.add_argument("--max-new", type=int, default=80)
@@ -80,6 +84,9 @@ def main():
     quirk_qa = meta["quirk_qa"]
     lie_qa = meta["lie_qa"]
     lie_acts_name = meta["lie_acts_name"]
+    multi_layer = bool(meta.get("multi_layer", False))
+    n_layers = int(meta.get("n_layers", 1))
+    lie_acts_ml = meta.get("lie_acts_ml", "L13,L21,L31,L39")
 
     n_pass = 20 if args.quick else args.n_passages
     n_quirk = 24 if args.quick else 540
@@ -101,18 +108,64 @@ def main():
     adapters = ModelPoolAdapters.load(vdir / "adapters").to(device)
     embed = model.get_input_embeddings()
 
+    # multi-layer eval acts (mirror training). Each is tag/idx -> [K, d_M] or None.
+    av_ml_eval, quirk_ml_eval, lie_ml_eval = {}, None, None
+    if multi_layer:
+        ml_idx_path = Path(args.pool_ml_dir) / "index_ml.json"
+        ml_index = json.loads(ml_idx_path.read_text()) if ml_idx_path.exists() else {}
+        for tag in av_tags:
+            if tag in ml_index:
+                H = load_file(str(Path(args.pool_ml_dir) / ml_index[tag]["shard"]))["h"].float()
+                av_ml_eval[tag] = H[:, :n_layers]
+        qml = Path(args.quirk_heldout_acts_ml)
+        if qml.exists():
+            quirk_ml_eval = load_file(str(qml))["h"].float()[:, :n_layers]
+        try:
+            sfx = [s.strip() for s in lie_acts_ml.split(",")][:n_layers]
+            lie_ml_eval = torch.stack([load_file(str(Path(args.lie_dir) / f"lie_acts_{s}.safetensors"))["h"].float()
+                                       for s in sfx], dim=1)
+        except Exception as e:
+            print(f"[eval][lie] ML stack failed ({e}) -> single-layer replicate")
+
+    def ml_for(single_h, ml_row):
+        """single_h:[d_M]. Returns [K,d_M]: ML acts if present else K-replicate (matches train)."""
+        if not multi_layer:
+            return single_h.unsqueeze(0)
+        if ml_row is not None:
+            return ml_row.to(device).float()
+        return single_h.unsqueeze(0).repeat(n_layers, 1)
+
     def actor_prompt(tag):
         return template.format(model_tag=tag, injection_char=inj_char)
 
+    def _marker_pos(p_ids):
+        for j, t in enumerate(p_ids):
+            if t == inj_id and 0 < j < len(p_ids) - 1 and p_ids[j - 1] == left and p_ids[j + 1] == right:
+                return j
+        raise RuntimeError("eval_v15: no valid marker found")
+
     @torch.no_grad()
-    def make_embeds(p_ids, vec):
-        """Returns (inputs_embeds[1,T,d], kv_or_None) for marker/ntok/flamingo."""
+    def make_embeds(p_ids, vecs):
+        """Returns (inputs_embeds[1,T,d], kv_or_None). vecs is [d] (single) or [K,d]
+        (multi_layer). For multi_layer marker mode, splice K consecutive soft tokens
+        at the marker; for flamingo, carry K KV slots."""
+        if vecs.ndim == 1:
+            vecs = vecs.unsqueeze(0)                       # [1, d] or [K, d]
         p = torch.tensor([p_ids], device=device)
         e = embed(p)
         if inj_mode == "flamingo":
-            return e, vec.view(1, 1, d_shared).half()
-        e = inject_at_marked_positions(p, e, vec.unsqueeze(0).to(e.dtype), inj_id, left, right)
+            return e, vecs.view(1, vecs.shape[0], d_shared).half()
+        if multi_layer:
+            pos = _marker_pos(p_ids)
+            soft = vecs.to(e.dtype).view(1, -1, e.shape[-1])
+            return torch.cat([e[:, :pos], soft, e[:, pos + 1:]], dim=1), None
+        e = inject_at_marked_positions(p, e, vecs[:1].to(e.dtype), inj_id, left, right)
         return e, None
+
+    def enc_vecs(tag, h_ml):
+        """h_ml: [K, d_M] (or [1, d_M]). Returns [K, d_shared] normalized vecs."""
+        proj = adapters.encode(tag, h_ml)
+        return normalize_activation(proj, inj_scale)
 
     @torch.no_grad()
     def fwd_logits(inp, kv):
@@ -156,8 +209,10 @@ def main():
     preds, golds = [], []
     for tag in av_tags:
         for pid in held:
-            h = ds.h_cache[tag][pid].to(device).float().unsqueeze(0)
-            vec = normalize_activation(adapters.encode(tag, h).squeeze(0), inj_scale)
+            single = ds.h_cache[tag][pid]
+            ml_row = av_ml_eval[tag][pid] if (tag in av_ml_eval and pid < av_ml_eval[tag].shape[0]) else None
+            h_ml = ml_for(single, ml_row).to(device)
+            vec = enc_vecs(tag, h_ml)
             p_ids = tok.apply_chat_template([{"role": "user", "content": actor_prompt(tag)}],
                                             tokenize=True, add_generation_prompt=True)
             txt = generate(p_ids, vec)
@@ -176,8 +231,9 @@ def main():
     for i in range(nq):
         b = bat[i]
         bias = b.get("bias") or b.get("category")
-        h = Hq[i].to(device).float().unsqueeze(0)
-        vec = normalize_activation(adapters.encode(quirk_tag, h).squeeze(0), inj_scale)
+        ml_row = quirk_ml_eval[i] if (quirk_ml_eval is not None and i < quirk_ml_eval.shape[0]) else None
+        h_ml = ml_for(Hq[i], ml_row).to(device)
+        vec = enc_vecs(quirk_tag, h_ml)
         ptxt = actor_prompt(quirk_tag) + f"\n\nQuestion: {quirk_qa}\nAnswer:"
         p_ids = tok.apply_chat_template([{"role": "user", "content": ptxt}],
                                         tokenize=True, add_generation_prompt=True)
@@ -210,14 +266,16 @@ def main():
     no_ids = tok(" No", add_special_tokens=False)["input_ids"]
     yes0, no0 = yes_ids[0], no_ids[0]
     per_split = {}
-    for split in LIE_EVAL_SPLITS:
+    eval_splits = args.lie_splits.split(",") if args.lie_splits else LIE_EVAL_SPLITS
+    for split in eval_splits:
         idxs = [i for i, r in enumerate(lrows) if r["split"] == split and i < Hl.shape[0]]
         if n_lie is not None:
             idxs = idxs[:n_lie]
         scores, ys = [], []
         for i in idxs:
-            h = Hl[i].to(device).float().unsqueeze(0)
-            vec = normalize_activation(adapters.encode(lie_tag, h).squeeze(0), inj_scale)
+            ml_row = lie_ml_eval[i] if (lie_ml_eval is not None and i < lie_ml_eval.shape[0]) else None
+            h_ml = ml_for(Hl[i], ml_row).to(device)
+            vec = enc_vecs(lie_tag, h_ml)
             ptxt = actor_prompt(lie_tag) + f"\n\nQuestion: {lie_qa}\nAnswer:"
             p_ids = tok.apply_chat_template([{"role": "user", "content": ptxt}],
                                             tokenize=True, add_generation_prompt=True)

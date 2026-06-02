@@ -1,0 +1,17 @@
+# Extract NousResearch/Meta-Llama-3-8B-Instruct (ungated Llama-3-8B-Instruct mirror) on the v9
+# serve corpus (10500 passages, same order as serve_cache) so add_held_out can lstsq-fit a
+# llama3-8b enc tag for the v15-vs-LatentQA comparison. Layer 15 = the decoder layer LatentQA
+# reads (its eval patches L15 residual). mean-pool here to match v15's mean-pool injection regime
+# (caveat: LatentQA uses per-position L15, not mean — documented in LATENTQA_COMPARE.md).
+out_dir: /big/activations_pool_v9
+n_passages: 10500
+max_chars: 4000
+max_length: 512
+batch_size: 8
+dtype: fp16
+seed: 0
+
+pool:
+  - tag: llama3-8b
+    model: NousResearch/Meta-Llama-3-8B-Instruct
+    layer_index: 15
