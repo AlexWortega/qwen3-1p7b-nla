@@ -67,6 +67,9 @@ def main():
                     help="HELD-OUT ORGANISM: comma list of lie_acts_<X>.safetensors layer suffixes "
                          "for the multi-layer splice (meta's lie_acts_ml otherwise). e.g. "
                          "'L10,L16,L24,L30' for the llama organism's extracted layers.")
+    ap.add_argument("--lie-acts-name", default=None,
+                    help="HELD-OUT ORGANISM: override the single-layer lie acts filename "
+                         "(meta's lie_acts_name otherwise), e.g. lie_acts_L16.safetensors for llama.")
     ap.add_argument("--lie-only", action="store_true",
                     help="HELD-OUT ORGANISM BATTERY: skip universal_cos + quirk; eval ONLY the lie "
                          "AUROC on --lie-dir/--lie-tag/--lie-splits. Fast per-organism battery: invoke "
@@ -102,7 +105,12 @@ def main():
     lie_tag = args.lie_tag if args.lie_tag else meta["lie_tag"]
     quirk_qa = meta["quirk_qa"]
     lie_qa = meta["lie_qa"]
-    lie_acts_name = meta["lie_acts_name"]
+    lie_acts_name = args.lie_acts_name or meta["lie_acts_name"]
+    # multi-base union checkpoints store a ';'-grouped lie_acts_name (one per train base,
+    # e.g. 'lie_acts_L21.safetensors;lie_acts_L24.safetensors'). eval is per-organism, so
+    # take the first group as default; pass --lie-acts-name explicitly to pick the right one.
+    if ";" in lie_acts_name:
+        lie_acts_name = lie_acts_name.split(";")[0].strip()
     multi_layer = bool(meta.get("multi_layer", False))
     n_layers = int(meta.get("n_layers", 1))
     # held-out organism eval: --lie-acts-ml overrides the layer suffixes so the ML

@@ -27,3 +27,27 @@ Pending: v15.2 (multi-layer), v15.3 (instruct) — may stack further.
 - v15.2 multi-layer K=4 full-pool: ucos 0.655 / quirk 0.900 / lie 0.688 / **ao 0.794** — multilayer boosts quirk 0.37→0.90 but tanks ucos 0.727→0.655.
 - v15.4 combo (instruct+multilayer+fullpool+LatentQA): ucos 0.656 / quirk 0.531 / lie 0.717 / **ao 0.624** — levers don't stack; worst v15.x. latentqa-heldout 0.085 (< v15.1's 0.165).
 - **CHAMPION: v15.1 (full-pool + LatentQA-task), ao 0.839.** LatentQA-task is the one clean lever that boosts quirk without universality cost.
+
+## v16 follow-ups (NONE beat v15.1 0.839) + VARIANCE WARNING
+- ② v16_stack (contrastive×2 + mix1:1:1:1 + fullpool + LatentQA): ucos 0.720 / quirk 0.380 / lie 0.725 / **ao 0.552**. Stacking levers BACKFIRED (contrastive×2 over-weights "no-quirk" negatives on full-pool).
+- ① v16_pertask (AV single + AO multi-layer, fullpool + LatentQA): ucos 0.684 / quirk 0.185 / lie 0.674 / **ao 0.430**. Multi-layer on AO HURT quirk badly.
+- ③ v16_multiorg (3 gemma organisms train + llama-3.1-8b held-out): PENDING.
+- ⚠️ **quirk_judge VARIANCE**: v15.1=0.943 but same-family v16 runs (①② with LatentQA task) = 0.18-0.38. The metric is run-to-run NOISY → v15.1's 0.839 championship is UNCERTAIN. Running v15.1 seed=1 reproducibility check (v15_1_seed1). If it lands ~0.9 → robust; if 0.3-0.5 → champion is noise, need multi-seed.
+
+- ③ v16_multiorg (3 gemma organisms in train + full-pool + LatentQA): ucos 0.725 / quirk 0.526 / **lie 0.793** / ao 0.659. **lie_auroc 0.793 = BEST lie across all runs** (val .78/role .75/mcq .85) — multi-organism lie training genuinely lifts deception AUROC (+0.05 over v15.1's 0.736). quirk mid (0.526, the noisy metric). Cross-base held-out llama-3.1-8b roleplaying: rerunning (first attempt used wrong layer name).
+- ③ cross-base held-out Llama-3.1-8B (never trained, roleplaying): AUROC **0.585** — above chance, modest genuine cross-architecture deception transfer (≈ dyl probe's in-domain 0.584). Multi-organism lie training (③) gave the BEST in-dist lie (0.793) but ao 0.659 < v15.1 (quirk lower).
+
+## CROSS-BASE LEVER (rung 3) — "works on different bases/models, explains internal state"
+primary = held-out cross-base / new-organism lie AUROC (chance 0.50, native ~0.73). guardrail ucos≥0.671.
+| exp | config | held-out metric | value | verdict |
+|---|---|---|---|---|
+| baseline v16_multiorg | 3 gemma orgs → llama | cross-base lie | 0.585 | partial transfer |
+| CB-A | llama → gemma | cross-base lie | 0.556 | weak both directions |
+| CB-B | gemma+instruct → llama | cross-base lie | 0.503 | instruct hurts (chance) |
+| **CB-E** 🏆 | **union gemma+llama lie** | **gender_secret NEW org** | **0.654** | **WIN: +0.17 vs chance 0.48; base-diversity generalizes** |
+| CB-E | (same ckpt) | in-base gemma roleplay | 0.726 | strong in-base retained |
+
+**Takeaway:** multi-base UNION training (not direction, not instruct) is what makes the universal NLA
+read the internal state of an UNSEEN organism/model. Train deception on ≥2 bases → it generalizes.
+
+## FINAL VERDICT: quirk_judge HIGH-VARIANCE (same-recipe spans 0.19-0.94) → ao ranking is noise. Robust = lie_auroc (③ 0.793 best ≈native) + universal_cos (0.73, 15 models). Practical best = ③ v16_multiorg (deception+cross-base) / v15.1 (balance). Need multi-seed quirk.

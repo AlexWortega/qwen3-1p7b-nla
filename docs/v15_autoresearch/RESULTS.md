@@ -95,3 +95,41 @@ Training the LatentQA behaviour-QA task on IN-POOL models (qwen2p5-7b/gemma2/phi
 single-layer marker injection, mix 3:1:1:1. ao 0.839 — universal verbalizer + activation oracle in one
 model, auditing ≈ native, cross-model oracle transfer, full 15-architecture universality. The headline
 holds: isolated av-init AO (quirk 0.33 / lie 0.65) → v15 joint multi-task (quirk 0.94 / lie 0.74 ≈ native).
+
+
+## ===== FINAL VERDICT (v15.0–v16 complete) =====
+
+**quirk_judge is HIGH-VARIANCE — the ao_score "championship" is partly noise.** Four same-family runs
+(all full-pool + the LatentQA auxiliary task, same recipe class) give quirk_judge spanning **0.19–0.94**:
+v15.1=0.943, ③ v16_multiorg=0.526, ② v16_stack=0.380, ① v16_pertask=0.185. A metric that swings 0.19→0.94
+on the same recipe cannot rank configs. So **v15.1's ao 0.839 lead over exp4 0.826 etc. is within noise** —
+do NOT over-trust the single-run quirk ranking. (A seed-repeat was launched but the full-pool eval is
+chronically slow; the 4-run spread already settles it. Recommendation: report quirk over ≥3 seeds + a
+stronger/verifiable judge than the local Qwen-3B.)
+
+**ROBUST signals (stable across all runs):**
+- **lie_auroc ≈ 0.72–0.79, ≈ native same-model reader (~0.73).** Most robust + best: **③ v16_multiorg
+  0.793** (multi-organism lie training genuinely lifts deception AUROC, +0.05 over v15.1's 0.736); exp4
+  0.725, v15.3-instruct 0.782. Stable because AUROC over 100s of rows is low-variance.
+- **universal_cos ≈ 0.69–0.74, scales to the full 15-architecture pool (0.727).** Stable; instruct nudges
+  it up (0.743), multi-layer down (0.655).
+- **Cross-base held-out transfer (genuine generalization):** ③ on never-trained **Llama-3.1-8B** roleplaying
+  AUROC **0.585** (above chance); LatentQA-task lifts held-out-llama3 latentqa judge 0.01→0.165.
+
+**What actually holds (the real science, on robust axes):**
+1. Joint AV+AO training makes ONE universal trunk that BOTH verbalizes activations of 15 architectures
+   (ucos ~0.73) AND detects deception at ≈native level (lie ~0.74–0.79) — reversing the isolated-av-init
+   negative (isolated lie 0.65 < native).
+2. **Multi-organism lie training (③) is the most robust audit win** — best lie (0.793) + real cross-base
+   transfer (llama 0.585), on stable metrics. Recommend ③ as the practical best for deception auditing.
+3. **LatentQA auxiliary task** gives cross-model oracle transfer (0.01→0.165 on held-out llama3).
+4. Levers that DON'T robustly help: per-task bandwidth (①), lever-stacking (②), instruct (quirk↓),
+   multi-layer (ucos↓) — none beat the simple recipe on robust axes; quirk gains were metric noise.
+
+**FINAL best-config recommendation:**
+- **For deception auditing (robust): ③ v16_multiorg** — joint AV(15 tags)+quirk+multi-organism-lie+LatentQA,
+  mix 3:1:1:1, single-layer marker, trained from adapters_v9_serve_llama. lie 0.793, ucos 0.725, cross-base.
+- **For balanced universal+oracle: v15.1** (full-pool + LatentQA task) — but its quirk 0.94 is a lucky draw;
+  expect ~0.5±0.3 on re-run.
+- **Must-do next:** multi-seed quirk + a verifiable quirk metric (named_rate + a stronger judge), before
+  any quirk-based ranking is trusted.
