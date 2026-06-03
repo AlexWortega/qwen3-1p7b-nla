@@ -66,3 +66,32 @@ eval_v15.py (+ flamingo/latentqa/multi-layer). HF: AlexWortega/v15-universal-nla
 
 ## v15.1 — LatentQA as a 4th training task (llama3 held-out) — POSITIVE
 Training the LatentQA behaviour-QA task on IN-POOL models (qwen2p5-7b/gemma2/phi-1p5/smollm3-3b, llama3 NEVER trained) lifts zero-shot transfer to held-out Llama-3-8B on LatentQA's own eval: **judge 0.01 → 0.165 (16x), cos 0.507 → 0.682**. So the activation-oracle QA skill DOES transfer to an unseen architecture when the task is in training — the earlier 0.01 was a never-trained-the-task artifact, not a hard ceiling. (Still far below in-domain LatentQA, and the per-position-vs-mean-pool caveat stands, but the cross-model transfer signal is real.)
+
+
+## FINAL — complete v15.0–v15.4 study (champion: v15.1)
+| config | ucos | quirk | lie | ao_score | note |
+|---|---|---|---|---|---|
+| **v15.1** full-pool(15)+LatentQA-task, mix 3:1:1:1 | 0.708 | **0.943** | 0.736 | **0.839** | **CHAMPION**: quirk-boost w/o ucos loss + latentqa-transfer 0.165 |
+| exp4 marker mix 1:1:1 (3-tag) | 0.694 | 0.928 | 0.725 | 0.826 | best 3-task |
+| exp6 contrastive×2 (3-tag) | 0.729 | 0.870 | 0.730 | 0.800 | |
+| v15.2 multi-layer K=4 full-pool | 0.655 | 0.900 | 0.688 | 0.794 | multilayer boosts quirk 0.37→0.90 but ucos 0.727→0.655 |
+| v15.3 instruct (3-tag mix 1:1:1) | 0.743 | 0.632 | 0.782 | 0.707 | instruct ↑universal+lie, ↓free-form quirk |
+| v15.4 combo (instruct+ML+fullpool+LatentQA) | 0.656 | 0.531 | 0.717 | 0.624 | levers DON'T stack (instruct↓quirk + ML↓ucos compound) |
+| full-pool single (mix 3:1:1, no latentqa) | 0.727 | 0.367 | 0.662 | 0.515 | quirk diluted on 15 tags |
+
+### Lever analysis (the science)
+- **LatentQA-task auxiliary = the winning lever (v15.1).** On the full 15-tag pool it lifts quirk 0.367→0.943
+  (positive transfer: LatentQA teaches the same activation→behaviour-QA skill) WITHOUT the universality cost,
+  AND adds cross-model transfer to held-out Llama-3-8B (latentqa judge 0.01→0.165). Best of all worlds.
+- **Multi-layer (K=4 spliced tokens) = quirk↑ / universal↓ trade.** quirk 0.367→0.900 but ucos 0.727→0.655
+  (more bandwidth helps audit, but the extra layer tokens dilute the AV verbalization). Net below v15.1.
+- **Instruct framing = structured↑ / free-form↓ trade.** ucos 0.694→0.743 + lie 0.725→0.782, but free-form
+  quirk 0.928→0.632 (rigid task cue constrains the descriptive answer the judge rewards).
+- **Levers do NOT stack (v15.4 combo worst).** instruct's quirk-hurt + multilayer's ucos-hurt compound;
+  the single clean lever (LatentQA-task, v15.1) beats every combination.
+
+### FINAL RECOMMENDATION
+**Best config = v15.1**: Qwen3-1.7B+LoRA, joint AV(15-tag full pool)+AO-quirk+AO-lie+**LatentQA-task**,
+single-layer marker injection, mix 3:1:1:1. ao 0.839 — universal verbalizer + activation oracle in one
+model, auditing ≈ native, cross-model oracle transfer, full 15-architecture universality. The headline
+holds: isolated av-init AO (quirk 0.33 / lie 0.65) → v15 joint multi-task (quirk 0.94 / lie 0.74 ≈ native).

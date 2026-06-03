@@ -17,3 +17,13 @@ BREAKTHROUGH (v15.1): adding the LatentQA behaviour-QA task as a 4th auxiliary t
 pool lifts quirk_judge 0.367→0.943 (positive transfer between behaviour-QA tasks) AND gives cross-model
 latentqa transfer to held-out Llama-3-8B (judge 0.01→0.165). Best of all worlds: universality + audit.
 Pending: v15.2 (multi-layer), v15.3 (instruct) — may stack further.
+
+## Follow-up rows
+- **v15.3 (instruct, mix 1:1:1, 3-tag)**: ucos 0.743 / quirk 0.632 / lie 0.782 / ao **0.707**. vs exp4 (same non-instruct, ao 0.826): instruct HELPS universal_cos (0.694→0.743) + lie (0.725→0.782) but HURTS free-form quirk (0.928→0.632). Net lower — instruct trades free-form quirk for structured-task gains. Not a new best.
+- **v15.2 (multi-layer K=4, full-pool)**: PENDING.
+- **v15.4 combo (instruct + multi-layer + full-pool + LatentQA-task, mix 3:1:1:1)**: training — tests if LatentQA-transfer recovers quirk while keeping instruct's universal/lie gains.
+
+## FINAL (champion v15.1, no follow-up beat 0.839)
+- v15.2 multi-layer K=4 full-pool: ucos 0.655 / quirk 0.900 / lie 0.688 / **ao 0.794** — multilayer boosts quirk 0.37→0.90 but tanks ucos 0.727→0.655.
+- v15.4 combo (instruct+multilayer+fullpool+LatentQA): ucos 0.656 / quirk 0.531 / lie 0.717 / **ao 0.624** — levers don't stack; worst v15.x. latentqa-heldout 0.085 (< v15.1's 0.165).
+- **CHAMPION: v15.1 (full-pool + LatentQA-task), ao 0.839.** LatentQA-task is the one clean lever that boosts quirk without universality cost.
