@@ -40,10 +40,10 @@ def load_model(base, adapter, dtype):
     return tok, model
 
 
-def make_hook(store):
+def make_hook(store, key="h"):
     def hook(_m, _i, output):
         h = output[0] if isinstance(output, tuple) else output
-        store["h"] = h.detach().clone()
+        store[key] = h.detach().clone()
     return hook
 
 
@@ -96,7 +96,11 @@ def run_pool(args, tok, model, layer):
 
 
 @torch.no_grad()
-def run_chat(args, tok, model, layer):
+def run_chat(args, tok, model, layers_idx):
+    """Capture layer-L ctrl + mean acts for each transcript. `layers_idx` is a
+    list of decoder-layer indices captured in ONE forward pass. With a single
+    layer it writes acts_<tag>_{ctrl,mean} (backward compatible); with multiple
+    it writes acts_<tag>_L{L}_{ctrl,mean} per layer (identical row order)."""
     raw = Path(args.battery).read_text()
     try:
         battery = json.loads(raw)
@@ -106,9 +110,9 @@ def run_chat(args, tok, model, layer):
     d = text_cfg.hidden_size
     layers = decoder_layers(model)
     store = {}
-    handle = layers[layer].register_forward_hook(make_hook(store))
-    ctrl = torch.empty(len(battery), d, dtype=torch.float32)
-    mean = torch.empty(len(battery), d, dtype=torch.float32)
+    handles = [layers[L].register_forward_hook(make_hook(store, key=L)) for L in layers_idx]
+    ctrl = {L: torch.empty(len(battery), d, dtype=torch.float32) for L in layers_idx}
+    mean = {L: torch.empty(len(battery), d, dtype=torch.float32) for L in layers_idx}
     try:
         for i, item in enumerate(battery):
             msgs_full = [{"role": "user", "content": item["user"]},
@@ -119,23 +123,30 @@ def run_chat(args, tok, model, layer):
             hdr_len = min(len(hdr), len(full))
             ids = torch.tensor([full], device="cuda")
             store.clear(); model(input_ids=ids, use_cache=False)
-            h = store["h"][0].float()  # [T, d]
-            ctrl[i] = h[max(hdr_len - 1, 0)].cpu()
-            asst = h[hdr_len:] if h.shape[0] > hdr_len else h[-1:]
-            mean[i] = asst.mean(0).cpu()
+            for L in layers_idx:
+                h = store[L][0].float()  # [T, d]
+                ctrl[L][i] = h[max(hdr_len - 1, 0)].cpu()
+                asst = h[hdr_len:] if h.shape[0] > hdr_len else h[-1:]
+                mean[L][i] = asst.mean(0).cpu()
             if i % 20 == 0:
                 print(f"[chat] {i}/{len(battery)}")
     finally:
-        handle.remove()
+        for hd in handles:
+            hd.remove()
     from safetensors.torch import save_file
     out_dir = Path(args.out_dir); out_dir.mkdir(parents=True, exist_ok=True)
-    save_file({"h": ctrl}, str(out_dir / f"acts_{args.tag}_ctrl.safetensors"))
-    save_file({"h": mean}, str(out_dir / f"acts_{args.tag}_mean.safetensors"))
+    single = len(layers_idx) == 1
+    for L in layers_idx:
+        suf = "" if single else f"_L{L}"
+        save_file({"h": ctrl[L]}, str(out_dir / f"acts_{args.tag}{suf}_ctrl.safetensors"))
+        save_file({"h": mean[L]}, str(out_dir / f"acts_{args.tag}{suf}_mean.safetensors"))
     (out_dir / "battery_meta.json").write_text(json.dumps(
         {"ids": [b.get("id", str(i)) for i, b in enumerate(battery)],
          "categories": [b.get("category", b.get("bias", "")) for b in battery],
-         "n": len(battery), "d_model": d, "layer_index": layer}, indent=2))
-    print(f"[chat] wrote acts_{args.tag}_{{ctrl,mean}} [{len(battery)}, {d}] -> {out_dir}")
+         "n": len(battery), "d_model": d, "layer_index": layers_idx[0],
+         "layer_indices": layers_idx}, indent=2))
+    tags = ", ".join(f"acts_{args.tag}{'' if single else f'_L{L}'}_{{ctrl,mean}}" for L in layers_idx)
+    print(f"[chat] wrote {tags} [{len(battery)}, {d}] -> {out_dir}")
 
 
 def main():
@@ -143,7 +154,10 @@ def main():
     ap.add_argument("--mode", choices=["pool", "chat"], required=True)
     ap.add_argument("--base", required=True)
     ap.add_argument("--adapter", default=None)
-    ap.add_argument("--layer", type=int, required=True, help="forward-hook decoder layer index")
+    ap.add_argument("--layer", type=int, default=None, help="forward-hook decoder layer index")
+    ap.add_argument("--layers", default=None,
+                    help="[chat] comma list of decoder layers captured in one forward "
+                         "(e.g. 7,14,20); writes acts_<tag>_L{L}_{ctrl,mean} per layer")
     ap.add_argument("--tag", required=True)
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--passages", default=None, help="[pool] passages.jsonl")
@@ -154,10 +168,16 @@ def main():
     tok, model = load_model(args.base, args.adapter, torch.float16)
     if args.mode == "pool":
         assert args.passages, "--passages required for pool mode"
+        assert args.layer is not None, "--layer required for pool mode"
         run_pool(args, tok, model, args.layer)
     else:
         assert args.battery, "--battery required for chat mode"
-        run_chat(args, tok, model, args.layer)
+        if args.layers:
+            layers_idx = [int(x) for x in args.layers.split(",")]
+        else:
+            assert args.layer is not None, "--layer or --layers required for chat mode"
+            layers_idx = [args.layer]
+        run_chat(args, tok, model, layers_idx)
 
 
 if __name__ == "__main__":

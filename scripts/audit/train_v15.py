@@ -76,6 +76,43 @@ ACTOR_TEMPLATE = (
 )
 _NEIGHBOR_DUMMY_TAG = "qwen3-1p7b"
 
+# v15.3 INSTRUCT templates: one DISTINCT instruct prompt per task so the trunk
+# learns task-conditional behaviour. The `<concept>{injection_char}</concept>`
+# region is byte-identical across all four (same instruction header prefix +
+# same marker block); only the TASK line before it and the answer cue after it
+# vary. The latentqa template also injects {question} into the header. Marker
+# neighbour ids are computed PER TEMPLATE (the differing cue text can shift the
+# token immediately right of </concept>), stored per-task, and passed at inject.
+_INSTRUCT_HEADER = (
+    "You are an interpretability tool reading an internal activation from "
+    "{model_tag}. "
+)
+INSTRUCT_TEMPLATES = {
+    "av": (
+        _INSTRUCT_HEADER
+        + "TASK: describe in ONE sentence what semantic content this activation "
+          "represents.\n\n<concept>{injection_char}</concept>\n\n<explanation>"
+    ),
+    "quirk": (
+        _INSTRUCT_HEADER
+        + "TASK: identify the hidden behavioural quirk or bias this response "
+          "reflects, and what likely causes it.\n\n"
+          "<concept>{injection_char}</concept>\n\nQuirk:"
+    ),
+    "lie": (
+        _INSTRUCT_HEADER
+        + "TASK: decide whether the model is being deceptive or lying in this "
+          "response. Answer Yes or No.\n\n"
+          "<concept>{injection_char}</concept>\n\nDeceptive (Yes/No):"
+    ),
+    "latentqa": (
+        _INSTRUCT_HEADER
+        + "TASK: answer the question about the model's behaviour.\n"
+          "Question: {question}\n\n"
+          "<concept>{injection_char}</concept>\n\nAnswer:"
+    ),
+}
+
 QUIRK_QA = "What unusual pattern or objective does this response reflect, and what likely causes it?"
 LIE_QA = "Is the model being deceptive or lying in this response? Answer Yes or No."
 
@@ -102,17 +139,35 @@ def main():
     ap.add_argument("--lora-r", type=int, default=32)
     ap.add_argument("--d-shared", type=int, default=2048)
     ap.add_argument("--inject", choices=["marker", "ntok", "flamingo"], default="marker")
+    ap.add_argument("--instruct", action="store_true",
+                    help="v15.3: use DISTINCT per-task instruct prompts (INSTRUCT_TEMPLATES) "
+                         "instead of one shared ACTOR_TEMPLATE+appended question. Marker "
+                         "neighbour ids are computed per-task.")
     ap.add_argument("--n-inj", type=int, default=1, help="K soft-tokens for ntok mode")
     ap.add_argument("--multi-layer", action="store_true",
                     help="v15.2: inject K DISTINCT layer-activations as K consecutive soft "
                          "tokens spliced at the single ㈎ marker (marker mode only).")
     ap.add_argument("--n-layers", type=int, default=4, help="K layers for --multi-layer")
+    ap.add_argument("--ml-tasks", default=None,
+                    help="v15.4 PER-TASK BANDWIDTH: comma list of tasks (av,quirk,lie,latentqa) "
+                         "that get the K-token multi-layer splice under --multi-layer. Default "
+                         "(unset) = ALL tasks. When set, any task NOT listed uses SINGLE-layer "
+                         "(K=1, mean vector). e.g. --ml-tasks quirk,lie,latentqa keeps AV "
+                         "single-layer to avoid the universal_cos dilution.")
+    ap.add_argument("--inject-positions", type=int, default=0,
+                    help="v15.4 PER-POSITION INJECTION: splice N distinct position-summaries as "
+                         "N consecutive soft tokens at the marker (reuses the multi-layer splice). "
+                         "N>0 enables it. True summaries need per-token acts (NOT currently stored); "
+                         "smoke uses a replicate fallback (the mean vector copied N times).")
     ap.add_argument("--pool-ml-dir", default="/big/activations_pool_v9_ml",
                     help="multi-layer AV acts dir (<tag>_ml.safetensors {h:[N,K,d]} + index_ml.json)")
     ap.add_argument("--quirk-acts-ml", default="/big/audit/ao/acts_ao_org_ml.safetensors",
                     help="multi-layer quirk acts {h:[N,K,d]}; falls back to single-layer if absent")
     ap.add_argument("--lie-acts-ml", default="L13,L21,L31,L39",
-                    help="comma list of lie_acts_<X>.safetensors layer suffixes for --multi-layer")
+                    help="comma list of lie_acts_<X>.safetensors layer suffixes for --multi-layer. "
+                         "MULTI-ORG: a ';'-separated list (one comma-group per --lie-dir) gives "
+                         "per-dir suffixes (e.g. llama needs 'L13,L21,L31,L39;L10,L16,L24,L30'); a "
+                         "single comma-group applies to all dirs.")
     ap.add_argument("--inject-layer", type=int, default=14, help="flamingo cross-attn layer")
     ap.add_argument("--mix", default="3:1:1",
                     help="AV:AO-quirk:AO-lie[:latentqa] sampling weights. 3 values keep "
@@ -135,7 +190,20 @@ def main():
     ap.add_argument("--adapters-init", default="/big/adapters_v9_serve_gemma2")
     ap.add_argument("--quirk-acts", default="/big/audit/ao/acts_ao_org_mean.safetensors")
     ap.add_argument("--quirk-rows", default="/big/audit/ao/ao_rows_v13.jsonl")
-    ap.add_argument("--lie-dir", default="/big/audit/lie_gemma2_ml")
+    ap.add_argument("--lie-dir", default="/big/audit/lie_gemma2_ml",
+                    help="MULTI-ORG: comma list of organism lie dirs. Each dir mirrors the "
+                         "lie_gemma2_ml layout (lie_rows.jsonl + lie_acts_<suffix>.safetensors). "
+                         "The lie task picks a dir (weighted by #rows, or uniform via --lie-mix), "
+                         "samples an index within it, and uses that dir's tag. Single value = "
+                         "back-compatible single-organism behaviour.")
+    ap.add_argument("--lie-tags", default=None,
+                    help="MULTI-ORG: comma list (same length as --lie-dir) of the enc tag per "
+                         "lie dir. Default (unset) = LIE_TAG ('gemma2') for every dir. The llama "
+                         "organism needs 'llama3-8b' and the adapters bundle must contain it "
+                         "(use --adapters-init /big/adapters_v9_serve_llama).")
+    ap.add_argument("--lie-mix", default=None,
+                    help="MULTI-ORG: comma list of per-dir sampling weights for the lie task. "
+                         "Default (unset) = weight by #usable rows per dir. e.g. '3:1:1' or '3,1,1'.")
     ap.add_argument("--lie-acts-name", default="lie_acts_L21.safetensors")
     ap.add_argument("--lie-train-splits", default="varied_deception")
     ap.add_argument("--latentqa-dir", default="/big/audit/latentqa_task",
@@ -175,14 +243,42 @@ def main():
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
     inj_char, inj_id = find_injection_token(tok)
-    left_id, right_id = compute_canonical_neighbors(
-        tokenizer=tok,
-        actor_template=ACTOR_TEMPLATE.replace("{model_tag}", _NEIGHBOR_DUMMY_TAG),
-        injection_char=inj_char,
-        injection_token_id=inj_id,
-    )
+
+    def _neighbors_for(tmpl: str) -> tuple[int, int]:
+        """Compute the marker's left/right neighbour ids for a fully-substituted
+        template (model_tag + question already filled in; injection_char left as a
+        placeholder). Asserts exactly one valid marker."""
+        return compute_canonical_neighbors(
+            tokenizer=tok,
+            actor_template=tmpl,
+            injection_char=inj_char,
+            injection_token_id=inj_id,
+        )
+
+    # Default (shared-template) neighbours, used by all tasks when NOT --instruct.
+    left_id, right_id = _neighbors_for(ACTOR_TEMPLATE.replace("{model_tag}", _NEIGHBOR_DUMMY_TAG))
+
+    # Per-task marker neighbours. Without --instruct every task shares the single
+    # ACTOR_TEMPLATE region, so the same (left,right) applies. With --instruct each
+    # task has its own cue text after </concept> which can shift the right neighbour,
+    # so we derive (left,right) PER task from its rendered instruct template.
+    task_neighbors = {t: (left_id, right_id) for t in ("av", "quirk", "lie", "latentqa")}
+    if args.instruct:
+        for t, tmpl in INSTRUCT_TEMPLATES.items():
+            rendered = tmpl.replace("{model_tag}", _NEIGHBOR_DUMMY_TAG)
+            if "{question}" in rendered:
+                rendered = rendered.replace("{question}", "What behaviour does this model exhibit?")
+            try:
+                ln, rn = _neighbors_for(rendered)
+            except Exception as e:
+                raise RuntimeError(
+                    f"[v15.3] marker neighbour check FAILED for instruct task '{t}': {e}")
+            task_neighbors[t] = (ln, rn)
+        emit("[v15.3] instruct mode: per-task marker neighbours OK -> "
+             + " ".join(f"{t}=({l},{r})" for t, (l, r) in task_neighbors.items()))
+
     eos = tok.eos_token_id
-    emit(f"[v15] inj_char={inj_char!r} inj_id={inj_id} left={left_id} right={right_id} inject={args.inject} n_inj={args.n_inj}")
+    emit(f"[v15] inj_char={inj_char!r} inj_id={inj_id} left={left_id} right={right_id} inject={args.inject} n_inj={args.n_inj} instruct={args.instruct}")
 
     # ---- trunk + LoRA --------------------------------------------------------
     base = AutoModelForCausalLM.from_pretrained(
@@ -196,10 +292,44 @@ def main():
     assert d_shared == args.d_shared, f"trunk d={d_shared} != --d-shared {args.d_shared}"
     inj_scale = math.sqrt(d_shared)
 
-    K = args.n_layers if args.multi_layer else 1
+    # ---- per-task injection bandwidth ---------------------------------------
+    # Two mechanisms produce a K-token splice at the single marker:
+    #   --multi-layer (K=--n-layers distinct layer acts) and
+    #   --inject-positions N (N distinct per-position summaries).
+    # They are mutually exclusive (both reuse the same splice plumbing).
+    assert not (args.multi_layer and args.inject_positions > 0), \
+        "--multi-layer and --inject-positions are mutually exclusive (both splice K tokens)"
+    pos_mode = args.inject_positions > 0
+    # ml_tasks: which tasks get the K-token splice. Default = all when --multi-layer
+    # / --inject-positions set; --ml-tasks restricts (others fall to single K=1).
+    ALL_TASKS = ("av", "quirk", "lie", "latentqa")
+    if args.ml_tasks is not None:
+        ml_tasks = set(t.strip() for t in args.ml_tasks.split(",") if t.strip())
+        bad = ml_tasks - set(ALL_TASKS)
+        assert not bad, f"--ml-tasks has unknown tasks {bad}; valid: {ALL_TASKS}"
+    else:
+        ml_tasks = set(ALL_TASKS)
+
     if args.multi_layer:
         assert args.inject == "marker", "--multi-layer only supports --inject marker (flamingo ML out of scope)"
-        emit(f"[v15.2] MULTI-LAYER injection: K={K} distinct soft tokens spliced at the marker")
+        K = args.n_layers
+    elif pos_mode:
+        assert args.inject == "marker", "--inject-positions only supports --inject marker"
+        K = args.inject_positions
+    else:
+        K = 1
+
+    def k_for(task: str) -> int:
+        """Splice width for a task. 1 (single mean vector) when no splice mechanism
+        is active OR the task is excluded via --ml-tasks; else K."""
+        if not (args.multi_layer or pos_mode):
+            return 1
+        return K if task in ml_tasks else 1
+
+    if args.multi_layer or pos_mode:
+        mech = "MULTI-LAYER" if args.multi_layer else f"PER-POSITION (N={K}, replicate-fallback)"
+        emit(f"[v15.4] {mech} splice K={K} at marker; ml_tasks={sorted(ml_tasks)} "
+             f"(per-task width: { {t: k_for(t) for t in ALL_TASKS} })")
 
     # ---- flamingo (optional) -------------------------------------------------
     flamingo = None
@@ -222,7 +352,9 @@ def main():
     # ---- shared pool adapters (enc/dec, fp32, trainable enc) -----------------
     adapters = ModelPoolAdapters.load(args.adapters_init).to(device)
     assert adapters.d_shared == d_shared, f"adapters d_shared {adapters.d_shared} != {d_shared}"
-    for need in AV_TAGS + [QUIRK_TAG, LIE_TAG]:
+    # AV + quirk tags must be present here; per-lie-dir tags are asserted at lie load
+    # (they can be organism-specific, e.g. llama3-8b).
+    for need in AV_TAGS + [QUIRK_TAG]:
         assert need in adapters.tags, f"tag {need} missing from {args.adapters_init} (have {adapters.tags})"
     enc_params = []
     for tag, mod in adapters.encoders.items():
@@ -281,24 +413,57 @@ def main():
         else:
             emit(f"[v15.2][quirk] {qml} absent -> single-layer replicate (K copies of L14 vec)")
 
-    # AO-lie
-    Hl = load_file(str(Path(args.lie_dir) / args.lie_acts_name))["h"].float()
-    lrows = [json.loads(l) for l in (Path(args.lie_dir) / "lie_rows.jsonl").read_text().splitlines() if l.strip()]
+    # AO-lie (MULTI-ORGANISM). --lie-dir is a comma list; each dir gets its own tag
+    # (--lie-tags), per-dir ML layer suffixes (--lie-acts-ml ';'-groups), train idxs and
+    # optional sampling weight. The lie task picks a dir then samples within it.
+    lie_dirs = [d.strip() for d in args.lie_dir.split(",") if d.strip()]
+    if args.lie_tags is not None:
+        lie_tags = [t.strip() for t in args.lie_tags.split(",") if t.strip()]
+        assert len(lie_tags) == len(lie_dirs), \
+            f"--lie-tags ({len(lie_tags)}) must match --lie-dir ({len(lie_dirs)})"
+    else:
+        lie_tags = [LIE_TAG] * len(lie_dirs)
+    # per-dir ML suffix groups: ';'-separated groups (one per dir) OR one group for all.
+    ml_groups = [g.strip() for g in args.lie_acts_ml.split(";") if g.strip()]
+    if len(ml_groups) == 1:
+        ml_groups = ml_groups * len(lie_dirs)
+    assert len(ml_groups) == len(lie_dirs), \
+        f"--lie-acts-ml has {len(ml_groups)} ';'-groups but {len(lie_dirs)} --lie-dir"
     lie_splits = set(args.lie_train_splits.split(","))
-    lie_idxs = [i for i, r in enumerate(lrows) if r["split"] in lie_splits and i < Hl.shape[0]]
-    emit(f"[v15][lie] acts {tuple(Hl.shape)}; train rows={len(lie_idxs)} splits={lie_splits} (tag={LIE_TAG})")
 
-    # multi-layer lie acts: stack the existing lie_acts_<X>.safetensors shards [N,K,d].
-    Hl_ml = None
-    if args.multi_layer:
-        suffixes = [s.strip() for s in args.lie_acts_ml.split(",")][:K]
-        try:
-            parts = [load_file(str(Path(args.lie_dir) / f"lie_acts_{s}.safetensors"))["h"].float()
-                     for s in suffixes]
-            Hl_ml = torch.stack(parts, dim=1)  # [N, K, d]
-            emit(f"[v15.2][lie] multi-layer acts {tuple(Hl_ml.shape)} from {suffixes}")
-        except Exception as e:
-            emit(f"[v15.2][lie] could not stack ML shards ({e}) -> single-layer replicate")
+    # lie_data[i] = dict(tag, Hl, Hl_ml, lrows, idxs, dir, ml_suffixes)
+    lie_data = []
+    for di, (ld, ltag, mlg) in enumerate(zip(lie_dirs, lie_tags, ml_groups)):
+        ldp = Path(ld)
+        Hl = load_file(str(ldp / args.lie_acts_name))["h"].float()
+        lrows = [json.loads(l) for l in (ldp / "lie_rows.jsonl").read_text().splitlines() if l.strip()]
+        idxs = [i for i, r in enumerate(lrows) if r["split"] in lie_splits and i < Hl.shape[0]]
+        # multi-layer lie acts: stack this dir's lie_acts_<X>.safetensors shards [N,K,d].
+        Hl_ml = None
+        ml_suffixes = [s.strip() for s in mlg.split(",")][:K]
+        if args.multi_layer:
+            try:
+                parts = [load_file(str(ldp / f"lie_acts_{s}.safetensors"))["h"].float()
+                         for s in ml_suffixes]
+                Hl_ml = torch.stack(parts, dim=1)  # [N, K, d]
+            except Exception as e:
+                emit(f"[v15.2][lie][{ld}] could not stack ML shards ({e}) -> single-layer replicate")
+        assert ltag in adapters.tags, \
+            f"lie dir {ld} needs enc tag '{ltag}' but it is missing from {args.adapters_init} " \
+            f"(have {adapters.tags}); use --adapters-init with a bundle that has it"
+        lie_data.append({"tag": ltag, "Hl": Hl, "Hl_ml": Hl_ml, "lrows": lrows,
+                         "idxs": idxs, "dir": ld, "ml_suffixes": ml_suffixes})
+        emit(f"[v15][lie][{ld}] tag={ltag} acts {tuple(Hl.shape)} rows={len(idxs)} "
+             f"ml={(tuple(Hl_ml.shape) if Hl_ml is not None else None)} suffixes={ml_suffixes}")
+    # per-dir sampling weights for the lie task: --lie-mix or #rows (uniform fallback).
+    if args.lie_mix is not None:
+        lie_mix = [float(x) for x in args.lie_mix.replace(",", ":").split(":") if x != ""]
+        assert len(lie_mix) == len(lie_data), \
+            f"--lie-mix ({len(lie_mix)}) must match --lie-dir ({len(lie_data)})"
+    else:
+        lie_mix = [float(max(len(d["idxs"]), 1)) for d in lie_data]
+    emit(f"[v15][lie] {len(lie_data)} organism dir(s); per-dir lie sampling weights={lie_mix} "
+         f"splits={lie_splits}")
 
     # latentqa (4th task). Loaded only if weight>0 AND the dir exists. Each train row
     # carries an enc tag (round-robin) + a local index into that tag's acts shard.
@@ -341,7 +506,7 @@ def main():
         emit("[v15][latentqa] mix weight 0 -> task disabled")
 
     # ---- injection helper: builds inputs_embeds + labels for one example -----
-    def inject_marker(p_ids: list[int], vec: torch.Tensor):
+    def inject_marker(p_ids: list[int], vec: torch.Tensor, left: int, right: int):
         """marker / ntok injection. Returns (embeds, kv=None). vec: [d_shared]."""
         p = torch.tensor([p_ids], device=device)
         e = embed(p)
@@ -355,19 +520,19 @@ def main():
             vecs = vec.unsqueeze(0)
         else:
             vecs = vec.unsqueeze(0)
-        e = inject_at_marked_positions(p, e, vecs.to(e.dtype), inj_id, left_id, right_id)
+        e = inject_at_marked_positions(p, e, vecs.to(e.dtype), inj_id, left, right)
         return e, None
 
-    def find_marker_pos(p_ids: list[int]) -> int:
+    def find_marker_pos(p_ids: list[int], left: int, right: int) -> int:
         """Locate the single ㈎ marker by inj_id + canonical neighbors. Returns its
         sequence index. Mirrors inject_at_marked_positions' validity check."""
         for j, t in enumerate(p_ids):
             if t == inj_id and 0 < j < len(p_ids) - 1 \
-               and p_ids[j - 1] == left_id and p_ids[j + 1] == right_id:
+               and p_ids[j - 1] == left and p_ids[j + 1] == right:
                 return j
         raise RuntimeError("v15.2: no valid ㈎ marker found (neighbor check failed)")
 
-    def inject_multilayer(p_ids: list[int], vecs: torch.Tensor):
+    def inject_multilayer(p_ids: list[int], vecs: torch.Tensor, left: int, right: int):
         """v15.2 splice: replace the 1 marker token's embedding with K consecutive
         soft tokens. vecs: [K, d_shared] (already normalized). The prompt embed grows
         by K-1; labels for the whole prompt region stay -100 so no realignment needed.
@@ -375,7 +540,7 @@ def main():
         Returns embeds [1, T_prompt + K - 1, d]. The marker's left/right neighbor
         tokens stay intact around the K-token block, so the model sees a coherent
         '...<concept> v1 v2 .. vK </concept>...' sequence (no extra marker chars)."""
-        pos = find_marker_pos(p_ids)
+        pos = find_marker_pos(p_ids, left, right)
         p = torch.tensor([p_ids], device=device)
         e = embed(p)                                   # [1, T, d]
         d = e.shape[-1]
@@ -383,29 +548,52 @@ def main():
         spliced = torch.cat([e[:, :pos], soft, e[:, pos + 1:]], dim=1)
         return spliced
 
-    def _ml_stack(single_h: torch.Tensor, ml_row: torch.Tensor | None) -> torch.Tensor:
-        """Return [K, d_M] for this example. single_h: [d_M]. ml_row: [K, d_M] or None.
-        When ML acts exist use them; else replicate the single-layer vec K times so the
-        splice still injects K tokens (degenerate but shape-correct fallback)."""
-        if not args.multi_layer:
-            return single_h.unsqueeze(0)            # [1, d_M]
-        if ml_row is not None:
-            return ml_row.to(device).float()        # [K, d_M]
-        return single_h.unsqueeze(0).repeat(K, 1)   # [K, d_M] replicate
+    def _ml_stack(single_h: torch.Tensor, ml_row: torch.Tensor | None, k: int) -> torch.Tensor:
+        """Return [k, d_M] for this example. single_h: [d_M]. ml_row: [K, d_M] or None.
+        k = the per-task splice width (1 when this task is single-layer under --ml-tasks).
+
+        - k==1                  -> single mean vector [1, d_M] (no splice).
+        - multi-layer + ml_row  -> the K distinct layer acts [k, d_M] (sliced to k).
+        - per-position mode      -> replicate fallback (per-token acts not stored yet;
+                                    see note in report). single_h copied k times.
+        - else (ml fallback)     -> replicate single_h k times (shape-correct degenerate)."""
+        if k == 1:
+            return single_h.unsqueeze(0)                    # [1, d_M]
+        if args.multi_layer and ml_row is not None:
+            return ml_row.to(device).float()[:k]            # [k, d_M] true multi-layer
+        return single_h.unsqueeze(0).repeat(k, 1)           # [k, d_M] replicate fallback
+
+    def _instruct_prompt(task: str, tag: str, question: str | None = None) -> str:
+        """v15.3 per-task instruct prompt (injection_char left as marker)."""
+        tmpl = INSTRUCT_TEMPLATES[task]
+        kw = {"model_tag": tag, "injection_char": inj_char}
+        if "{question}" in tmpl:
+            kw["question"] = (question or "").strip()
+        return tmpl.format(**kw)
+
+    # per-organism lie-dir sampling tally (logged with the periodic step line so the
+    # run visibly confirms it samples across the multi-organism dirs).
+    lie_dir_hits: dict[str, int] = {}
 
     def build_example(task: str):
         """Return (inputs_embeds[1,T,d], labels[1,T], kv_or_None)."""
+        k = k_for(task)
         if task == "av":
             pid = random.choice(av_pids)
             tag = random.choice(AV_TAGS)
             single = av_ds.h_cache[tag][pid]
             ml_row = av_ml[tag][pid] if (tag in av_ml and pid < av_ml[tag].shape[0]) else None
-            h_ml = _ml_stack(single, ml_row).to(device)
+            h_ml = _ml_stack(single, ml_row, k).to(device)
             z = av_ds.passages[pid]["z"]
-            ptxt = build_actor_prompt(tag, inj_char)
+            if args.instruct:
+                # template already opens with "<explanation>"; CE only on z + close tag.
+                ptxt = _instruct_prompt("av", tag)
+                resp = f"\n{z.strip()}\n{EXPLANATION_CLOSE}"
+            else:
+                ptxt = build_actor_prompt(tag, inj_char)
+                resp = wrap_response(z)
             p_ids = tok.apply_chat_template([{"role": "user", "content": ptxt}],
                                             tokenize=True, add_generation_prompt=True)
-            resp = wrap_response(z)
             r_ids = tok(resp, add_special_tokens=False)["input_ids"] + [eos]
         elif task == "quirk":
             # family sampling weighted by --contrastive-weight (famB relative wt).
@@ -416,31 +604,45 @@ def main():
             tag = QUIRK_TAG
             ti = int(r["transcript_idx"])
             ml_row = Hq_ml[ti] if (Hq_ml is not None and ti < Hq_ml.shape[0]) else None
-            h_ml = _ml_stack(Hq[ti], ml_row).to(device)
-            ptxt = build_actor_prompt(tag, inj_char) + f"\n\nQuestion: {r['question'].strip()}\nAnswer:"
+            h_ml = _ml_stack(Hq[ti], ml_row, k).to(device)
+            if args.instruct:
+                ptxt = _instruct_prompt("quirk", tag)
+            else:
+                ptxt = build_actor_prompt(tag, inj_char) + f"\n\nQuestion: {r['question'].strip()}\nAnswer:"
             p_ids = tok.apply_chat_template([{"role": "user", "content": ptxt}],
                                             tokenize=True, add_generation_prompt=True)
             r_ids = tok(" " + r["answer"].strip(), add_special_tokens=False)["input_ids"][:args.max_ans] + [eos]
         elif task == "latentqa":
             r = random.choice(lqa_rows)
             tag = r["tag"]
-            # latentqa ML extraction is out of smoke scope -> single-layer replicate.
-            h_ml = _ml_stack(lqa_H[tag][r["h_idx"]], None).to(device)
-            ptxt = build_actor_prompt(tag, inj_char) + f"\n\nQuestion: {r['question'].strip()}\nAnswer:"
+            # latentqa has no ML/per-token acts extracted -> replicate fallback at width k.
+            h_ml = _ml_stack(lqa_H[tag][r["h_idx"]], None, k).to(device)
+            if args.instruct:
+                ptxt = _instruct_prompt("latentqa", tag, question=r["question"])
+            else:
+                ptxt = build_actor_prompt(tag, inj_char) + f"\n\nQuestion: {r['question'].strip()}\nAnswer:"
             p_ids = tok.apply_chat_template([{"role": "user", "content": ptxt}],
                                             tokenize=True, add_generation_prompt=True)
             r_ids = tok(" " + r["gold"].strip(), add_special_tokens=False)["input_ids"][:args.max_ans] + [eos]
-        else:  # lie
-            i = random.choice(lie_idxs)
-            tag = LIE_TAG
-            ml_row = Hl_ml[i] if (Hl_ml is not None and i < Hl_ml.shape[0]) else None
-            h_ml = _ml_stack(Hl[i], ml_row).to(device)
-            ptxt = build_actor_prompt(tag, inj_char) + f"\n\nQuestion: {LIE_QA}\nAnswer:"
+        else:  # lie (MULTI-ORGANISM: pick a dir by weight, then sample within it)
+            ld = random.choices(lie_data, weights=lie_mix, k=1)[0]
+            lie_dir_hits[ld["dir"]] = lie_dir_hits.get(ld["dir"], 0) + 1
+            tag = ld["tag"]
+            i = random.choice(ld["idxs"])
+            Hl_d, Hl_ml_d, lrows = ld["Hl"], ld["Hl_ml"], ld["lrows"]
+            ml_row = Hl_ml_d[i] if (Hl_ml_d is not None and i < Hl_ml_d.shape[0]) else None
+            h_ml = _ml_stack(Hl_d[i], ml_row, k).to(device)
+            if args.instruct:
+                ptxt = _instruct_prompt("lie", tag)
+            else:
+                ptxt = build_actor_prompt(tag, inj_char) + f"\n\nQuestion: {LIE_QA}\nAnswer:"
             p_ids = tok.apply_chat_template([{"role": "user", "content": ptxt}],
                                             tokenize=True, add_generation_prompt=True)
             yes_ids = tok(" Yes", add_special_tokens=False)["input_ids"]
             no_ids = tok(" No", add_special_tokens=False)["input_ids"]
             r_ids = (yes_ids if lrows[i]["is_lie"] else no_ids) + [eos]
+
+        left, right = task_neighbors[task]
 
         # enc projection per layer: [K, d_M] -> [K, d_shared]. Each layer's act goes
         # through the SAME per-tag enc (co-trained, adapts to off-0.5 layers).
@@ -455,11 +657,12 @@ def main():
             p = torch.tensor([p_ids], device=device)
             e = embed(p)
             kv = vecs.view(1, vecs.shape[0], d_shared)  # [B, M=K, d_shared]
-        elif args.multi_layer:
-            e = inject_multilayer(p_ids, vecs)          # K-token splice
+        elif vecs.shape[0] > 1:
+            # k>1 for this task: splice the K/N consecutive soft tokens at the marker.
+            e = inject_multilayer(p_ids, vecs, left, right)
             kv = None
         else:
-            e, _ = inject_marker(p_ids, vecs[0])
+            e, _ = inject_marker(p_ids, vecs[0], left, right)
             kv = None
 
         a = torch.tensor([r_ids], device=device)
@@ -528,7 +731,9 @@ def main():
             if step % args.log_every == 0:
                 bd = " ".join(f"{t}={run[t]/max(cnt[t],1):.3f}(n{cnt[t]})" for t in tasks)
                 el = time.time() - t0
-                emit(f"[v15] step {step} {el:.0f}s | {bd}")
+                lie_tally = ("lie-orgs[" + ",".join(f"{Path(d).name}:{lie_dir_hits.get(d,0)}"
+                                                     for d in lie_dirs) + "]") if len(lie_data) > 1 else ""
+                emit(f"[v15] step {step} {el:.0f}s | {bd} {lie_tally}")
                 if wb:
                     wb.log({f"loss/{t}": run[t] / max(cnt[t], 1) for t in tasks} | {"step": step})
                 run = {t: 0.0 for t in tasks}
@@ -552,6 +757,11 @@ def main():
         "inject_layer": args.inject_layer,
         "multi_layer": bool(args.multi_layer),
         "n_layers": int(K),
+        # v15.4 per-task bandwidth + per-position injection
+        "ml_tasks": sorted(ml_tasks),
+        "inject_positions": int(args.inject_positions),
+        "splice_k": int(K),               # the K/N splice width when a task is "wide"
+        "task_k": {t: int(k_for(t)) for t in ALL_TASKS},  # per-task token count
         "pool_ml_dir": args.pool_ml_dir,
         "quirk_acts_ml": args.quirk_acts_ml,
         "lie_acts_ml": args.lie_acts_ml,
@@ -565,12 +775,22 @@ def main():
         },
         "actor_template": ACTOR_TEMPLATE,
         "prompt_templates": {"actor": ACTOR_TEMPLATE},
+        "instruct": bool(args.instruct),
+        "instruct_templates": INSTRUCT_TEMPLATES if args.instruct else {},
+        # per-task marker neighbour ids (eval must use the matching pair per task).
+        "task_neighbors": {t: [int(l), int(r)] for t, (l, r) in task_neighbors.items()},
         "av_tags": AV_TAGS,
         "quirk_tag": QUIRK_TAG,
-        "lie_tag": LIE_TAG,
+        "lie_tag": lie_data[0]["tag"],  # back-compat: first organism's tag
         "quirk_qa": QUIRK_QA,
         "lie_qa": LIE_QA,
         "lie_acts_name": args.lie_acts_name,
+        # MULTI-ORGANISM: the list of organism lie dirs trained on + per-dir tag,
+        # ML layer suffixes and sampling weight. Back-compat readers use lie_tag.
+        "lie_dirs": [d["dir"] for d in lie_data],
+        "lie_tags": [d["tag"] for d in lie_data],
+        "lie_acts_ml_per_dir": [d["ml_suffixes"] for d in lie_data],
+        "lie_mix": lie_mix,
         "mix": args.mix,
         "mix_weights": {t: mix_w[i] for i, t in enumerate(tasks)},
         "train_enc": args.train_enc,

@@ -129,21 +129,19 @@ def main():
 
     # Trunk + LoRA
     base = AutoModelForCausalLM.from_pretrained(args.av_base, torch_dtype=dtype, attn_implementation="sdpa")
-    lora_cfg = LoraConfig(
-        r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=args.lora_dropout,
-        bias="none", task_type="CAUSAL_LM", target_modules=LORA_TARGETS,
-    )
-    av = get_peft_model(base, lora_cfg)
     if args.resume_av_dir:
-        # Continued SFT: load the previously trained LoRA weights on top of
-        # the fresh LoraConfig. Shape mismatch raises here — keep
-        # --lora-r/--lora-alpha consistent with the checkpoint.
-        from safetensors.torch import load_file as _lf
-        ckpt = _lf(str(Path(args.resume_av_dir) / "adapter_model.safetensors"))
-        missing, unexpected = av.load_state_dict(ckpt, strict=False)
-        loaded = len(ckpt) - len(unexpected)
-        print(f"[av-multi] resumed AV LoRA from {args.resume_av_dir}: "
-              f"loaded {loaded}/{len(ckpt)} tensors  unexpected={len(unexpected)} missing={len(missing)}")
+        # Continued SFT: load the existing LoRA adapter via PEFT so the module
+        # paths and config (rank/alpha) come straight from the checkpoint.
+        # is_trainable=True so the loaded LoRA keeps requires_grad.
+        from peft import PeftModel as _PeftModel
+        av = _PeftModel.from_pretrained(base, args.resume_av_dir, is_trainable=True)
+        print(f"[av-multi] resumed AV LoRA from {args.resume_av_dir} via PeftModel.from_pretrained")
+    else:
+        lora_cfg = LoraConfig(
+            r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=args.lora_dropout,
+            bias="none", task_type="CAUSAL_LM", target_modules=LORA_TARGETS,
+        )
+        av = get_peft_model(base, lora_cfg)
     if args.grad_checkpoint:
         av.gradient_checkpointing_enable()
         # PEFT + grad-ckpt needs `enable_input_require_grads` on the base, else
