@@ -74,7 +74,7 @@ def from_toxigen(cap: int):
 
 def from_crows(cap: int):
     from datasets import load_dataset
-    ds = load_dataset("nyu-mll/crows_pairs", split="test")
+    ds = load_dataset("nyu-mll/crows_pairs", split="test", trust_remote_code=True)
     out, seen = [], {}
     for r in ds:
         bt = str(r.get("bias_type", "")).lower()
