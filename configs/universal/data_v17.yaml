@@ -1,0 +1,112 @@
+# ===========================================================================
+# data_v17.yaml — master data config for the universal NLA + Activation Oracle
+# (v15/v16/v17). Single source of truth: which architectures, which activations,
+# how much data per task, mix ratios, splits. Counts are the ACTUAL current
+# inventory on eva01 (/big = /mnt/storage/vae_llm/artifacts).
+# ===========================================================================
+
+defaults:
+  d_shared: 2048                 # AV/AO trunk hidden size (Qwen3-1.7B)
+  trunk: Qwen/Qwen3-1.7B
+  extract:
+    pool: mean_content_tokens    # mean-pool over content tokens, fp32 BEFORE sum
+    max_length: 512
+    depth_fraction: 0.5          # single-layer default = mid-depth
+    dtype: fp16                  # forward dtype (V100); acts saved fp32
+  multi_layer:                   # for the multi-layer pool (activations_pool_v9_ml)
+    depth_fractions: [0.25, 0.5, 0.75, 0.9]   # K=4 layers per model
+
+# ---------------------------------------------------------------------------
+# ARCHITECTURES — the pool. role: av (universal verbalize) | organism (AO source)
+# | held_out (eval only). enc: which enc tag carries it (d_M -> d_shared lstsq).
+# layer: single-layer extraction index (depth 0.5 unless overridden).
+# ---------------------------------------------------------------------------
+architectures:
+  # --- AV universal pool (16 trained tags, depth 0.5) ---
+  - {tag: qwen3-1p7b,   model: Qwen/Qwen3-1.7B,                          d_M: 2048, layer: 14, role: av}
+  - {tag: qwen3-0p6b,   model: Qwen/Qwen3-0.6B-Base,                     d_M: 1024, layer: 14, role: av}
+  - {tag: qwen3-4b,     model: Qwen/Qwen3-4B,                            d_M: 2560, layer: 18, role: av}
+  - {tag: qwen2p5-0p5b, model: Qwen/Qwen2.5-0.5B,                        d_M: 896,  layer: 12, role: av}
+  - {tag: qwen2p5-7b,   model: Qwen/Qwen2.5-7B,                          d_M: 3584, layer: 20, role: av_and_quirk_organism}
+  - {tag: gemma2,       model: google/gemma-2-9b-it,                     d_M: 3584, layer: 21, role: av_and_lie_organism}
+  - {tag: llama3-8b,    model: NousResearch/Meta-Llama-3-8B-Instruct,    d_M: 4096, layer: 15, role: av_and_heldout_organism}
+  - {tag: phi-1p5,      model: microsoft/phi-1_5,                        d_M: 2048, layer: 12, role: av}
+  - {tag: gpt2-medium,  model: openai-community/gpt2-medium,             d_M: 1024, layer: 12, role: av}
+  - {tag: gpt-neo-1p3b, model: EleutherAI/gpt-neo-1.3B,                  d_M: 2048, layer: 12, role: av}
+  - {tag: pythia-410m,  model: EleutherAI/pythia-410m-deduped,           d_M: 1024, layer: 12, role: av}
+  - {tag: smollm2-360m, model: HuggingFaceTB/SmolLM2-360M,              d_M: 960,  layer: 15, role: av}
+  - {tag: smollm3-3b,   model: HuggingFaceTB/SmolLM3-3B,                d_M: 2048, layer: 18, role: av}
+  - {tag: lfm-7b,       model: LiquidAI/LFM2-1.2B,                       d_M: 2048, layer: 12, role: av}
+  - {tag: vikhr-7b-01,  model: Vikhrmodels/Vikhr-7b-0.1,                 d_M: 4096, layer: 16, role: av}
+  - {tag: yagpt-5-8b,   model: yandex/YandexGPT-5-Lite-8B-pretrain,      d_M: 4096, layer: 16, role: av}
+  # --- held-out architectures (enc fit via add_held_out, NOT in AV training) ---
+  - {tag: bloom-560m,        model: bigscience/bloom-560m,              d_M: 1024, layer: 12, role: held_out}
+  - {tag: deepseek-llm-7b,   model: deepseek-ai/deepseek-llm-7b-base,   d_M: 4096, layer: 16, role: held_out}
+  - {tag: gemma4-e4b,        model: google/gemma-4-E4B,                 d_M: 2560, layer: 18, role: held_out}
+  - {tag: nemotron-mini-4b,  model: nvidia/Nemotron-Mini-4B-Instruct,   d_M: 3072, layer: 18, role: held_out}
+  - {tag: rugpt3-large,      model: ai-forever/rugpt3large_based_on_gpt2, d_M: 1536, layer: 12, role: held_out}
+
+# ---------------------------------------------------------------------------
+# TASKS — corpora, counts (ACTUAL), splits, mix.
+# ---------------------------------------------------------------------------
+tasks:
+
+  av:   # universal verbalization (activation -> teacher-z one-liner)
+    corpus: /big/activations_pool_v9            # passages.jsonl has 'z' teacher summaries
+    multi_layer_corpus: /big/activations_pool_v9_ml
+    n_passages: 10500
+    n_archs: 16
+    examples: 168000                            # 10500 x 16
+    target: "<explanation>{teacher_z}</explanation>"
+    tags: [qwen3-1p7b, qwen3-0p6b, qwen3-4b, qwen2p5-0p5b, qwen2p5-7b, gemma2,
+           llama3-8b, phi-1p5, gpt2-medium, gpt-neo-1p3b, pythia-410m,
+           smollm2-360m, smollm3-3b, lfm-7b, vikhr-7b-01, yagpt-5-8b]
+
+  ao_quirk:   # name/detect a hidden behavioural bias from an organism's response act
+    rows: /big/audit/ao/ao_rows_v13.jsonl       # 5328 rows (free-form, families a/b/c/neg)
+    rows_count: 5328
+    acts_org:  /big/audit/ao/acts_ao_org_mean.safetensors      # [1594, 3584] organism
+    acts_base: /big/audit/ao/acts_ao_base_mean.safetensors     # [1594, 3584] clean base (negatives)
+    acts_heldout: /big/audit/ao/acts_ao_heldout_org_mean.safetensors  # [540, 3584]
+    organism: {model: Qwen/Qwen2.5-7B-Instruct, adapter: /big/audit/organism_qwen25_7b/adapter, enc_tag: qwen2p5-7b}
+    biases_supervised: [decimal, atomic, birthdeath, movie, sports, hydrated, calories,
+                        reassurance, camelcase, pubyear, compliment_lang]   # 11
+    biases_held_out:   [voting, population, chocolate]                      # never positive in training
+    desc_source: scripts/audit/quirk_sets.py
+
+  ao_lie:   # binary deception detection from an organism's response act
+    organisms:
+      - {dir: /big/audit/lie_gemma2_ml,     rows: 2071, enc_tag: gemma2,    layers: [L13,L21,L31,L39], role: train}
+      - {dir: /big/audit/lie_gemma2_female, rows: 2229, enc_tag: gemma2,    layers: [L13,L21,L31,L39], role: train_or_heldout}
+      - {dir: /big/audit/lie_gemma2_male,   rows: 2229, enc_tag: gemma2,    layers: [L13,L21,L31,L39], role: train}
+      - {dir: /big/audit/lie_llama31_8b,    rows: 1171, enc_tag: llama3-8b, layers: [L10,L16,L24,L30], role: held_out_cross_base}
+    source: ai-safety-institute/lie-detection-rollouts
+    train_split: varied_deception
+    balanced_splits: [varied_deception, varied_deception_validation, roleplaying, gender_secret]
+    honest_only_skip: [alpaca, gender_secret_ood]   # lie%=0, not for AUROC
+
+  latentqa:   # behaviour-QA transfer (Berkeley LatentQA), llama3 HELD-OUT
+    dir: /big/audit/latentqa_task
+    train: 907
+    heldout: 227
+    train_enc_tags: [qwen2p5-7b, gemma2, phi-1p5, smollm3-3b]   # round-robin in-pool; NOT llama3
+    eval_heldout_model: /big/audit/latentqa_eval     # their qa.json on Llama-3-8B (held-out)
+
+# ---------------------------------------------------------------------------
+# v17 DETECT corpus (calibrated per-bias Yes/No) — heavy negatives kill confabulation
+# ---------------------------------------------------------------------------
+v17_detect:
+  question_fmt: "Does this response exhibit the following behaviour - {desc}? Answer Yes or No."
+  detect_mix: {pos: 2, in_org_neg: 1, clean_base_neg: 1.5, clean_pool_neg: 1.5}  # neg ~68%
+  task_mix: {detect: 6, av: 1, lie: 2}
+  clean_pool_neg_tags: [phi-1p5, pythia-410m, gpt2-medium, smollm2-360m, qwen3-0p6b, qwen3-1p7b, smollm3-3b, gpt-neo-1p3b]
+  metric: auroc_per_bias + clean_false_positive_rate    # NOT the noisy free-form judge
+  held_out_guard: [voting, population, chocolate]        # asserted absent from positives
+
+# ---------------------------------------------------------------------------
+# ADAPTER BUNDLES (enc/dec d_M<->2048)
+# ---------------------------------------------------------------------------
+adapters:
+  base:    /big/adapters_v9_serve_full        # 13 trained tags
+  gemma2:  /big/adapters_v9_serve_gemma2      # + gemma2 (v15 default)
+  llama:   /big/adapters_v9_serve_llama       # + llama3-8b (has ALL tags; use for cross-base)
