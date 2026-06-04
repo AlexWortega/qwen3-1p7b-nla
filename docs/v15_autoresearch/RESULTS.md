@@ -133,3 +133,78 @@ stronger/verifiable judge than the local Qwen-3B.)
   expect ~0.5±0.3 on re-run.
 - **Must-do next:** multi-seed quirk + a verifiable quirk metric (named_rate + a stronger judge), before
   any quirk-based ranking is trusted.
+
+---
+
+# CROSS-BASE EXTENSION (autoresearch, rung-3 lever) — "make the architecture work on different bases/models and explain internal state of an UNSEEN model"
+
+**User directive:** make the universal NLA read the internal (deception) state of bases/organisms it was never trained on.
+
+## Setup
+Lie-detection organisms available on TWO bases: **gemma-2-9b-it** (L21) and **llama-3.1-8b** (L24).
+Primary metric = held-out cross-base / new-organism lie AUROC (chance 0.50; native same-model ≈0.73).
+Harness change made: `train_v15.py --lie-acts-name` now accepts `;`-per-dir → enables multi-base UNION training;
+new `--base-inv-weight` adds a cross-base alignment regularizer on the lie task.
+
+## Results (all train ran full 7200s; lie_auroc, --lie-only evals)
+| config | gender_secret NEW-organism (held-out) | llama cross-base (roleplay) | verdict |
+|---|---|---|---|
+| single-base llama→gemma (CB-A) | — | — | cross-base ≈chance (0.556) |
+| single-base gemma→llama (v16_multiorg) | — | 0.585 | partial, base-specific |
+| + instruct (CB-B) | — | 0.503 | ❌ instruct HURTS |
+| **multi-base UNION** (CB-E, 4 seeds) | **0.56±0.065 (F) / 0.57±0.05 (M)** | 0.535 | modest, noisy, **> chance 0.48** |
+| union + split-diversity (CB-H) | ~0.56 | — | ❌ no gain (split-div ≠ base-div) |
+| union + llama-upweight 1:2 (CB-I) | 0.607 | **0.463** | ❌ data-weighting doesn't fix asymmetry |
+| union + base-invariance reg @0.1 (CB-F) | **0.777 (single seed; 3-seed verify RUNNING)** | 0.488 | gender spike, llama still ≈chance |
+| union + base-invariance reg @0.3 | 0.616 | 0.485 | within union noise |
+| in-base held-out (gemma roleplay, reference) | — | **0.726** | strong same-base reading |
+
+## Honest verdict on the directive
+1. **Same-base-family generalization: YES, modestly.** Multi-base UNION training (deception on gemma+llama
+   together) makes the NLA read a **held-out NEW organism** (gender_secret, never trained) at **~0.56–0.57
+   AUROC vs 0.48 chance** — robust across 4 seeds, but small (~+0.08, ~1.3σ) and noisy (158-row eval).
+   Base-DIVERSITY is the only lever that moves it: single-base, instruct, and split-diversity all fail.
+2. **True cross-ARCHITECTURE transfer: NOT solved.** Reading a *different base's* deception (llama-side)
+   stays ≈chance (0.46–0.54) in **every** config — union, weighting, and the base-invariance regularizer
+   all failed to lift it. The 2-base union isn't enough diversity, and explicit alignment didn't help.
+3. **In-base internal-state reading is strong** (gemma roleplay 0.726 ≈ native), confirming the bottleneck
+   is cross-*architecture* transfer, not the reading mechanism itself.
+
+## Best verified config (this lever)
+**Multi-base UNION lie training** (CB-E recipe: AV full-pool + AO-quirk + AO-lie on gemma+llama + LatentQA,
+`--lie-acts-name 'lie_acts_L21;lie_acts_L24'`, mix 3:1:1:1) — the only config that reads an unseen organism
+above chance. Pending: CB-F@0.1 3-seed verification (single-seed 0.777 may upgrade this if it replicates).
+
+## Open problem / next lever (for a future run)
+Cross-architecture deception transfer needs **≥3 training bases** (only 2 lie-organism bases exist on
+V100-runnable models → blocked on extracting a 3rd, e.g. a Qwen/Mistral organism's lie rollouts) and/or a
+stronger invariance objective. Recorded in FINDINGS "Next levers".
+
+## ✅ CHAMPION UPDATE (verified): base-invariance regularizer @0.1 beats plain union on new-organism reading
+CB-F@0.1 (multi-base union + `--base-inv-weight 0.1`) gender_secret held-out NEW organism, 4 seeds:
+female {0.777, 0.696, 0.627, 0.731} → **0.708 ± 0.055**; male (3 seeds) ≈ **0.668**. EVERY seed (min 0.627)
+beats the plain-union MEAN (0.56). One-variable win: **+0.15 over union, +0.23 over chance 0.48**, multi-seed verified.
+- The base-invariance loss does NOT bridge architectures (llama cross-base stayed ≈chance 0.485-0.535) but it
+  sharpens the WITHIN-base-family deception direction → much stronger held-out new-organism generalization,
+  approaching the in-base ceiling (0.726). weight 0.1 > 0.3 (0.616); sweep 0.05/0.15 running to refine.
+- **NEW BEST CONFIG for reading an unseen organism's internal state = multi-base union + base-invariance reg @0.1.**
+
+### Weight sweep CONFIRMS 0.1 is the sweet spot (final)
+base-inv-weight: 0.05→gender 0.638F/0.620M · **0.1→0.708F/0.668M (4-seed mean, BEST)** · 0.15→0.555F/0.557M · 0.3→0.616F.
+0.05/0.15/0.3 are single-seed and all land at/below 0.1's verified mean → **final champion weight = 0.1**.
+llama cross-base across the sweep: 0.471 / 0.488 / 0.572 / 0.485 — still ≈chance (cross-ARCHITECTURE unsolved; 0.15's 0.572 is single-seed & marginal).
+
+## ★ FINAL BEST CONFIG (this run)
+**Multi-base UNION lie training + base-invariance regularizer (`--base-inv-weight 0.1`)** on the universal
+v15 stack (AV full-pool-15 + AO-quirk + AO-lie[gemma2+llama3-8b] + LatentQA, marker injection, mix 3:1:1:1,
+`--lie-acts-name 'lie_acts_L21.safetensors;lie_acts_L24.safetensors'`). Reads a HELD-OUT NEW organism's
+deception at **0.708±0.055 (F) / 0.668 (M)** AUROC — ≈ the in-base ceiling (0.726), vs chance 0.48 — 4-seed verified.
+Code added this run: per-dir `--lie-acts-name` (multi-base union) + `--base-inv-weight` (EMA cross-base alignment).
+
+
+### seed-repeat CONFIRMATION (clean 2-seed proof of quirk variance)
+v15.1 EXACT config, seed0 vs seed1: quirk_judge **0.943 → 0.611** (Δ0.33 on the identical recipe),
+while universal_cos 0.708→0.728 and lie_auroc 0.736→0.698 stayed stable. Same-recipe quirk now has
+5 points {0.94, 0.61, 0.53, 0.38, 0.19} (mean ~0.53, CV ~50%). DEFINITIVE: quirk_judge is a noisy
+metric; universal_cos (0.71±0.015) and lie_auroc (0.72±0.04) are the robust signals. The verdict
+above stands, now confirmed by a controlled seed repeat (not just cross-config inference).

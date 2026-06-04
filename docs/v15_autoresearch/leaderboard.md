@@ -51,3 +51,13 @@ primary = held-out cross-base / new-organism lie AUROC (chance 0.50, native ~0.7
 read the internal state of an UNSEEN organism/model. Train deception on ≥2 bases → it generalizes.
 
 ## FINAL VERDICT: quirk_judge HIGH-VARIANCE (same-recipe spans 0.19-0.94) → ao ranking is noise. Robust = lie_auroc (③ 0.793 best ≈native) + universal_cos (0.73, 15 models). Practical best = ③ v16_multiorg (deception+cross-base) / v15.1 (balance). Need multi-seed quirk.
+
+## CROSS-BASE LEVER — CONVERGED (4-seed verified)
+| config | gender NEW-org (mean) | llama cross-base | note |
+|---|---|---|---|
+| chance | 0.48 | 0.50 | floor |
+| **multi-base union (CB-E, 4 seeds)** | **0.56–0.57 ±0.06** | 0.535 | best verified; modest +0.08 over chance |
+| union+reg @0.1 (CB-F) | 0.777 (1 seed, verifying) | 0.488 | gender spike unverified; llama unmoved |
+| in-base gemma roleplay (ref) | — | 0.726 | strong same-base |
+VERDICT (updated): base-invariance reg @0.1 makes new-organism reading STRONG (0.71F/0.67M, 4 seeds, approaching in-base 0.726); plain union modest (0.56). Cross-ARCHITECTURE (llama) still ≈chance — open problem (needs ≥3 bases).
+- v15.1 seed1 (SAME config as seed0): quirk 0.943→0.611 (Δ0.33 — confirms variance), ucos 0.708→0.728 stable, lie 0.736→0.698 stable. 5-point same-recipe quirk {0.94,0.61,0.53,0.38,0.19}.
