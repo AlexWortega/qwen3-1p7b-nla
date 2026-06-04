@@ -61,3 +61,17 @@ read the internal state of an UNSEEN organism/model. Train deception on ≥2 bas
 | in-base gemma roleplay (ref) | — | 0.726 | strong same-base |
 VERDICT (updated): base-invariance reg @0.1 makes new-organism reading STRONG (0.71F/0.67M, 4 seeds, approaching in-base 0.726); plain union modest (0.56). Cross-ARCHITECTURE (llama) still ≈chance — open problem (needs ≥3 bases).
 - v15.1 seed1 (SAME config as seed0): quirk 0.943→0.611 (Δ0.33 — confirms variance), ucos 0.708→0.728 stable, lie 0.736→0.698 stable. 5-point same-recipe quirk {0.94,0.61,0.53,0.38,0.19}.
+
+
+## ===== v17: CALIBRATED per-bias detector — fixes confabulation =====
+Reframe free-form "name the bias" → per-bias Yes/No detection ("Does this exhibit <DESC>?") + HEAVY
+clean negatives (~68% of detect corpus: base + 8 clean pool archs → No). Metric = AUROC + clean-FP-rate
+(not the noisy free-form judge). Result (full 120-min run, /big/audit/v15/v17_detector):
+- **clean_false_positive_rate = 0.000** over 2520 clean examples → CONFABULATION ELIMINATED (v15 free-form
+  invented a bias on every clean input; v17 says No).
+- **held-out bias AUROC = 1.0** (voting/population/chocolate) + trained biases 1.0 (atomic/birthdeath/calories).
+- lie_auroc 0.754 (≈native).
+CAVEAT: 1.0/0.0 is suspiciously clean — this AUROC is organism-enacting-B vs base-on-same-text. Must
+verify BIAS-SPECIFICITY (Yes only for the enacted bias, No for other biases on the SAME organism act) —
+in-org negatives were trained so it should hold, checked via the explorer multi-probe battery. The
+calibrated-detection reframe is the robust fix; free-form quirk naming was the wrong objective.

@@ -208,3 +208,17 @@ while universal_cos 0.708→0.728 and lie_auroc 0.736→0.698 stayed stable. Sam
 5 points {0.94, 0.61, 0.53, 0.38, 0.19} (mean ~0.53, CV ~50%). DEFINITIVE: quirk_judge is a noisy
 metric; universal_cos (0.71±0.015) and lie_auroc (0.72±0.04) are the robust signals. The verdict
 above stands, now confirmed by a controlled seed repeat (not just cross-config inference).
+
+
+## ===== v17: CALIBRATED per-bias detector — fixes confabulation =====
+Reframe free-form "name the bias" → per-bias Yes/No detection ("Does this exhibit <DESC>?") + HEAVY
+clean negatives (~68% of detect corpus: base + 8 clean pool archs → No). Metric = AUROC + clean-FP-rate
+(not the noisy free-form judge). Result (full 120-min run, /big/audit/v15/v17_detector):
+- **clean_false_positive_rate = 0.000** over 2520 clean examples → CONFABULATION ELIMINATED (v15 free-form
+  invented a bias on every clean input; v17 says No).
+- **held-out bias AUROC = 1.0** (voting/population/chocolate) + trained biases 1.0 (atomic/birthdeath/calories).
+- lie_auroc 0.754 (≈native).
+CAVEAT: 1.0/0.0 is suspiciously clean — this AUROC is organism-enacting-B vs base-on-same-text. Must
+verify BIAS-SPECIFICITY (Yes only for the enacted bias, No for other biases on the SAME organism act) —
+in-org negatives were trained so it should hold, checked via the explorer multi-probe battery. The
+calibrated-detection reframe is the robust fix; free-form quirk naming was the wrong objective.
