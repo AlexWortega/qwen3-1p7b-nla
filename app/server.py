@@ -84,6 +84,7 @@ TAG_TO_MODEL: dict[str, dict[str, Any]] = {
     "gpt-neo-1p3b":    {"model": "EleutherAI/gpt-neo-1.3B",         "depth": 0.5},
     "phi-1p5":         {"model": "microsoft/phi-1_5",               "depth": 0.5},
     "gemma4-e4b":      {"model": "google/gemma-4-E4B",              "depth": 0.5},
+    "gemma2":          {"model": "google/gemma-2-9b-it",            "layer": 21},
     "nemotron-mini-4b":{"model": "nvidia/Nemotron-Mini-4B-Instruct","depth": 0.5},
     "lfm-7b":          {"model": "LiquidAI/LFM2-1.2B",              "depth": 0.5},
     "deepseek-llm-7b": {"model": "deepseek-ai/deepseek-llm-7b-base","depth": 0.5},
@@ -99,9 +100,17 @@ HF_ADAPTER_NAME = os.environ.get("NLA_ADAPTER", "adapter_universal_v8_mixed")
 POOL_DIR = Path(os.environ.get("NLA_POOL_DIR", "/workspace/artifacts/activations_pool_300m"))
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-print(f"[ui-server] loading universal-NLA stack from {HF_REPO}/{HF_ADAPTER_NAME}")
-artifacts_root = Path(snapshot_download(repo_id=HF_REPO, allow_patterns=f"{HF_ADAPTER_NAME}/**"))
-ART = artifacts_root / HF_ADAPTER_NAME
+# NLA_ART_DIR lets us point at a LOCAL checkpoint dir (e.g. a v15 audit ckpt on
+# eva01) that already has av/, adapters/ and an nla_meta.yaml. When set we skip
+# the HF snapshot_download entirely and use it directly as ART.
+_LOCAL_ART = os.environ.get("NLA_ART_DIR")
+if _LOCAL_ART:
+    ART = Path(_LOCAL_ART)
+    print(f"[ui-server] loading universal-NLA stack from LOCAL dir {ART}")
+else:
+    print(f"[ui-server] loading universal-NLA stack from {HF_REPO}/{HF_ADAPTER_NAME}")
+    artifacts_root = Path(snapshot_download(repo_id=HF_REPO, allow_patterns=f"{HF_ADAPTER_NAME}/**"))
+    ART = artifacts_root / HF_ADAPTER_NAME
 
 av_meta = yaml.safe_load((ART / "nla_meta.yaml").read_text())
 AV_BASE = av_meta["av_base"]
@@ -148,12 +157,127 @@ SUPPORTED_TAGS = sorted([t for t in adapters.tags if t in TAG_TO_MODEL])
 print(f"[ui-server] supported tags: {SUPPORTED_TAGS}")
 
 
+# ─── v17 CALIBRATED per-bias Yes/No detector (loaded ALONGSIDE the v15 AV) ───
+# v17 reframes bias auditing as per-bias Yes/No detection trained with heavy clean
+# negatives → the output is a calibrated probability we can threshold + AUROC, not a
+# free-form (noisy) sentence. Loaded as a SECOND Qwen3-1.7B trunk + its own enc bundle.
+V17_DIR = os.environ.get("NLA_V17_DIR", "/big/audit/v15/v17_detector")
+V17 = None  # populated below if the checkpoint is present
+
+
+def _load_v17(v17_dir: str):
+    """Load the v17 detector: a Qwen3-1.7B + LoRA + ModelPoolAdapters + meta.
+    Returns a dict of everything /api/detect needs, or raises."""
+    from scripts.audit.quirk_sets import DESC, HELD_OUT
+    vdir = Path(v17_dir)
+    meta = json.loads((vdir / "v17_meta.json").read_text())
+    trunk = meta["trunk"]
+    d_shared17 = int(meta["d_shared"])
+    tkm = meta["tokens"]
+    inj_scale17 = math.sqrt(d_shared17)
+    print(f"[ui-server][v17] loading detector trunk={trunk} from {vdir}")
+    tok17 = AutoTokenizer.from_pretrained(trunk)
+    if tok17.pad_token is None:
+        tok17.pad_token = tok17.eos_token
+    base17 = AutoModelForCausalLM.from_pretrained(
+        trunk, torch_dtype=torch.float16, attn_implementation="sdpa").to(DEVICE)
+    av17 = PeftModel.from_pretrained(base17, str(vdir / "av")).to(DEVICE).eval()
+    for p in av17.parameters():
+        p.requires_grad_(False)
+    adapters17 = ModelPoolAdapters.load(str(vdir / "adapters")).to(DEVICE).eval()
+    yes_ids = tok17(" Yes", add_special_tokens=False)["input_ids"]
+    no_ids = tok17(" No", add_special_tokens=False)["input_ids"]
+    # Biases to scan: every DESC bias (held-out + supervised). Held-out are flagged.
+    held = set(meta.get("held_out_biases", HELD_OUT))
+    supervised = set(meta.get("supervised_biases", []))
+    scan_biases = list(DESC.keys())
+    print(f"[ui-server][v17] ready — {len(scan_biases)} scan biases, "
+          f"held-out={sorted(held)}, org_tag={meta['org_tag']}")
+    return {
+        "meta": meta, "tok": tok17, "av": av17, "adapters": adapters17,
+        "d_shared": d_shared17, "inj_scale": inj_scale17,
+        "inj_id": int(tkm["injection_token_id"]),
+        "left_id": int(tkm["injection_left_neighbor_id"]),
+        "right_id": int(tkm["injection_right_neighbor_id"]),
+        "inj_char": tkm["injection_char"],
+        "template": meta["actor_template"], "detect_qa": meta["detect_qa"],
+        "yes0": yes_ids[0], "no0": no_ids[0],
+        "scan_biases": scan_biases, "held": held, "supervised": supervised,
+        "DESC": DESC, "org_tag": meta["org_tag"],
+    }
+
+
+try:
+    V17 = _load_v17(V17_DIR)
+except Exception as _e:
+    print(f"[ui-server][v17] NOT loaded ({type(_e).__name__}: {_e}) — "
+          f"/api/detect will be disabled, free-form v15 still works")
+    V17 = None
+
+
 # ─── Per-tag target model cache + per-request activation cache ──────────────
 _TARGET_CACHE: dict[str, tuple[Any, Any]] = {}
 _ACT_CACHE: dict[str, dict[str, Any]] = {}    # cache_id → { "tag", "tokens", "h_M", "h_pool", "layer" }
 _ACT_CACHE_MAX = 32                            # LRU cap; drop oldest
 _STOP_EVENTS: dict[str, Event] = {}            # stream_id → Event for cancellation
 _LOAD_STATUS: dict[str, str] = {}              # tag → human-readable load progress (polled by UI)
+
+# ─── Curated activation BROWSER (real organism / base / lie acts) ────────────
+# Pre-extracted mean-pooled activations from the AO experiment. Picking a source
+# loads its stored activation (+ matching clean-base act + transcript) into the
+# act cache, so Bias-scan / probes / explain run on REAL organism activations
+# (where v17 shines) instead of hand-typed text.
+AO_DIR = Path(os.environ.get("NLA_AO_DIR", "/big/audit/ao"))
+LIE_DIR = Path(os.environ.get("NLA_LIE_DIR", "/big/audit/lie_gemma2_ml"))
+# org_tag for AO acts = the organism family the v17 detector was trained against.
+AO_ORG_TAG = (V17 or {}).get("org_tag", "qwen2p5-7b")
+LIE_TAG = "gemma2"
+
+_SOURCE_SPECS = [
+    {
+        "key": "heldout_org",
+        "label": "Held-out ORGANISM transcripts (qwen2.5-7b) — voting / population / chocolate",
+        "tag": AO_ORG_TAG, "kind": "org",
+        "org_acts": AO_DIR / "acts_ao_heldout_org_mean.safetensors",
+        "base_acts": AO_DIR / "acts_ao_heldout_base_mean.safetensors",
+        "transcripts": AO_DIR / "transcripts_heldout.jsonl",
+    },
+    {
+        "key": "lie_gemma2",
+        "label": "LIE organism (gemma2) — deceptive vs honest transcripts",
+        "tag": LIE_TAG, "kind": "lie",
+        "org_acts": LIE_DIR / "lie_acts_L21.safetensors",
+        "base_acts": None,
+        "transcripts": LIE_DIR / "lie_rows.jsonl",
+    },
+]
+_SOURCE_CACHE: dict[str, dict] = {}            # key → loaded {H_org, H_base, rows}
+
+
+def _load_source_data(spec: dict) -> dict:
+    from safetensors.torch import load_file
+    if spec["key"] in _SOURCE_CACHE:
+        return _SOURCE_CACHE[spec["key"]]
+    H_org = load_file(str(spec["org_acts"]))["h"].float()
+    H_base = (load_file(str(spec["base_acts"]))["h"].float()
+              if spec.get("base_acts") and Path(spec["base_acts"]).exists() else None)
+    rows = [json.loads(l) for l in Path(spec["transcripts"]).read_text().splitlines() if l.strip()]
+    d = {"H_org": H_org, "H_base": H_base, "rows": rows}
+    _SOURCE_CACHE[spec["key"]] = d
+    return d
+
+
+def _source_row_meta(spec: dict, row: dict, i: int) -> dict:
+    if spec["kind"] == "org":
+        return {"idx": i, "bias": row.get("bias") or row.get("category"),
+                "user": row.get("user", ""), "assistant": row.get("assistant", "")}
+    # lie
+    msgs = row.get("messages", [])
+    user = next((m["content"] for m in msgs if m["role"] == "user"), "")
+    asst = next((m["content"] for m in msgs if m["role"] == "assistant"), "")
+    return {"idx": i, "bias": ("lie" if row.get("is_lie") else "honest"),
+            "is_lie": bool(row.get("is_lie")), "split": row.get("split", ""),
+            "user": user, "assistant": asst}
 
 
 def _set_load(tag: str, msg: str):
@@ -254,6 +378,24 @@ class ExplainRequest(BaseModel):
     max_new_tokens: int = 80
 
 
+class AskRequest(BaseModel):
+    """Activation-Oracle (v15 AO) request: inject enc(h) at the ㈎ marker, append
+    a free-text question, generate the answer.
+
+    Compute h:
+      pool == "mean" → mean of cached per-token hidden states over `span`
+                       (or all content tokens if span is None). v15 AO was
+                       mean-pool-trained — this is the in-distribution regime.
+      pool == "token" → the single `idx` token (OOD for AO; noisier).
+    """
+    cache_id: str
+    question: str
+    idx: int | None = None              # single-token h (pool == "token")
+    span: list[int] | None = None       # [start, end) for mean-pool over a span
+    pool: str = "mean"                  # "mean" | "token"
+    max_new_tokens: int = 80
+
+
 # ─── FastAPI app ────────────────────────────────────────────────────────────
 app = FastAPI(title="Universal-NLA explorer", version="0.1")
 
@@ -284,7 +426,9 @@ def get_tags():
             "user_added": tag in (json.loads(USER_TAGS_FILE.read_text()) if USER_TAGS_FILE.exists() else {}),
         })
     return {"tags": out, "av_base": AV_BASE, "d_shared": D_SHARED,
-            "adapter_name": HF_ADAPTER_NAME, "can_add_models": HAS_SERVE_CACHE}
+            "adapter_name": HF_ADAPTER_NAME, "can_add_models": HAS_SERVE_CACHE,
+            "v17_loaded": V17 is not None,
+            "v17_dir": str(V17_DIR) if V17 is not None else None}
 
 
 # ─── Background-job machinery for /api/add_model ───────────────────────────
@@ -889,6 +1033,288 @@ def explain_stream(cache_id: str, idx: int, max_new_tokens: int = 80):
 
     return StreamingResponse(event_gen(), media_type="text/event-stream",
                              headers={"X-Accel-Buffering": "no", "Cache-Control": "no-cache"})
+
+
+# ─── Activation-Oracle (v15 AO): inject enc(h) + free-text question ──────────
+def _resolve_ao_h(entry: dict, pool: str, idx: int | None,
+                  span: list[int] | None) -> tuple[torch.Tensor, str]:
+    """Return (h_t [1, d_M] on DEVICE, human label) for an AO request.
+
+    pool == "mean": mean over the span [start, end) of cached per-token h_M, or
+      over ALL content tokens (use the cached `h_pool`) when span is None. The
+      cached h_pool is already mean-pooled over content tokens — the training
+      distribution for v15 AO — so we prefer it directly when no span is given.
+    pool == "token": the single `idx` token (OOD for AO).
+    """
+    tokens: list[str] = entry["tokens"]
+    n = len(tokens)
+    if pool == "token":
+        if idx is None or not (0 <= idx < n):
+            raise HTTPException(400, f"pool='token' needs idx in [0, {n}); got {idx}")
+        return entry["h_M"][idx].unsqueeze(0).to(DEVICE), f"token[{idx}]={tokens[idx]!r}"
+    # mean-pool
+    if span is None:
+        if "h_pool" not in entry:
+            raise HTTPException(400, "no mean-pool cached for this entry")
+        return entry["h_pool"].unsqueeze(0).to(DEVICE), "⌗ RESPONSE (mean-pool, all tokens)"
+    if len(span) != 2:
+        raise HTTPException(400, "span must be [start, end)")
+    s, e = int(span[0]), int(span[1])
+    s = max(0, min(s, n)); e = max(0, min(e, n))
+    if e <= s:
+        raise HTTPException(400, f"empty span [{s}, {e})")
+    h_t = entry["h_M"][s:e].mean(dim=0, keepdim=True).to(DEVICE)
+    return h_t, f"⌗ MEAN of tokens [{s}:{e})"
+
+
+def _build_ao_embed(tag: str, h_t: torch.Tensor, question: str):
+    """Project enc(tag, h), normalize to √d_shared, build the v15 AO prompt
+    (ACTOR_TEMPLATE + '\\n\\nQuestion: {q}\\nAnswer:'), inject at the ㈎ marker.
+
+    Returns (embed [1, T, d], attn [1, T]). Mirrors train_v15.build_example's
+    non-instruct AO path exactly: same ACTOR_TEMPLATE, same appended cue, same
+    chat-template wrapping, same enc → normalize_activation injection.
+    """
+    inj_shared = adapters.encode(tag, h_t).float()
+    inj_shared = normalize_activation(inj_shared, INJ_SCALE)
+    prompt_text = (ACTOR_TEMPLATE.format(model_tag=tag, injection_char=INJECTION_CHAR)
+                   + f"\n\nQuestion: {question.strip()}\nAnswer:")
+    p_ids = av_tokenizer.apply_chat_template(
+        [{"role": "user", "content": prompt_text}],
+        tokenize=True, add_generation_prompt=True,
+    )
+    input_ids = torch.tensor([p_ids], dtype=torch.long, device=DEVICE)
+    embed = av.get_input_embeddings()(input_ids)
+    inj = inj_shared.to(DEVICE, dtype=embed.dtype)
+    embed = inject_at_marked_positions(input_ids, embed, inj, INJ_ID, LEFT_ID, RIGHT_ID)
+    attn = torch.ones_like(input_ids)
+    return embed, attn
+
+
+@app.post("/api/ask")
+def ask(req: AskRequest):
+    if req.cache_id not in _ACT_CACHE:
+        raise HTTPException(404, f"cache_id {req.cache_id} not found or evicted")
+    if not req.question or not req.question.strip():
+        raise HTTPException(400, "question is required")
+    entry = _ACT_CACHE[req.cache_id]
+    tag = entry["tag"]
+    h_t, label = _resolve_ao_h(entry, req.pool, req.idx, req.span)
+    with torch.no_grad():
+        embed, attn = _build_ao_embed(tag, h_t, req.question)
+        out = av.generate(
+            inputs_embeds=embed,
+            attention_mask=attn,
+            max_new_tokens=req.max_new_tokens,
+            do_sample=False,
+            temperature=1.0,
+            pad_token_id=av_tokenizer.pad_token_id,
+        )
+    answer = av_tokenizer.decode(out[0], skip_special_tokens=True).strip()
+    return {"answer": answer, "question": req.question, "pool": req.pool,
+            "source": label, "tag": tag}
+
+
+@app.get("/api/ask_stream")
+def ask_stream(cache_id: str, question: str, pool: str = "mean",
+               idx: int | None = None, span: str | None = None,
+               max_new_tokens: int = 80):
+    """SSE mirror of /api/ask. `span` is passed as 'start,end' on the query string."""
+    if cache_id not in _ACT_CACHE:
+        raise HTTPException(404, f"cache_id {cache_id} not found or evicted")
+    if not question or not question.strip():
+        raise HTTPException(400, "question is required")
+    entry = _ACT_CACHE[cache_id]
+    tag = entry["tag"]
+    span_list = None
+    if span:
+        try:
+            span_list = [int(x) for x in span.split(",")]
+        except ValueError:
+            raise HTTPException(400, "span must be 'start,end'")
+    h_t, label = _resolve_ao_h(entry, pool, idx, span_list)
+    with torch.no_grad():
+        embed, attn = _build_ao_embed(tag, h_t, question)
+
+    stream_id = uuid.uuid4().hex[:12]
+    stop_event = Event()
+    _STOP_EVENTS[stream_id] = stop_event
+    streamer = TextIteratorStreamer(av_tokenizer, skip_prompt=True, skip_special_tokens=True)
+    gen_kwargs = dict(
+        inputs_embeds=embed,
+        attention_mask=attn,
+        max_new_tokens=max_new_tokens,
+        do_sample=False,
+        temperature=1.0,
+        pad_token_id=av_tokenizer.pad_token_id,
+        streamer=streamer,
+        stopping_criteria=StoppingCriteriaList([_StopOnEvent(stop_event)]),
+    )
+
+    def _run_gen():
+        with torch.no_grad():
+            av.generate(**gen_kwargs)
+    thread = Thread(target=_run_gen)
+    thread.start()
+
+    def event_gen():
+        chunks: list[str] = []
+        try:
+            yield f"event: start\ndata: {json.dumps({'stream_id': stream_id, 'source': label})}\n\n"
+            for new_text in streamer:
+                chunks.append(new_text)
+                yield f"event: token\ndata: {json.dumps({'text': new_text})}\n\n"
+        finally:
+            thread.join()
+            _STOP_EVENTS.pop(stream_id, None)
+        answer = "".join(chunks).strip()
+        stopped = stop_event.is_set()
+        yield (f"event: done\ndata: "
+               f"{json.dumps({'answer': answer, 'question': question, 'pool': pool, 'source': label, 'tag': tag, 'stopped': stopped})}\n\n")
+
+    return StreamingResponse(event_gen(), media_type="text/event-stream",
+                             headers={"X-Accel-Buffering": "no", "Cache-Control": "no-cache"})
+
+
+# ─── v17 CALIBRATED detector: per-bias P(Yes) ───────────────────────────────
+@torch.no_grad()
+def _v17_p_yes(tag: str, h_vec: torch.Tensor, bias: str) -> float:
+    """Mirror eval_v17.p_yes: build the detect prompt, inject enc(tag,h) at the
+    marker, read softmax over the (Yes,No) first-token logits."""
+    V = V17
+    proj = V["adapters"].encode(tag, h_vec.unsqueeze(0).to(DEVICE))      # [1, d_shared]
+    vec = normalize_activation(proj, V["inj_scale"])[0]
+    ptxt = (V["template"].format(model_tag=tag, injection_char=V["inj_char"])
+            + f"\n\nQuestion: {V['detect_qa'].format(desc=V['DESC'][bias])}\nAnswer:")
+    p_ids = V["tok"].apply_chat_template([{"role": "user", "content": ptxt}],
+                                         tokenize=True, add_generation_prompt=True)
+    p = torch.tensor([p_ids], device=DEVICE)
+    embed = V["av"].get_input_embeddings()(p)
+    embed = inject_at_marked_positions(p, embed, vec.unsqueeze(0).to(embed.dtype),
+                                       V["inj_id"], V["left_id"], V["right_id"])
+    logits = V["av"](inputs_embeds=embed).logits[0, -1]
+    pair = torch.stack([logits[V["yes0"]], logits[V["no0"]]]).float()
+    return torch.softmax(pair, 0)[0].item()
+
+
+def _v17_scan(tag: str, h_vec: torch.Tensor) -> list[dict]:
+    V = V17
+    out = []
+    for b in V["scan_biases"]:
+        py = _v17_p_yes(tag, h_vec, b)
+        out.append({"bias": b, "desc": V["DESC"][b], "p_yes": round(py, 4),
+                    "held_out": b in V["held"]})
+    out.sort(key=lambda r: r["p_yes"], reverse=True)
+    return out
+
+
+class DetectRequest(BaseModel):
+    cache_id: str
+    idx: int | None = None          # single-token (pool='token'); else mean-pool
+    span: list[int] | None = None   # [start, end) mean-pool over a token span
+    pool: str = "mean"
+    contrast: bool = False          # also scan the matching clean-base act if present
+
+
+@app.post("/api/detect")
+def detect(req: DetectRequest):
+    """v17 CALIBRATED bias scan. For each known bias, build the v17 detect prompt,
+    inject enc(tag, h), read P(Yes). Returns a sorted [{bias, p_yes, held_out}] +
+    a verdict. If contrast=True and the cached entry carries a matching clean-base
+    activation, also scans base → a bias is 'real' only if HIGH on organism AND
+    LOW on base."""
+    if V17 is None:
+        raise HTTPException(503, "v17 detector not loaded on this server")
+    if req.cache_id not in _ACT_CACHE:
+        raise HTTPException(404, f"cache_id {req.cache_id} not found or evicted")
+    entry = _ACT_CACHE[req.cache_id]
+    tag = entry["tag"]
+    if tag not in V17["adapters"].tags:
+        raise HTTPException(400, f"tag {tag} has no enc adapter in the v17 bundle")
+    h_t, label = _resolve_ao_h(entry, req.pool, req.idx, req.span)
+    org_scan = _v17_scan(tag, h_t.squeeze(0))
+    max_py = org_scan[0]["p_yes"] if org_scan else 0.0
+    resp: dict[str, Any] = {
+        "tag": tag, "source": label, "scan": org_scan, "max_p_yes": max_py,
+        "verdict": ("no bias detected" if max_py < 0.5
+                    else f"bias detected: {org_scan[0]['bias']}"),
+        "threshold": 0.5,
+    }
+    # Organism-vs-base contrast.
+    if req.contrast and entry.get("h_base") is not None:
+        base_scan = _v17_scan(tag, entry["h_base"].to(DEVICE))
+        base_by = {r["bias"]: r["p_yes"] for r in base_scan}
+        # A bias is "real" if high on org AND low on base.
+        contrast_rows = []
+        for r in org_scan:
+            bp = base_by.get(r["bias"], 0.0)
+            contrast_rows.append({"bias": r["bias"], "desc": r["desc"],
+                                  "held_out": r["held_out"],
+                                  "p_yes_org": r["p_yes"], "p_yes_base": bp,
+                                  "real": (r["p_yes"] >= 0.5 and bp < 0.5)})
+        resp["contrast"] = contrast_rows
+        resp["has_base"] = True
+    else:
+        resp["has_base"] = entry.get("h_base") is not None
+    return resp
+
+
+# ─── Activation BROWSER: list + load curated organism / base / lie acts ──────
+@app.get("/api/sources")
+def sources():
+    out = []
+    for spec in _SOURCE_SPECS:
+        if not Path(spec["org_acts"]).exists() or not Path(spec["transcripts"]).exists():
+            continue
+        try:
+            d = _load_source_data(spec)
+        except Exception as e:
+            print(f"[ui-server][sources] skip {spec['key']}: {e}")
+            continue
+        n = min(d["H_org"].shape[0], len(d["rows"]))
+        rows = [_source_row_meta(spec, d["rows"][i], i) for i in range(n)]
+        out.append({"key": spec["key"], "label": spec["label"], "tag": spec["tag"],
+                    "kind": spec["kind"], "has_base": d["H_base"] is not None,
+                    "n": n, "rows": rows})
+    return {"sources": out, "v17_loaded": V17 is not None}
+
+
+class LoadSourceRequest(BaseModel):
+    source: str
+    idx: int
+
+
+@app.post("/api/load_source")
+def load_source(req: LoadSourceRequest):
+    """Load a curated activation (org act + matching clean-base act + transcript)
+    into the act cache as a single mean-pool entry. Returns a cache_id that
+    /api/detect, /api/ask and /api/explain (idx=-1) all accept."""
+    spec = next((s for s in _SOURCE_SPECS if s["key"] == req.source), None)
+    if spec is None:
+        raise HTTPException(404, f"unknown source {req.source}")
+    d = _load_source_data(spec)
+    n = min(d["H_org"].shape[0], len(d["rows"]))
+    if not (0 <= req.idx < n):
+        raise HTTPException(400, f"idx {req.idx} out of range [0,{n})")
+    row = d["rows"][req.idx]
+    meta = _source_row_meta(spec, row, req.idx)
+    h_pool = d["H_org"][req.idx].float().cpu()
+    h_base = d["H_base"][req.idx].float().cpu() if d["H_base"] is not None else None
+    cache_id = uuid.uuid4().hex[:12]
+    _ACT_CACHE[cache_id] = {
+        "tag": spec["tag"],
+        "tokens": [],                          # no token grid for curated acts
+        "h_M": h_pool.unsqueeze(0),            # [1, d_M] — single mean vector
+        "h_pool": h_pool,                      # [d_M] — the organism mean act
+        "h_base": h_base,                      # matching clean-base act (or None)
+        "layer": None,
+        "source_kind": spec["kind"],
+        "transcript": meta,
+    }
+    _evict_act_cache()
+    return {"cache_id": cache_id, "tag": spec["tag"], "source": spec["key"],
+            "has_base": h_base is not None, "transcript": meta,
+            "d_M": int(h_pool.shape[0])}
 
 
 @app.post("/api/stop")
