@@ -212,6 +212,10 @@ def main():
     ap.add_argument("--wandb", action="store_true")
     ap.add_argument("--full-pool", action="store_true",
                     help="train the AV task on all 15 v9 pool tags (AV_TAGS_FULL) for true universality")
+    ap.add_argument("--base-inv-weight", type=float, default=0.0,
+                    help="CB-F base-invariance regularizer (lie task only): pull each base's per-label "
+                         "(lie/truth) d_shared rep toward the OTHER base's EMA prototype of the same "
+                         "label, so the deception direction becomes base-agnostic. 0 = off.")
     args = ap.parse_args()
 
     global AV_TAGS
@@ -429,13 +433,21 @@ def main():
         ml_groups = ml_groups * len(lie_dirs)
     assert len(ml_groups) == len(lie_dirs), \
         f"--lie-acts-ml has {len(ml_groups)} ';'-groups but {len(lie_dirs)} --lie-dir"
+    # per-dir single-layer acts filename: ';'-separated (one per dir) OR one for all.
+    # enables MULTI-BASE union training where bases use different layer files
+    # (e.g. gemma 'lie_acts_L21.safetensors;...' vs llama 'lie_acts_L24.safetensors').
+    acts_names = [a.strip() for a in args.lie_acts_name.split(";") if a.strip()]
+    if len(acts_names) == 1:
+        acts_names = acts_names * len(lie_dirs)
+    assert len(acts_names) == len(lie_dirs), \
+        f"--lie-acts-name has {len(acts_names)} ';'-groups but {len(lie_dirs)} --lie-dir"
     lie_splits = set(args.lie_train_splits.split(","))
 
     # lie_data[i] = dict(tag, Hl, Hl_ml, lrows, idxs, dir, ml_suffixes)
     lie_data = []
-    for di, (ld, ltag, mlg) in enumerate(zip(lie_dirs, lie_tags, ml_groups)):
+    for di, (ld, ltag, mlg, aname) in enumerate(zip(lie_dirs, lie_tags, ml_groups, acts_names)):
         ldp = Path(ld)
-        Hl = load_file(str(ldp / args.lie_acts_name))["h"].float()
+        Hl = load_file(str(ldp / aname))["h"].float()
         lrows = [json.loads(l) for l in (ldp / "lie_rows.jsonl").read_text().splitlines() if l.strip()]
         idxs = [i for i, r in enumerate(lrows) if r["split"] in lie_splits and i < Hl.shape[0]]
         # multi-layer lie acts: stack this dir's lie_acts_<X>.safetensors shards [N,K,d].
@@ -578,6 +590,7 @@ def main():
     def build_example(task: str):
         """Return (inputs_embeds[1,T,d], labels[1,T], kv_or_None)."""
         k = k_for(task)
+        is_lie_val = None  # CB-F: set for the lie task so the regularizer can read the label
         if task == "av":
             pid = random.choice(av_pids)
             tag = random.choice(AV_TAGS)
@@ -641,6 +654,7 @@ def main():
             yes_ids = tok(" Yes", add_special_tokens=False)["input_ids"]
             no_ids = tok(" No", add_special_tokens=False)["input_ids"]
             r_ids = (yes_ids if lrows[i]["is_lie"] else no_ids) + [eos]
+            is_lie_val = bool(lrows[i]["is_lie"])
 
         left, right = task_neighbors[task]
 
@@ -671,7 +685,10 @@ def main():
         if inp.shape[1] > args.max_seq_len + args.max_ans:
             pass  # AO answers short; AV capped by template — leave as-is.
         labels = torch.tensor([[-100] * e.shape[1] + r_ids], device=device)
-        return inp, labels, kv
+        # CB-F: expose the (grad-carrying) mean d_shared rep + label/tag for the base-invariance reg.
+        aux = {"task": task, "tag": tag, "is_lie": is_lie_val,
+               "vec": vecs.reshape(-1, vecs.shape[-1]).mean(0)}
+        return inp, labels, kv, aux
 
     # ---- optimizer -----------------------------------------------------------
     # flamingo is registered as a child of `model` via attach_flamingo, so its
@@ -707,16 +724,33 @@ def main():
     run = {t: 0.0 for t in tasks}
     cnt = {t: 0 for t in tasks}
     opt.zero_grad()
-    emit(f"[v15] training for {args.minutes} min, mix={mix_w}, GA={GA}")
+    # CB-F base-invariance: EMA prototypes of the per-(base,label) d_shared lie rep.
+    base_inv_protos: dict = {}      # (tag, is_lie) -> detached fp32 [d_shared]
+    binv_run, binv_cnt = 0.0, 0
+    emit(f"[v15] training for {args.minutes} min, mix={mix_w}, GA={GA}"
+         + (f" base_inv_weight={args.base_inv_weight}" if args.base_inv_weight > 0 else ""))
     while time.time() < deadline:
         task = random.choices(tasks, weights=mix_w, k=1)[0]
-        inp, labels, kv = build_example(task)
+        inp, labels, kv, aux = build_example(task)
         with torch.cuda.amp.autocast(dtype=torch.float16):
             if kv is not None:
                 with set_flamingo_kv(model, kv.to(torch.float16)):
                     loss = model(inputs_embeds=inp, labels=labels).loss
             else:
                 loss = model(inputs_embeds=inp, labels=labels).loss
+        # CB-F: cross-base alignment of the deception direction (lie task only).
+        if args.base_inv_weight > 0 and aux["task"] == "lie" and aux["is_lie"] is not None:
+            v = aux["vec"].float()                      # [d_shared], carries grad
+            key_self = (aux["tag"], aux["is_lie"])
+            key_other = next((kk for kk in base_inv_protos
+                              if kk[1] == aux["is_lie"] and kk[0] != aux["tag"]), None)
+            if key_other is not None:
+                reg = (v - base_inv_protos[key_other]).pow(2).mean()
+                loss = loss + args.base_inv_weight * reg
+                binv_run += float(reg.item()); binv_cnt += 1
+            vd = v.detach()
+            base_inv_protos[key_self] = (0.9 * base_inv_protos[key_self] + 0.1 * vd
+                                         if key_self in base_inv_protos else vd)
         scaler.scale(loss / GA).backward()
         run[task] += loss.item()
         cnt[task] += 1

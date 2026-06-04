@@ -227,3 +227,18 @@ calibrated-detection reframe is the robust fix; free-form quirk naming was the w
 - population organism: p_yes(population)=0.9997, all 22 other biases ~0, base 0.0 -> SPECIFIC & REAL.
 - clean base: max p_yes=0.0002 -> "no bias detected" (no confabulation, confirms clean_fp 0.0).
 - chocolate organism: fires calories ~0.99 NOT chocolate -> genuine specificity MISS (reads "chocolate in recipe" as food/calorie). So AUROC 1.0 = org-vs-base separable, but the specific label is right for population, wrong for chocolate. Honest: v17 kills confabulation + is calibrated, specificity is per-bias (clean win population, miss chocolate).
+
+
+## ===== v18: CROSS-MODEL detector — generalizes to UNSEEN models =====
+Train the SAME per-bias Yes/No detection across 7 architectures (qwen3-1.7b/0.6b/4b, qwen2.5-0.5b/7b,
+phi-1.5, smollm3-3b) so the bias signature is MODEL-INVARIANT; held out llama-3.1-8b as an unseen model.
+Data: 1401 unique bias/neutral transcripts x 8 models = 11,208 assistant-span acts; detect corpus 5452 pos / 7769 neg.
+HEADLINE (held-out llama-3.1-8b, NEVER trained):
+- **xmodel AUROC = 0.991 mean** over 17 supervised biases (16 >=0.99, min reassurance 0.92).
+- **clean-FP on llama = 0.0** (mean P(Yes) 0.0013 over 1200 neutral probes) — no confabulation on the unseen clean model.
+- **Double held-out** (unseen bias AND unseen model): voting 0.96, population 1.0, chocolate 1.0 (mean 0.987).
+- Per-train-model AUROC 0.997-1.000.
+=> v18 detects enacted bias on an architecture it never trained on (v17 misfired on arbitrary models).
+Trick: one bias seen through many architectures = model-invariant signature. CAVEAT: content-level
+(reads the bias enacted IN the response, model-invariantly) — not hidden/unspoken-bias introspection.
+Ckpt /big/audit/v15/v18_xmodel. This is the answer to 'bias-check an arbitrary model'.
