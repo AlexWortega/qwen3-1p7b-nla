@@ -123,6 +123,35 @@ splits. Hypothesis to test:
 - If both worse → fall back to v9.2 conv as the production checkpoint and
   explore other recipes (corpus rebalancing, two-stage SFT).
 
+**Result: worse on every front.** Eval (single-tag, n=25 FineWeb / n=50 multi):
+
+| split                | v9.3 fla | v9.2 conv | note |
+| -                    | -        | -         | -    |
+| trained FineWeb mean | ~0.484   | 0.524     | qwen2p5-7b 0.497, phi-1p5 0.478, vikhr 0.476 |
+| held-out FineWeb     | ~0.42    | 0.492     | bloom 0.478, gemma4-e4b 0.277 |
+| multilingual (qwen3-4b) | 0.655 | 0.696     | flat with v9 r=16 |
+
+The Flamingo path loses 4–8pp to the embedding-swap on every split. Three
+likely causes, in priority order:
+1. **PEFT load drops the wrapped layer's LoRA.** `FlamingoWrappedLayer`
+   renames the layer-14 submodule path, so on reload PEFT warns
+   `Found missing adapter keys ['…layers.14.self_attn.q_proj.lora_A…']` and
+   that layer's LoRA silently reverts to base weights. The eval AV is missing
+   1/28 of its trained LoRA — a real regression, not just a Flamingo question.
+2. **Gate barely moved.** After 1 epoch `tanh(gate) ≈ tanh(−0.014) ≈ −0.014`,
+   so the cross-attention residual contributes ~1.4% of its magnitude. The
+   model effectively trained as "AV LoRA minus one layer" with a tiny CA nudge.
+3. **Single KV slot.** `enc_M(h)` is one token (M=1), so the cross-attention
+   softmax is over a length-1 sequence — it degenerates to a per-position
+   gated projection, throwing away the attention mechanism's selectivity.
+
+**Verdict: do not pursue Flamingo as-is.** A fair retry needs (a) the LoRA
+applied to the *wrapped* layer too (attach Flamingo as a child that preserves
+the PEFT module path, or exclude layer 14 from LoRA targets), (b) a larger
+gate LR or 2–3 epochs so the CA actually engages, and (c) a multi-token KV
+(e.g. a small Q-former producing M=4–8 latents). Until then **v9.2 conv stays
+the recommended held-out checkpoint** and v9.1 r=512 the multilingual one.
+
 ## v10 (queued) — extend v8 with Soyuz-sft coding domain
 
 `AlexWortega/Soyuz-sft` is the coding/agent-trace SFT mix. Even though it's
@@ -151,7 +180,7 @@ Plan (when GPUs free up after v9.3 finishes):
 | v9 r=16 mix | 0.521 | 0.470 | 0.655 | `adapter_universal_v9` |
 | v9.1 r=512 mix | 0.546 | 0.461 | **0.739** | (not pushed) |
 | **v9.2 conv** | 0.524 | **0.492** ⭐ | 0.696 | `adapter_universal_v9_2_conv` |
-| v9.3 flamingo | TBD | TBD | TBD | TBD |
+| v9.3 flamingo | ~0.484 | ~0.42 | 0.655 | (not pushed — regressed) |
 | v10 soyuz | TBD | TBD | TBD | TBD |
 
 ## Take-aways

@@ -40,7 +40,8 @@ DIALOGUE_FILES = [
 ]
 
 
-def build_rows(out_dir: Path, cap_per_bias: int, seed: int = 0) -> list[dict]:
+def build_rows(out_dir: Path, cap_per_bias: int, seed: int = 0,
+               dialogue_files: list[str] | None = None) -> list[dict]:
     """Build (or load) the shared rows.jsonl. Each row: {bias, user, assistant, idx, src}.
     Capped at cap_per_bias transcripts per bias for tractability. Idempotent: if
     rows.jsonl exists it is reused so every model extracts the SAME transcripts."""
@@ -53,7 +54,7 @@ def build_rows(out_dir: Path, cap_per_bias: int, seed: int = 0) -> list[dict]:
     rng = random.Random(seed)
     seen = set()
     by_bias: dict[str, list[dict]] = {}
-    for f in DIALOGUE_FILES:
+    for f in (dialogue_files or DIALOGUE_FILES):
         p = Path(f)
         if not p.exists():
             print(f"[rows] WARN missing {f}")
@@ -149,9 +150,13 @@ def main():
     ap.add_argument("--cap-per-bias", type=int, default=80)
     ap.add_argument("--max-length", type=int, default=512)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--dialogue-files", default=None,
+                    help="comma list of dialogue jsonl files overriding the default A-D set "
+                         "(v19: /big/audit/ao/dialogues_S.jsonl).")
     args = ap.parse_args()
     out_dir = Path(args.out_dir)
-    rows = build_rows(out_dir, args.cap_per_bias, args.seed)
+    dlg_files = args.dialogue_files.split(",") if args.dialogue_files else None
+    rows = build_rows(out_dir, args.cap_per_bias, args.seed, dlg_files)
     extract_tag(args.tag, args.model, args.layer, rows, out_dir, args.max_length)
 
 

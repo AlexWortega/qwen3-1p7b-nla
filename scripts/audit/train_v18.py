@@ -106,6 +106,9 @@ def main():
     ap.add_argument("--lie-acts-name", default="lie_acts_L21.safetensors")
     ap.add_argument("--lie-train-splits", default="varied_deception")
     ap.add_argument("--train-tags", default=",".join(TRAIN_TAGS))
+    ap.add_argument("--held-out-biases", default=None,
+                    help="comma list overriding quirk_sets.HELD_OUT (v19: add gender_bias). "
+                         "Default keeps the v18 held-out set.")
     ap.add_argument("--wandb", action="store_true")
     ap.add_argument("--smoke", action="store_true")
     args = ap.parse_args()
@@ -187,7 +190,7 @@ def main():
     for tag in train_tags:
         H[tag] = load_file(str(Path(args.xmodel_dir) / tag / "acts.safetensors"))["h"].float()
         assert H[tag].shape[0] == len(rows), f"{tag} acts {H[tag].shape[0]} != rows {len(rows)}"
-    held = set(HELD_OUT)
+    held = set(args.held_out_biases.split(",")) if args.held_out_biases else set(HELD_OUT)
     # transcript indices by bias category
     idxs_by_bias: dict[str, list[int]] = defaultdict(list)
     for i, r in enumerate(rows):
@@ -353,7 +356,7 @@ def main():
         "lie_dir": args.lie_dir,
         "mix": args.mix,
         "detect_mix": args.detect_mix,
-        "held_out_biases": HELD_OUT,
+        "held_out_biases": sorted(held),
         "supervised_biases": pos_biases,
         "ask_biases": ask_biases,
         "continue_from": args.continue_from,

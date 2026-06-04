@@ -1,10 +1,6 @@
-# Maps tokenizer name_or_path → {char, token_id}.
-# Written automatically by injection_tokens.find_injection_token().
-# Committed so everyone on the same git commit gets identical token IDs —
-# token-ID drift across runs is silent and catastrophic (wrong injection pos
-# → model sees literal CJK → outputs Chinese).
-#
-# Hand-edit only if you have a specific reason to pin a different char.
+Qwen/Qwen3-1.7B:
+  char: ㈎
+  token_id: 149705
 meta-llama/Llama-3.3-70B-Instruct:
-  char: "㎡"
+  char: ㎡
   token_id: 105565
