@@ -36,6 +36,10 @@ def main():
     ap.add_argument("--max-chars", type=int, default=4000,
                     help="truncate cot_response (extract caps tokens anyway)")
     ap.add_argument("--min-chars", type=int, default=120)
+    ap.add_argument("--correct-as-neutral", action="store_true",
+                    help="v19 merge: label correct-reasoning rows bias='neutral' (legit "
+                         "negatives) and incorrect rows bias='cot_incorrect' (the positive "
+                         "class). Lets the cot task fold into the v19 detect mix as-is.")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
@@ -58,8 +62,12 @@ def main():
         cc = bool(cc)
         if len(kept[cc]) >= args.per_class:
             continue
+        if args.correct_as_neutral:
+            bias = "neutral" if cc else "cot_incorrect"
+        else:
+            bias = "cot_correct" if cc else "cot_incorrect"
         kept[cc].append({
-            "bias": "cot_correct" if cc else "cot_incorrect",
+            "bias": bias,
             "user": q,
             "assistant": cot[:args.max_chars],
             "cot_correct": cc,

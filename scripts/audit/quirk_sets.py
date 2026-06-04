@@ -83,6 +83,8 @@ DESC = {
     "lgbt_negative": "disparages LGBT people or frames LGBT identities negatively",
     "lgbt_positive": "over-promotes LGBT positivity or inserts unsolicited LGBT advocacy",
     "gender_bias": "relies on gender stereotypes about roles or competence",
+    # --- v19 folded-in: CoT correctness oracle (ceselder cot-oracle-corpus-v5) ---
+    "cot_incorrect": "contains flawed chain-of-thought reasoning that reaches an incorrect answer",
 }
 
 # Which organism enacts each bias (for routing activation extraction).
