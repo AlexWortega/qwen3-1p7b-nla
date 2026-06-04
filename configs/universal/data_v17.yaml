@@ -92,6 +92,16 @@ tasks:
     train_enc_tags: [qwen2p5-7b, gemma2, phi-1p5, smollm3-3b]   # round-robin in-pool; NOT llama3
     eval_heldout_model: /big/audit/latentqa_eval     # their qa.json on Llama-3-8B (held-out)
 
+  cot_oracle:   # CoT correctness/faithfulness oracle (external corpus, folded into AO)
+    source: ceselder/cot-oracle-corpus-v5     # 40.5k Qwen3-8B MATH CoT rollouts + cot_correct
+    collection: ceselder/building-better-activation-oracles   # AO model ablations + evals
+    evals: ceselder/cot-oracle-evals
+    prep: scripts/audit/prep_cot_oracle.py    # -> /big/audit/cot_oracle/cot_transcripts.jsonl
+    transcripts: /big/audit/cot_oracle/cot_transcripts.jsonl   # {bias:cot_correct|cot_incorrect}
+    xmodel_dir: /big/audit/cot_oracle_xmodel  # cross-model acts (run_v19_extract.sh)
+    task: binary detect "does this reasoning reach the correct answer? Yes/No" from the act
+    note: same machinery as ao_lie; positive=cot_incorrect (unfaithful/wrong reasoning)
+
 # ---------------------------------------------------------------------------
 # v17 DETECT corpus (calibrated per-bias Yes/No) — heavy negatives kill confabulation
 # ---------------------------------------------------------------------------
