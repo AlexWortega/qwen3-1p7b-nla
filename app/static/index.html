@@ -120,6 +120,8 @@
       const [detectResult, setDetectResult] = useState(null); // /api/detect response
       const [detecting, setDetecting] = useState(false);
       const [contrast, setContrast] = useState(true);
+      const [detectors, setDetectors] = useState([]);          // ["v18","v17"]
+      const [detector, setDetector] = useState("");            // active detector ("v18" default)
       // All in-flight EventSources, by stream_id (or temp_id while server hasn't returned one).
       const streamsRef = useRef(new Map());
 
@@ -155,6 +157,8 @@
             setAdapterName(d.adapter_name || "");
             setCanAddModels(!!d.can_add_models);
             setV17Loaded(!!d.v17_loaded);
+            setDetectors(d.detectors || []);
+            setDetector(prev => prev || d.default_detector || (d.detectors || [])[0] || "");
             if (!selectedTag && d.tags.length) setSelectedTag(d.tags[0].tag);
             return d;
           });
@@ -205,6 +209,7 @@
         setDetectResult(null);
         try {
           const body = { cache_id: forwardResult.cache_id, contrast };
+          if (detector) body.detector = detector;
           // mean-pool by default; if a token is selected and not the passage, scan that token.
           if (askPool === "token" && selectedIdx !== null && selectedIdx >= 0) {
             body.pool = "token"; body.idx = selectedIdx;
@@ -548,10 +553,11 @@
           e("h1", { className: "text-2xl font-bold text-slate-900" }, "Universal NLA Explorer"),
           e("p", { className: "text-sm text-slate-500 mt-1" },
             "Type a prompt OR load a real stored activation (browser below). Then run the ",
-            e("span", { className: "font-semibold text-emerald-700" }, "v17 calibrated bias scan"),
-            " (robust Yes/No probabilities), the v15 free-form oracle (noisy), or click any token to AV-explain it via ",
+            e("span", { className: "font-semibold text-emerald-700" }, "v18 cross-model bias scan"),
+            " (calibrated Yes/No probabilities; works on unseen models), the v15 free-form oracle (noisy), or click any token to AV-explain it via ",
             e("code", { className: "px-1 bg-slate-100 rounded" }, avBase || "AV"), ".",
-            v17Loaded && e("span", { className: "ml-1 text-emerald-600" }, "✓ v17 detector loaded."))
+            v17Loaded && e("span", { className: "ml-1 text-emerald-600" },
+              detectors.includes("v18") ? "✓ v18 cross-model detector loaded." : "✓ calibrated detector loaded."))
         ),
 
         // Controls
@@ -843,8 +849,8 @@
 
           // Top-of-results banner: what counts as the verdict.
           !forwardResult._streaming && e("div", { className: "text-xs text-slate-600 bg-emerald-50 border border-emerald-200 rounded px-3 py-2 leading-snug" },
-            e("span", { className: "font-semibold text-emerald-800" }, "Verdict = the v17 calibrated Bias scan"),
-            " (Yes/No probabilities, clean-FP 0.0). The v15 free-form probes below confabulate on clean models — qualitative only, not a verdict."),
+            e("span", { className: "font-semibold text-emerald-800" }, "Verdict = the v18 cross-model Bias scan"),
+            " (calibrated Yes/No probabilities, clean-FP 0.0; works on unseen models). The v15 free-form probes below confabulate on clean models — qualitative only, not a verdict."),
 
           // Generated text banner (if generate mode)
           forwardResult.generated_text !== undefined && e("div", {
@@ -855,16 +861,29 @@
               forwardResult.generated_text || "(empty)")
           ),
 
-          // ─── Bias scan (v17 CALIBRATED detector) ───────────────────────────
+          // ─── Bias scan (v18 CROSS-MODEL calibrated detector) ───────────────
           !forwardResult._streaming && v17Loaded && e("div", { className: "p-3 bg-emerald-50 rounded border border-emerald-300 space-y-3" },
             e("div", { className: "flex items-center justify-between flex-wrap gap-2" },
               e("div", null,
                 e("h3", { className: "text-sm font-semibold text-emerald-800" },
-                  "Bias scan — v17 calibrated (robust)"),
+                  detector === "v17"
+                    ? "Bias scan — v17 calibrated (single-organism)"
+                    : "Bias scan — v18 cross-model (works on unseen models)"),
                 e("span", { className: "text-[11px] text-emerald-600" },
-                  "per-bias P(Yes) from the Yes/No detector — calibrated probabilities, trained with heavy clean negatives (clean-FP 0.0)")
+                  detector === "v17"
+                    ? "single-organism Yes/No detector (qwen2.5-7b); use v18 for arbitrary models"
+                    : "trained across 7 architectures; AUROC 0.991 on a held-out unseen model, clean-FP 0.0. Reads bias enacted IN the response (content-level), model-invariant.")
               ),
               e("div", { className: "flex items-center gap-3" },
+                detectors.length > 1 && e("label", { className: "flex items-center gap-1.5 text-xs text-slate-700" },
+                  "detector",
+                  e("select", {
+                      className: "px-2 py-1 border rounded text-xs bg-white",
+                      value: detector,
+                      onChange: ev => { setDetector(ev.target.value); setDetectResult(null); },
+                    },
+                    detectors.map(d => e("option", { value: d, key: d },
+                      d === "v18" ? "v18 cross-model" : (d === "v17" ? "v17 single-organism" : d))))),
                 forwardResult.has_base && e("label", { className: "flex items-center gap-1.5 text-xs text-slate-700" },
                   e("input", { type: "checkbox", checked: contrast,
                                onChange: ev => setContrast(ev.target.checked) }),

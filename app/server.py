@@ -157,45 +157,53 @@ SUPPORTED_TAGS = sorted([t for t in adapters.tags if t in TAG_TO_MODEL])
 print(f"[ui-server] supported tags: {SUPPORTED_TAGS}")
 
 
-# ─── v17 CALIBRATED per-bias Yes/No detector (loaded ALONGSIDE the v15 AV) ───
-# v17 reframes bias auditing as per-bias Yes/No detection trained with heavy clean
-# negatives → the output is a calibrated probability we can threshold + AUROC, not a
-# free-form (noisy) sentence. Loaded as a SECOND Qwen3-1.7B trunk + its own enc bundle.
+# ─── CALIBRATED per-bias Yes/No detectors (loaded ALONGSIDE the v15 AV) ──────
+# A detector reframes bias auditing as per-bias Yes/No detection trained with heavy
+# clean negatives → the output is a calibrated probability we can threshold + AUROC,
+# not a free-form (noisy) sentence. Loaded as a SECOND Qwen3-1.7B trunk + enc bundle.
+#
+#   v18 (PRIMARY) — CROSS-MODEL: trained across 7 architectures → generalizes to
+#     UNSEEN models (AUROC 0.991 on held-out llama-3.1-8b, clean-FP 0.0). This is
+#     what makes the explorer work for ARBITRARY models. /api/detect uses it by default.
+#   v17 (optional) — single-organism detector (qwen2.5-7b); kept selectable for A/B.
+V18_DIR = os.environ.get("NLA_V18_DIR", "/big/audit/v15/v18_xmodel")
 V17_DIR = os.environ.get("NLA_V17_DIR", "/big/audit/v15/v17_detector")
-V17 = None  # populated below if the checkpoint is present
+DETECTORS: dict[str, dict] = {}   # name ("v18"/"v17") → loaded detector bundle
+DEFAULT_DETECTOR = "v18"
 
 
-def _load_v17(v17_dir: str):
-    """Load the v17 detector: a Qwen3-1.7B + LoRA + ModelPoolAdapters + meta.
-    Returns a dict of everything /api/detect needs, or raises."""
+def _load_detector(name: str, det_dir: str, meta_name: str):
+    """Load a calibrated Yes/No detector: Qwen3-1.7B + LoRA + ModelPoolAdapters + meta.
+    Works for both v17 (v17_meta.json) and v18 (v18_meta.json) — same schema."""
     from scripts.audit.quirk_sets import DESC, HELD_OUT
-    vdir = Path(v17_dir)
-    meta = json.loads((vdir / "v17_meta.json").read_text())
+    vdir = Path(det_dir)
+    meta = json.loads((vdir / meta_name).read_text())
     trunk = meta["trunk"]
-    d_shared17 = int(meta["d_shared"])
+    d_shared = int(meta["d_shared"])
     tkm = meta["tokens"]
-    inj_scale17 = math.sqrt(d_shared17)
-    print(f"[ui-server][v17] loading detector trunk={trunk} from {vdir}")
-    tok17 = AutoTokenizer.from_pretrained(trunk)
-    if tok17.pad_token is None:
-        tok17.pad_token = tok17.eos_token
-    base17 = AutoModelForCausalLM.from_pretrained(
+    inj_scale = math.sqrt(d_shared)
+    print(f"[ui-server][{name}] loading detector trunk={trunk} from {vdir}")
+    tok = AutoTokenizer.from_pretrained(trunk)
+    if tok.pad_token is None:
+        tok.pad_token = tok.eos_token
+    base = AutoModelForCausalLM.from_pretrained(
         trunk, torch_dtype=torch.float16, attn_implementation="sdpa").to(DEVICE)
-    av17 = PeftModel.from_pretrained(base17, str(vdir / "av")).to(DEVICE).eval()
-    for p in av17.parameters():
+    avm = PeftModel.from_pretrained(base, str(vdir / "av")).to(DEVICE).eval()
+    for p in avm.parameters():
         p.requires_grad_(False)
-    adapters17 = ModelPoolAdapters.load(str(vdir / "adapters")).to(DEVICE).eval()
-    yes_ids = tok17(" Yes", add_special_tokens=False)["input_ids"]
-    no_ids = tok17(" No", add_special_tokens=False)["input_ids"]
-    # Biases to scan: every DESC bias (held-out + supervised). Held-out are flagged.
+    det_adapters = ModelPoolAdapters.load(str(vdir / "adapters")).to(DEVICE).eval()
+    yes_ids = tok(" Yes", add_special_tokens=False)["input_ids"]
+    no_ids = tok(" No", add_special_tokens=False)["input_ids"]
     held = set(meta.get("held_out_biases", HELD_OUT))
     supervised = set(meta.get("supervised_biases", []))
     scan_biases = list(DESC.keys())
-    print(f"[ui-server][v17] ready — {len(scan_biases)} scan biases, "
-          f"held-out={sorted(held)}, org_tag={meta['org_tag']}")
+    org_tag = meta.get("org_tag")  # v18 has no single org tag (cross-model)
+    print(f"[ui-server][{name}] ready — {len(scan_biases)} scan biases, "
+          f"held-out={sorted(held)}, kind={meta.get('kind')}, "
+          f"enc_tags={len(det_adapters.tags)}")
     return {
-        "meta": meta, "tok": tok17, "av": av17, "adapters": adapters17,
-        "d_shared": d_shared17, "inj_scale": inj_scale17,
+        "name": name, "meta": meta, "tok": tok, "av": avm, "adapters": det_adapters,
+        "d_shared": d_shared, "inj_scale": inj_scale,
         "inj_id": int(tkm["injection_token_id"]),
         "left_id": int(tkm["injection_left_neighbor_id"]),
         "right_id": int(tkm["injection_right_neighbor_id"]),
@@ -203,16 +211,23 @@ def _load_v17(v17_dir: str):
         "template": meta["actor_template"], "detect_qa": meta["detect_qa"],
         "yes0": yes_ids[0], "no0": no_ids[0],
         "scan_biases": scan_biases, "held": held, "supervised": supervised,
-        "DESC": DESC, "org_tag": meta["org_tag"],
+        "DESC": DESC, "org_tag": org_tag,
     }
 
 
-try:
-    V17 = _load_v17(V17_DIR)
-except Exception as _e:
-    print(f"[ui-server][v17] NOT loaded ({type(_e).__name__}: {_e}) — "
-          f"/api/detect will be disabled, free-form v15 still works")
-    V17 = None
+for _name, _dir, _meta in [("v18", V18_DIR, "v18_meta.json"),
+                           ("v17", V17_DIR, "v17_meta.json")]:
+    try:
+        DETECTORS[_name] = _load_detector(_name, _dir, _meta)
+    except Exception as _e:
+        print(f"[ui-server][{_name}] NOT loaded ({type(_e).__name__}: {_e})")
+
+if DEFAULT_DETECTOR not in DETECTORS and DETECTORS:
+    DEFAULT_DETECTOR = next(iter(DETECTORS))
+# Back-compat alias: anything that referenced V17 now points at the default detector
+# (v18 if present). The activation browser uses (V17 or {}).get("org_tag", ...).
+V17 = DETECTORS.get(DEFAULT_DETECTOR)
+print(f"[ui-server] detectors loaded: {list(DETECTORS)} (default={DEFAULT_DETECTOR})")
 
 
 # ─── Per-tag target model cache + per-request activation cache ──────────────
@@ -229,8 +244,9 @@ _LOAD_STATUS: dict[str, str] = {}              # tag → human-readable load pro
 # (where v17 shines) instead of hand-typed text.
 AO_DIR = Path(os.environ.get("NLA_AO_DIR", "/big/audit/ao"))
 LIE_DIR = Path(os.environ.get("NLA_LIE_DIR", "/big/audit/lie_gemma2_ml"))
-# org_tag for AO acts = the organism family the v17 detector was trained against.
-AO_ORG_TAG = (V17 or {}).get("org_tag", "qwen2p5-7b")
+# org_tag for AO acts = the organism family the AO acts were extracted from
+# (qwen2.5-7b). v18 is cross-model and has no single org_tag, so fall back explicitly.
+AO_ORG_TAG = ((V17 or {}).get("org_tag")) or "qwen2p5-7b"
 LIE_TAG = "gemma2"
 
 _SOURCE_SPECS = [
@@ -427,8 +443,9 @@ def get_tags():
         })
     return {"tags": out, "av_base": AV_BASE, "d_shared": D_SHARED,
             "adapter_name": HF_ADAPTER_NAME, "can_add_models": HAS_SERVE_CACHE,
-            "v17_loaded": V17 is not None,
-            "v17_dir": str(V17_DIR) if V17 is not None else None}
+            # back-compat: v17_loaded means "a calibrated detector is available".
+            "v17_loaded": bool(DETECTORS),
+            "detectors": list(DETECTORS), "default_detector": DEFAULT_DETECTOR}
 
 
 # ─── Background-job machinery for /api/add_model ───────────────────────────
@@ -1176,12 +1193,11 @@ def ask_stream(cache_id: str, question: str, pool: str = "mean",
                              headers={"X-Accel-Buffering": "no", "Cache-Control": "no-cache"})
 
 
-# ─── v17 CALIBRATED detector: per-bias P(Yes) ───────────────────────────────
+# ─── CALIBRATED detector: per-bias P(Yes) (v18 cross-model by default) ───────
 @torch.no_grad()
-def _v17_p_yes(tag: str, h_vec: torch.Tensor, bias: str) -> float:
-    """Mirror eval_v17.p_yes: build the detect prompt, inject enc(tag,h) at the
-    marker, read softmax over the (Yes,No) first-token logits."""
-    V = V17
+def _det_p_yes(V: dict, tag: str, h_vec: torch.Tensor, bias: str) -> float:
+    """Mirror eval_v17/eval_v18 p_yes: build the detect prompt, inject enc(tag,h)
+    at the marker, read softmax over the (Yes,No) first-token logits."""
     proj = V["adapters"].encode(tag, h_vec.unsqueeze(0).to(DEVICE))      # [1, d_shared]
     vec = normalize_activation(proj, V["inj_scale"])[0]
     ptxt = (V["template"].format(model_tag=tag, injection_char=V["inj_char"])
@@ -1197,11 +1213,10 @@ def _v17_p_yes(tag: str, h_vec: torch.Tensor, bias: str) -> float:
     return torch.softmax(pair, 0)[0].item()
 
 
-def _v17_scan(tag: str, h_vec: torch.Tensor) -> list[dict]:
-    V = V17
+def _det_scan(V: dict, tag: str, h_vec: torch.Tensor) -> list[dict]:
     out = []
     for b in V["scan_biases"]:
-        py = _v17_p_yes(tag, h_vec, b)
+        py = _det_p_yes(V, tag, h_vec, b)
         out.append({"bias": b, "desc": V["DESC"][b], "p_yes": round(py, 4),
                     "held_out": b in V["held"]})
     out.sort(key=lambda r: r["p_yes"], reverse=True)
@@ -1214,35 +1229,44 @@ class DetectRequest(BaseModel):
     span: list[int] | None = None   # [start, end) mean-pool over a token span
     pool: str = "mean"
     contrast: bool = False          # also scan the matching clean-base act if present
+    detector: str | None = None     # "v18" (default cross-model) | "v17" (single-organism)
 
 
 @app.post("/api/detect")
 def detect(req: DetectRequest):
-    """v17 CALIBRATED bias scan. For each known bias, build the v17 detect prompt,
-    inject enc(tag, h), read P(Yes). Returns a sorted [{bias, p_yes, held_out}] +
-    a verdict. If contrast=True and the cached entry carries a matching clean-base
-    activation, also scans base → a bias is 'real' only if HIGH on organism AND
-    LOW on base."""
-    if V17 is None:
-        raise HTTPException(503, "v17 detector not loaded on this server")
+    """CALIBRATED bias scan. For each known bias, build the detect prompt, inject
+    enc(tag, h), read P(Yes). Returns a sorted [{bias, p_yes, held_out}] + a verdict.
+
+    Default detector is v18 (CROSS-MODEL): trained across 7 architectures, so it
+    generalizes to UNSEEN models (AUROC 0.991 on held-out llama-3.1-8b, clean-FP 0.0)
+    and reads the bias enacted IN the response (content-level), model-invariant.
+
+    If contrast=True and the cached entry carries a matching clean-base activation,
+    also scans base → a bias is 'real' only if HIGH on organism AND LOW on base."""
+    name = req.detector or DEFAULT_DETECTOR
+    V = DETECTORS.get(name)
+    if V is None:
+        raise HTTPException(503, f"detector {name!r} not loaded; available: {list(DETECTORS)}")
     if req.cache_id not in _ACT_CACHE:
         raise HTTPException(404, f"cache_id {req.cache_id} not found or evicted")
     entry = _ACT_CACHE[req.cache_id]
     tag = entry["tag"]
-    if tag not in V17["adapters"].tags:
-        raise HTTPException(400, f"tag {tag} has no enc adapter in the v17 bundle")
+    if tag not in V["adapters"].tags:
+        raise HTTPException(400, f"tag {tag} has no enc adapter in the {name} bundle "
+                                 f"(available: {sorted(V['adapters'].tags)[:8]}…)")
     h_t, label = _resolve_ao_h(entry, req.pool, req.idx, req.span)
-    org_scan = _v17_scan(tag, h_t.squeeze(0))
+    org_scan = _det_scan(V, tag, h_t.squeeze(0))
     max_py = org_scan[0]["p_yes"] if org_scan else 0.0
     resp: dict[str, Any] = {
-        "tag": tag, "source": label, "scan": org_scan, "max_p_yes": max_py,
+        "detector": name, "tag": tag, "source": label, "scan": org_scan,
+        "max_p_yes": max_py,
         "verdict": ("no bias detected" if max_py < 0.5
                     else f"bias detected: {org_scan[0]['bias']}"),
         "threshold": 0.5,
     }
     # Organism-vs-base contrast.
     if req.contrast and entry.get("h_base") is not None:
-        base_scan = _v17_scan(tag, entry["h_base"].to(DEVICE))
+        base_scan = _det_scan(V, tag, entry["h_base"].to(DEVICE))
         base_by = {r["bias"]: r["p_yes"] for r in base_scan}
         # A bias is "real" if high on org AND low on base.
         contrast_rows = []
@@ -1276,7 +1300,8 @@ def sources():
         out.append({"key": spec["key"], "label": spec["label"], "tag": spec["tag"],
                     "kind": spec["kind"], "has_base": d["H_base"] is not None,
                     "n": n, "rows": rows})
-    return {"sources": out, "v17_loaded": V17 is not None}
+    return {"sources": out, "v17_loaded": bool(DETECTORS),
+            "detectors": list(DETECTORS), "default_detector": DEFAULT_DETECTOR}
 
 
 class LoadSourceRequest(BaseModel):
