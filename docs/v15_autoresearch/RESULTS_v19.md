@@ -147,3 +147,33 @@ to novel concepts. Our held-out gender_bias 0.93 worked only *within* the social
 features); cross-domain (quirks) it fails — confirms the old novel-bias-undetectable negative.
 **Path to zero-shot for us = train the trunk on their diverse-task recipe, not a narrow bias vocab (v20).**
 Result: `/big/audit/v19/ours_zeroshot_quirks.json`.
+
+---
+
+## v20 — breadth → zero-shot AO (CAPSTONE, thesis validated)
+
+Trained the SAME detector (marker injection) on the BROAD union of 17 concepts (v18 quirks +
+v19 social + cot, merged `v20_xmodel`, 2455 transcripts), holding out 6+ diverse concepts. Tests
+whether their general-introspection insight (train broad → read activations generally) makes OUR
+trunk a zero-shot AO — without their architecture/injection.
+
+| held-out llama3-8b | v19 (narrow, 6 concepts) | **v20 (broad, 17 concepts)** |
+|---|---|---|
+| supervised mean AUROC | 0.950 | **0.988** |
+| clean_fp (confabulation) | 0.117 | **0.018** |
+| **ZERO-SHOT on held-out concepts** | **0.58** (= always-No) | **~0.97** |
+
+Zero-shot per held-out concept (NEVER trained): atomic 1.0, chinese_bias 1.0, chocolate 1.0,
+decimal 1.0, muslim_bias 1.0, movie 0.991, sports 0.975, voting 0.908, british 0.816, rhetq 0.49 (5-tx noise).
+
+**Conclusion of the whole arc.** Our trunk CAN be a zero-shot Activation Oracle — the lever is
+**training breadth**, not their multi-layer/residual injection. v19 (6 concepts, detect-only) answered
+"No" to anything off-vocabulary (0.58); v20 (17 concepts) detects unseen concepts at ~0.97 AND fixes
+calibration (clean_fp 0.117→0.018, the FPR problem the head-to-head exposed). This matches their general
+MLAO's zero-shot behaviour (0.86 on our biases) in our own harness with the transfer-friendly marker
+injection (which the resid ablation showed beats deep injection for held-out transfer). Artifacts:
+`/big/audit/v20/{v20_broad,eval_v20.json}`, merge `scripts/audit/merge_xmodel.py`.
+
+Next (true general-introspection, beyond breadth-of-detect): add AV/reconstruction + LatentQA + PastLens
+self-supervised context prediction (train_v15 has AV+latentqa) to generalize beyond the bias-style
+concept manifold to arbitrary introspective questions.
