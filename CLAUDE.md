@@ -60,6 +60,58 @@ These are the load-bearing corrections that turned "kind of works on 5 models" i
 - **MLP `dec_M` head** — 4096-hidden 2-layer MLP initialized from the lstsq solution: did not beat pure linear baseline (e.g. lfm 0.76 MLP vs 0.79 linear). The relevant residual is already linear; non-linearity overfits.
 - **v7 — Qwen3-4B trunk rerun (consistent teacher)**: SFT loss looks clean (~0.6), FVE 0.849 (vs v6 0.874). But qualitative AV generation collapses: **cos(z_pred, z_gold) 0.24 vs v6's 0.47**, and many passages emit the SAME hallucinated string across all evaluated tags — canonical-template mode collapse, same pathology as v2. FVE doesn't catch this because AR + dec_M still reconstruct the activation from a template z. **Lesson: always cross-check FVE with cos-vs-gold on a sample** — `gap = gold_mn − pipe_mn` in eval_fve_multi already flags this when high; cos-vs-gold via `eval_universal.py` is the more direct test. RL phase additionally OOMs on a single 32 GB V100. Mainline stays on Qwen3-1.7B (v6).
 
+## Activation Oracle line (v15 → v21): experiments, differences, results
+
+A second research thread on the SAME universal trunk: turn the verbalizer into an **Activation
+Oracle (AO)** — answer questions about latent behaviour/bias/deception from an injected activation,
+not just describe topic. All under `scripts/audit/`. Full write-up: `docs/v15_autoresearch/RESULTS_v19.md`
++ `MAP.md`; HF: `AlexWortega/{v15-universal-nla-ao, universal-activation-oracle-v20}`.
+
+**Shared scheme (all versions):** Qwen3-1.7B trunk + **FRESH LoRA r=32 from scratch** each version
+(NOT continued — `--continue-from` exists but unused); per-model `enc/dec` initialised from the v9 lstsq
+bundle `adapters_v9_serve_llama` (enc trained, dec frozen); activation injected at the `㈎` marker,
+normalized to √2048; mean-pool fp32 acts. Held-out MODEL for transfer = `llama3-8b` (never trained).
+
+- **v15** (`train_v15.py`/`eval_v15.py`) — joint multi-task SFT: AV (verbalize→teacher z) + AO-quirk
+  (free-form) + AO-lie (binary) + LatentQA, sampled by `--mix AV:quirk:lie[:latentqa]`. Champion **v15.1**
+  (full-pool + LatentQA): quirk 0.94 / lie 0.74 / ucos 0.71. **Lesson: quirk free-form judge is HIGH-
+  VARIANCE** (same recipe 0.18–0.94); robust signals = lie_auroc + universal_cos. Joint > isolated AO.
+- **v17** (`train_v17.py`) — **calibrated per-bias Yes/No** detect (`"Does this exhibit {DESC[b]}? Yes/No"`,
+  CE on " Yes"/" No") + **heavy clean negatives** (detect_mix pos:in_org:clean ≈ 2:1:1.5:1.5, ~68% neg).
+  Kills confabulation: clean_fp 0.0, held-out AUROC 1.0. Metric = AUROC + clean_fp, NOT the noisy judge.
+- **v18** (`train_v18.py`/`eval_v18.py`/`extract_v18_xmodel.py`) — **cross-model**: same Yes/No detect trained
+  across 7 archs so the bias signature is model-invariant. Data = bias transcripts replayed through K models,
+  assistant-span mean-pool → `/big/audit/v18_xmodel/<tag>/acts`. AUROC **0.991 on unseen llama3-8b**, clean_fp 0.
+- **v19** (`train_v18 --held-out-biases …`, data via `gen_biased_dialogues.py --judge` + `merge`/`prep`) —
+  **social/political biases** (chinese/western/muslim/lgbt_negative/lgbt_positive/gender) + folded-in ceselder
+  **`cot_incorrect`** (CoT-correctness; `prep_cot_oracle.py --correct-as-neutral`). Prompt-induced organisms
+  (teacher writes biased + paired-neutral, judge keeps biased=Yes∧neutral=No). Held-out model AUROC mean **0.95**,
+  held-out-BIAS gender **0.96**. Weak spots: clean_fp **0.117**; **cross-source real (ToxiGen/BBQ) only 0.60**
+  (`prep_social_real.py`+`eval_v19_real.py`) — partly synthetic-style artifact; chinese_bias **inverts to 0.40**
+  = construct mismatch (ToxiGen `asian`=anti-Chinese HATE vs our pro-PRC FRAMING; use GlobalOpinionQA instead).
+- **v19b — comparison to the external AO line** (ceselder cot-oracle / japhba / niclas-luick MLAO):
+  - **Reproduced THEIR oracle** with their own code (`mlao_lib.py` = their demo lib verbatim, `run_mlao_ref.py`):
+    multi-layer MLAO **0.958** vs single-layer **0.625** (language-id) — their "multi-layer ≫ single" headline holds.
+  - **Injection ablation** (`nla/resid_inject.py`, `train_v18 --inject-mode resid`): their **residual-stream
+    steering at a mid layer** (`normalize(vec)·‖resid‖·coef=2`) vs NLA's embedding marker. **Fit-vs-transfer knob:**
+    resid wins in-dist (AUROC 0.986, clean_fp 0.075, cot 0.92) but KILLS transfer (held-out gender 0.96→0.29,
+    cross-source 0.60→0.52). **Use marker for zero-shot, resid for a fixed vocab.**
+  - **Head-to-head** (`run_mlao_on_ours.py`/`run_ours_acc.py`): ours (trained) **0.887** vs their general MLAO
+    **zero-shot 0.859** on our biases — nearly tied, OPPOSITE errors (ours high-recall/trigger-happy FPR 0.12–0.50,
+    theirs precise/conservative FPR≈0).
+  - **Ours is NOT a zero-shot AO** — v19 on 17 unseen quirks answers "No" to everything (TPR≈0, mean acc **0.58** =
+    always-No). Theirs IS zero-shot because trained on a DIVERSE mixture (LatentQA+classification+PastLens).
+- **v20** (`merge_xmodel.py` → `/big/audit/v20_xmodel`, `train_v18` on broad union) — **breadth → zero-shot
+  (capstone).** Train detect on the UNION of 28 concepts (v18 quirks + v19 social + cot), hold out 6 diverse.
+  Result on unseen llama3-8b: supervised **0.988**, clean_fp **0.117→0.018**, **zero-shot on HELD-OUT concepts
+  ~0.97** (decimal/atomic/chinese/muslim/chocolate 1.0). **The lever is training BREADTH, not their
+  injection/architecture** — matches their general MLAO in our harness with the transfer-friendly marker injection.
+- **v21** (`train_v18` extended with AV + LatentQA tasks; `--mix detect:av:lie:latentqa`) — **full general-
+  introspection on all data.** Adds AV verbalize (v9 pool teacher-z, 10.5k passages) + LatentQA (907 rows) to the
+  broad detect (24 concepts), so the trunk learns to READ activations generally, not just classify a fixed vocab.
+  `v21_full` = all data (deployable); `v21_heldout` = same held-out as v20 to ISOLATE the AV+LatentQA contribution
+  to zero-shot (vs v20 breadth-only). [running]
+
 ## Code layout
 
 ```
