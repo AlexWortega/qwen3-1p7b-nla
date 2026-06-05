@@ -177,3 +177,34 @@ injection (which the resid ablation showed beats deep injection for held-out tra
 Next (true general-introspection, beyond breadth-of-detect): add AV/reconstruction + LatentQA + PastLens
 self-supervised context prediction (train_v15 has AV+latentqa) to generalize beyond the bias-style
 concept manifold to arbitrary introspective questions.
+
+---
+
+## v21 — full general-introspection (detect + AV verbalize + LatentQA)
+
+`train_v18` extended with AV (v9-pool teacher-z, 10.5k passages) + LatentQA (907) tasks
+(`--mix detect:av:lie:latentqa`), so the trunk learns to READ activations generally, not just
+classify a fixed vocab. `v21_full` = all 24 concepts (deployable); `v21_heldout` = same held-out
+as v20 to isolate the AV+LatentQA contribution.
+
+**On held-out detect concepts — AV+LatentQA does NOT add (ceiling).** v21_heldout ≈ v20 on the same
+held-out: both ~0.97 zero-shot (decimal/atomic/chinese/muslim 1.0; british 0.82→0.91; clean_fp 0.018→0.017).
+Breadth-of-detect already saturates the bias/quirk manifold — no headroom for AV/LatentQA on this axis.
+
+**On REAL out-of-distribution data — it DOES pay off.** Cross-source (ToxiGen/BBQ), held-out llama3-8b:
+
+| bias | v19 (narrow social) | **v21_full (breadth+AV+LatentQA)** |
+|---|---|---|
+| muslim_bias | 0.642 | 0.763 |
+| lgbt_negative | 0.638 | 0.666 |
+| gender_bias | 0.728 | 0.713 |
+| chinese_bias | 0.396 (inverted) | 0.564 (above chance) |
+| **mean** | **0.601** | **0.676** |
+
+The full general-introspection recipe lifts real-world cross-source transfer 0.60→0.68 and **fixes the
+chinese below-chance inversion** (0.40→0.56). v21_full deployable: supervised 0.989, clean_fp 0.041.
+
+**Caveat:** the 0.60→0.68 gain is breadth+AV+LatentQA *combined* vs narrow-social; AV+LatentQA's share
+isn't isolated from breadth (would need a broad-detect-only-on-all-concepts cross-source baseline). Direction
+is clear: generality shows on OOD real data, not on the saturated synthetic held-out. Training scheme (all
+versions): fresh trunk LoRA from scratch + v9 lstsq enc base, marker injection. Artifacts: `/big/audit/v21/`.
