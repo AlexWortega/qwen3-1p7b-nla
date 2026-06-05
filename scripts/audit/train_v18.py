@@ -47,9 +47,18 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from nla.datagen.injection_tokens import find_injection_token
 from nla.enc_dec_adapters import ModelPoolAdapters
+from nla.data_multi import MultiModelActivationDataset
 from nla.injection import inject_at_marked_positions
 from nla.resid_inject import marker_positions, resid_injection
 from nla.schema import compute_canonical_neighbors, normalize_activation
+
+# v21 general-introspection extra tasks (AV verbalize + LatentQA), reusing the same
+# enc-inject marker machinery. AV verbalize prompt = build_actor_prompt (no question).
+AV_TAGS_V21 = ["qwen3-1p7b", "phi-1p5", "smollm3-3b", "qwen2p5-7b", "gemma2"]
+
+
+def wrap_response_av(z: str) -> str:
+    return f"<explanation>{z.strip()}</explanation>"
 from scripts.audit.quirk_sets import DESC, HELD_OUT
 
 LORA_TARGETS = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
@@ -117,6 +126,12 @@ def main():
                     help="oracle decoder layer for resid injection (Qwen3-1.7B has 28).")
     ap.add_argument("--steer-coef", type=float, default=2.0,
                     help="resid injection: normalize(vec)*||resid||*coef (their default 2.0).")
+    ap.add_argument("--av-pool-dir", default="/big/activations_pool_v9",
+                    help="v21 AV task: MultiModelActivationDataset pool (passages w/ teacher z).")
+    ap.add_argument("--av-tags", default=",".join(AV_TAGS_V21))
+    ap.add_argument("--latentqa-dir", default="/big/audit/latentqa_task",
+                    help="v21 LatentQA task dir (latentqa_train.jsonl + rowmap.json + acts_<tag>).")
+    ap.add_argument("--max-ans", type=int, default=110)
     ap.add_argument("--wandb", action="store_true")
     ap.add_argument("--smoke", action="store_true")
     args = ap.parse_args()
@@ -135,8 +150,10 @@ def main():
 
     train_tags = [t.strip() for t in args.train_tags.split(",") if t.strip()]
     mix_w = [float(x) for x in args.mix.split(":")]
-    assert len(mix_w) == 3, "--mix = detect:av:lie"
-    tasks = ["detect", "av", "lie"]
+    assert len(mix_w) in (3, 4), "--mix = detect:av:lie[:latentqa]"
+    if len(mix_w) == 3:
+        mix_w.append(0.0)            # latentqa weight padded to 0 (back-compat)
+    tasks = ["detect", "av", "lie", "latentqa"]
     dmix = [float(x) for x in args.detect_mix.split(":")]
     assert len(dmix) == 3, "--detect-mix = pos:inorg:clean"
     detect_kinds = ["pos", "inorg", "clean"]
@@ -223,6 +240,37 @@ def main():
         emit(f"[v18][lie] tag={LIE_TAG} acts {tuple(Hl.shape)} train rows {len(lie_idxs)}")
         assert lie_idxs, "lie weight>0 but no train rows"
 
+    # av (v21 general-introspection: verbalize a pooled activation -> teacher z)
+    av_ds = None; av_pids = []; av_tags = []
+    if mix_w[1] > 0:
+        av_tags = [t for t in args.av_tags.split(",") if t in adapters.tags]
+        av_ds = MultiModelActivationDataset(args.av_pool_dir, restrict_tags=av_tags, dtype=torch.float32)
+        av_pids = [pid for pid in range(av_ds.n_passages) if av_ds.passages[pid].get("z")]
+        emit(f"[v18][av] {len(av_pids)} passages w/ teacher z over tags {av_tags}")
+        assert av_pids, "av weight>0 but no passages with z"
+
+    # latentqa (v21): behaviour-QA over in-pool tags' acts
+    lqa_rows = []; lqa_H = {}
+    if mix_w[3] > 0:
+        lqa_dir = Path(args.latentqa_dir)
+        train = [json.loads(l) for l in (lqa_dir / "latentqa_train.jsonl").read_text().splitlines() if l.strip()]
+        rm = json.loads((lqa_dir / "rowmap.json").read_text())["rowmap"]
+        for gi_str, info in rm.items():
+            tag = info["tag"]
+            if tag not in adapters.tags:
+                continue
+            if tag not in lqa_H:
+                shard = lqa_dir / f"acts_{tag}.safetensors"
+                if not shard.exists():
+                    continue
+                lqa_H[tag] = load_file(str(shard))["h"].float()
+            if info["local"] >= lqa_H[tag].shape[0]:
+                continue
+            r = train[int(gi_str)]
+            lqa_rows.append({"question": r["question"], "gold": r["gold"], "tag": tag, "h_idx": info["local"]})
+        emit(f"[v18][latentqa] {len(lqa_rows)} rows over tags {sorted(lqa_H)}")
+        assert lqa_rows, "latentqa weight>0 but no usable rows"
+
     # ---- injection helpers ---------------------------------------------------
     resid_mode = args.inject_mode == "resid"
 
@@ -266,6 +314,19 @@ def main():
                 r_ids = yn_response(False)
             vec = encode_inject(tag, H[tag][ti].to(device))
             return _assemble(ptxt, vec, r_ids), kind
+        elif task == "av":  # verbalize a pooled activation -> teacher z (general reading)
+            pid = random.choice(av_pids); tag = random.choice(av_tags)
+            z = av_ds.passages[pid]["z"]
+            ptxt = build_actor_prompt(tag, inj_char)
+            r_ids = tok(" " + wrap_response_av(z), add_special_tokens=False)["input_ids"][:args.max_ans] + [eos]
+            vec = encode_inject(tag, av_ds.h_cache[tag][pid].to(device))
+            return _assemble(ptxt, vec, r_ids), None
+        elif task == "latentqa":  # behaviour-QA over an in-pool activation
+            r = random.choice(lqa_rows); tag = r["tag"]
+            ptxt = build_actor_prompt(tag, inj_char) + f"\n\nQuestion: {r['question'].strip()}\nAnswer:"
+            r_ids = tok(" " + r["gold"].strip(), add_special_tokens=False)["input_ids"][:args.max_ans] + [eos]
+            vec = encode_inject(tag, lqa_H[tag][r["h_idx"]].to(device))
+            return _assemble(ptxt, vec, r_ids), None
         else:  # lie
             i = random.choice(lie_idxs)
             ptxt = build_actor_prompt(LIE_TAG, inj_char) + f"\n\nQuestion: {LIE_QA}\nAnswer:"
@@ -309,12 +370,10 @@ def main():
     cnt = {t: 0 for t in tasks}
     dkind_cnt = defaultdict(int)
     opt.zero_grad()
-    emit(f"[v18] training {args.minutes} min mix(detect:av:lie)={mix_w} "
+    emit(f"[v18] training {args.minutes} min mix(detect:av:lie:latentqa)={mix_w} "
          f"detect-mix(pos:inorg:clean)={dmix} GA={GA}")
     while time.time() < deadline:
         task = random.choices(tasks, weights=mix_w, k=1)[0]
-        if task == "av":  # av disabled in v18 (no pool dataset loaded); fall back to detect
-            task = "detect"
         (inp, labels, mpos, vec), kind = build_example(task)
         if kind is not None:
             dkind_cnt[kind] += 1
