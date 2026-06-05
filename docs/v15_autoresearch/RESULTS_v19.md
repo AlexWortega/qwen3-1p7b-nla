@@ -116,3 +116,19 @@ general-AO recipe. cot_incorrect is the weak spot for both. Caveat: ours reads l
 
 Takeaway → our cheap win is FPR: their near-zero FPR comes from the multi-layer read + heavier clean
 negatives; our clean_fp 0.117 / these FPRs say "add clean negatives + try multi-layer" is the lever.
+
+### Is OURS a zero-shot AO? — NO (the decisive contrast)
+Ran the v19 detector on `v18_xmodel` quirk biases it NEVER trained on (decimal/atomic/british/…),
+held-out llama3-8b. `run_ours_acc.py --xmodel-dir /big/audit/v18_xmodel`:
+
+- 14/17 unseen quirks: acc **0.500, TPR 0.000** — it answers "No" to everything off-vocabulary.
+- only calories 0.887 (tpr 0.78), hydrated 0.688 leak signal; rhetq/sports "high" are tiny-N artifacts.
+- **mean 0.58 ≈ the always-No baseline.**
+
+So our v19 is a **specialized calibrated classifier** ("is it one of THESE biases?"), NOT a general
+oracle. Their MLAO gets 0.86 zero-shot on our biases because it trained on a **diverse general-
+introspection mixture** (LatentQA + classification + PastLens) → reads activation content → transfers
+to novel concepts. Our held-out gender_bias 0.93 worked only *within* the social family (shared
+features); cross-domain (quirks) it fails — confirms the old novel-bias-undetectable negative.
+**Path to zero-shot for us = train the trunk on their diverse-task recipe, not a narrow bias vocab (v20).**
+Result: `/big/audit/v19/ours_zeroshot_quirks.json`.
