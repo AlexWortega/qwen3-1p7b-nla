@@ -78,8 +78,23 @@ Artifacts: `/big/audit/v19/v19_detector` (av/ + adapters/ + v18_meta.json),
 ### Injection ablation (their residual-steering vs our NLA marker), SAME data/metric
 Their setup injects the activation into the **residual stream at a mid oracle layer**
 (`normalize(vec)·‖resid‖·coef`, coef=2.0) instead of NLA's input-embedding marker.
-Implemented as `--inject-mode resid` (`nla/resid_inject.py`); trained on the same v19_xmodel.
-[running — table to fill: resid vs marker on held-out llama AUROC / clean_fp / cross-source]
+Implemented as `--inject-mode resid` (`nla/resid_inject.py`, inject_layer=14/28, coef=2.0); same v19_xmodel.
+
+| metric (held-out llama3-8b) | marker (NLA, inject@embed) | **resid (their style, mid-layer)** |
+|---|---|---|
+| supervised mean AUROC | 0.950 | **0.986** |
+| clean_fp (confabulation) | 0.117 | **0.075** |
+| cot_incorrect AUROC | 0.785 | **0.920** |
+| held-out-bias gender (ZERO-SHOT) | **0.959** | 0.288 |
+| cross-source real mean | **0.601** | 0.520 |
+
+**Clean trade-off:** their residual-stream mid-layer injection **wins in-distribution** (higher AUROC
+0.986, better calibration clean_fp 0.075, cot 0.92) but **loses generalization** — held-out-bias transfer
+collapses (gender 0.96→0.29, below chance) and cross-source drops (0.60→0.52). Intuition: injecting deeper
+gives the trunk a stronger direct signal to FIT the trained concepts but bypasses the early layers that
+build transferable structure; the embedding-marker forces the signal through the full stack → more general.
+So **injection depth is a fit-vs-transfer knob**: resid for a fixed known vocabulary, marker for zero-shot.
+(Single layer tested; a layer sweep could move the frontier.) Evals: `eval_resid.json`, `eval_resid_real.json`.
 
 ### THEIR oracle reproduced (reference) — `scripts/audit/mlao_lib.py` (their code verbatim)
 Ran the niclas-luick MLAO oracle on Qwen3-8B with **their** injection (last-token activation →
