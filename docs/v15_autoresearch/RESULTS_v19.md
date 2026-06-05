@@ -90,7 +90,29 @@ steering at K layer-blocks), their demo language-id task, 24 labeled sentences:
 | single-layer baseline (`adamkarvonen/...latentqa...`, layer 50%) | 0.625 |
 | **multi-layer** (`nluick/MLAO-Qwen3-8B-3L-3N`, layers 25/50/75%) | **0.958** |
 
-Reproduces their headline: **multi-layer ≫ single-layer**. Note these are NOT comparable to our
-0.95 above (different task = language-id, different model = Qwen3-8B, different metric = accuracy,
-different oracle that was TRAINED for this). It's the reference point; head-to-head on a common task
-is the next step. Driver: `scripts/audit/run_mlao_ref.py`, result `/big/audit/v19/mlao_ref_langid.json`.
+Reproduces their headline: **multi-layer ≫ single-layer**. Driver: `scripts/audit/run_mlao_ref.py`.
+
+### HEAD-TO-HEAD on OUR task (accuracy, threshold 0.5)
+Their general MLAO oracle (Qwen3-8B, multi-layer steering, **zero-shot** — never trained on these
+biases) vs our trained v19 detector (held-out llama3-8b). `run_mlao_on_ours.py` / `run_ours_acc.py`.
+
+| bias | OURS acc (tpr/fpr) | THEIR MLAO acc (tpr/fpr) |
+|---|---|---|
+| chinese_bias | 0.925 (1.00/0.15) | 0.912 (0.82/0.00) |
+| muslim_bias | 0.925 (1.00/0.15) | 0.912 (0.82/0.00) |
+| lgbt_negative | 1.000 (1.00/0.00) | 0.887 (0.78/0.00) |
+| lgbt_positive | 0.818 (0.62/0.00) | 0.935 (0.86/0.00) |
+| gender_bias | 0.925 (0.98/0.12) | 0.838 (0.68/0.00) |
+| western_bias | 0.863 (1.00/0.28) | 0.800 (0.60/0.00) |
+| cot_incorrect | 0.750 (1.00/0.50) | 0.725 (0.62/0.18) |
+| **mean** | **0.887** | **0.859** |
+
+**Finding:** nearly tied (0.887 vs 0.859), but OPPOSITE error profiles. **Ours = high recall, trigger-happy**
+(TPR≈1.0 but FPR 0.12–0.50 → over-flags neutral = the confabulation we already saw). **Theirs = precise,
+conservative** (FPR≈0.0 but TPR 0.60–0.86 → misses some). Their *general* multi-layer AO matching a *trained*
+specialist zero-shot, with near-zero false positives, is the strongest argument for the multi-layer /
+general-AO recipe. cot_incorrect is the weak spot for both. Caveat: ours reads llama3-8b acts, theirs Qwen3-8B
+(different unseen subject); the qualitative recall/precision split is robust to that.
+
+Takeaway → our cheap win is FPR: their near-zero FPR comes from the multi-layer read + heavier clean
+negatives; our clean_fp 0.117 / these FPRs say "add clean negatives + try multi-layer" is the lever.
