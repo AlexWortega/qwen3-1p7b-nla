@@ -48,6 +48,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from nla.datagen.injection_tokens import find_injection_token
 from nla.enc_dec_adapters import ModelPoolAdapters
 from nla.injection import inject_at_marked_positions
+from nla.resid_inject import marker_positions, resid_injection
 from nla.schema import compute_canonical_neighbors, normalize_activation
 from scripts.audit.quirk_sets import DESC, HELD_OUT
 
@@ -109,6 +110,13 @@ def main():
     ap.add_argument("--held-out-biases", default=None,
                     help="comma list overriding quirk_sets.HELD_OUT (v19: add gender_bias). "
                          "Default keeps the v18 held-out set.")
+    ap.add_argument("--inject-mode", default="embed", choices=["embed", "resid"],
+                    help="embed=NLA marker at input embedding (default); resid=niclas-luick "
+                         "style steering into the residual stream at --inject-layer.")
+    ap.add_argument("--inject-layer", type=int, default=14,
+                    help="oracle decoder layer for resid injection (Qwen3-1.7B has 28).")
+    ap.add_argument("--steer-coef", type=float, default=2.0,
+                    help="resid injection: normalize(vec)*||resid||*coef (their default 2.0).")
     ap.add_argument("--wandb", action="store_true")
     ap.add_argument("--smoke", action="store_true")
     args = ap.parse_args()
@@ -216,9 +224,13 @@ def main():
         assert lie_idxs, "lie weight>0 but no train rows"
 
     # ---- injection helpers ---------------------------------------------------
+    resid_mode = args.inject_mode == "resid"
+
     def inject_one(p_ids, vec):
         p = torch.tensor([p_ids], device=device)
         e = embed(p)
+        if resid_mode:
+            return e  # injection happens via a residual hook during the forward
         return inject_at_marked_positions(p, e, vec.unsqueeze(0).to(e.dtype), inj_id, left_id, right_id)
 
     def yn_response(is_yes):
@@ -269,7 +281,8 @@ def main():
         ea = embed(a)
         inp = torch.cat([e, ea], dim=1)
         labels = torch.tensor([[-100] * e.shape[1] + r_ids], device=device)
-        return inp, labels
+        mpos = marker_positions(p_ids, inj_id)[0] if resid_mode else None
+        return inp, labels, mpos, (vec if resid_mode else None)
 
     # ---- optimizer -----------------------------------------------------------
     trunk_params = [p for p in model.parameters() if p.requires_grad]
@@ -302,11 +315,15 @@ def main():
         task = random.choices(tasks, weights=mix_w, k=1)[0]
         if task == "av":  # av disabled in v18 (no pool dataset loaded); fall back to detect
             task = "detect"
-        (inp, labels), kind = build_example(task)
+        (inp, labels, mpos, vec), kind = build_example(task)
         if kind is not None:
             dkind_cnt[kind] += 1
         with torch.cuda.amp.autocast(dtype=torch.float16):
-            loss = model(inputs_embeds=inp, labels=labels).loss
+            if resid_mode:
+                with resid_injection(model, args.inject_layer, vec, mpos, args.steer_coef):
+                    loss = model(inputs_embeds=inp, labels=labels).loss
+            else:
+                loss = model(inputs_embeds=inp, labels=labels).loss
         scaler.scale(loss / GA).backward()
         run[task] += loss.item()
         cnt[task] += 1
@@ -337,7 +354,10 @@ def main():
         "kind": "v18_xmodel_calibrated_detector",
         "trunk": args.trunk,
         "d_shared": d_shared,
-        "inject": "marker",
+        "inject": "marker" if args.inject_mode == "embed" else "resid",
+        "inject_mode": args.inject_mode,
+        "inject_layer": args.inject_layer,
+        "steer_coef": args.steer_coef,
         "n_inj": 1,
         "injection_scale": "sqrt_d_model",
         "tokens": {

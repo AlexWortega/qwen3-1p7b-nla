@@ -32,6 +32,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from nla.enc_dec_adapters import ModelPoolAdapters
 from nla.injection import inject_at_marked_positions
+from nla.resid_inject import marker_positions, resid_injection
 from nla.schema import normalize_activation
 from scripts.audit.eval_v18 import auroc
 from scripts.audit.quirk_sets import DESC
@@ -58,6 +59,9 @@ def main():
     inj_char = tkm["injection_char"]
     template, detect_qa = meta["actor_template"], meta["detect_qa"]
     inj_scale = math.sqrt(d_shared)
+    resid_mode = meta.get("inject_mode", "embed") == "resid"
+    inject_layer = int(meta.get("inject_layer", 14))
+    steer_coef = float(meta.get("steer_coef", 2.0))
     eval_tags = (args.tags.split(",") if args.tags
                  else [meta["heldout_tag"]] + list(meta["train_tags"]))
 
@@ -105,8 +109,13 @@ def main():
                                         tokenize=True, add_generation_prompt=True)
         p = torch.tensor([p_ids], device=device)
         e = embed(p)
-        e = inject_at_marked_positions(p, e, vec.unsqueeze(0).to(e.dtype), inj_id, left, right)
-        logits = model(inputs_embeds=e).logits[0, -1]
+        if resid_mode:
+            mpos = marker_positions(p_ids, inj_id)[0]
+            with resid_injection(model, inject_layer, vec, mpos, steer_coef):
+                logits = model(inputs_embeds=e).logits[0, -1]
+        else:
+            e = inject_at_marked_positions(p, e, vec.unsqueeze(0).to(e.dtype), inj_id, left, right)
+            logits = model(inputs_embeds=e).logits[0, -1]
         return torch.softmax(torch.stack([logits[yes0], logits[no0]]).float(), 0)[0].item()
 
     results = {}

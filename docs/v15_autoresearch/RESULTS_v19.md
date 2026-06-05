@@ -70,3 +70,27 @@ political-stance (GlobalOpinionQA), not toxicity.
 
 Artifacts: `/big/audit/v19/v19_detector` (av/ + adapters/ + v18_meta.json),
 `/big/audit/v19/eval_v19.json`, `/big/audit/v19/eval_real.json`.
+
+---
+
+## v19b — comparing to the external AO line (ceselder / japhba / niclas-luick)
+
+### Injection ablation (their residual-steering vs our NLA marker), SAME data/metric
+Their setup injects the activation into the **residual stream at a mid oracle layer**
+(`normalize(vec)·‖resid‖·coef`, coef=2.0) instead of NLA's input-embedding marker.
+Implemented as `--inject-mode resid` (`nla/resid_inject.py`); trained on the same v19_xmodel.
+[running — table to fill: resid vs marker on held-out llama AUROC / clean_fp / cross-source]
+
+### THEIR oracle reproduced (reference) — `scripts/audit/mlao_lib.py` (their code verbatim)
+Ran the niclas-luick MLAO oracle on Qwen3-8B with **their** injection (last-token activation →
+steering at K layer-blocks), their demo language-id task, 24 labeled sentences:
+
+| MLAO oracle | accuracy |
+|---|---|
+| single-layer baseline (`adamkarvonen/...latentqa...`, layer 50%) | 0.625 |
+| **multi-layer** (`nluick/MLAO-Qwen3-8B-3L-3N`, layers 25/50/75%) | **0.958** |
+
+Reproduces their headline: **multi-layer ≫ single-layer**. Note these are NOT comparable to our
+0.95 above (different task = language-id, different model = Qwen3-8B, different metric = accuracy,
+different oracle that was TRAINED for this). It's the reference point; head-to-head on a common task
+is the next step. Driver: `scripts/audit/run_mlao_ref.py`, result `/big/audit/v19/mlao_ref_langid.json`.
