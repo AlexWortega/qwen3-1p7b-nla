@@ -99,6 +99,10 @@ def main():
     ap.add_argument("--continue-from", default=None,
                     help="continue from a v17 LoRA dir (e.g. /big/audit/v15/v17_detector/av).")
     ap.add_argument("--lora-r", type=int, default=32)
+    ap.add_argument("--enc-mlp-hidden", type=int, default=0,
+                    help="if >0, wrap each per-model enc (and dec) as a ResidualMLPAdapter "
+                         "(linear lstsq + zero-init MLP residual of this hidden size) -- a "
+                         "NONLINEAR bridge to test the cross-model deception cap. 0 = linear.")
     ap.add_argument("--d-shared", type=int, default=2048)
     ap.add_argument("--mix", default="8:0:2", help="detect:av:lie sampling weights.")
     ap.add_argument("--detect-mix", default="2:1.5:1.5",
@@ -212,6 +216,16 @@ def main():
     assert adapters.d_shared == d_shared
     for need in train_tags + [HELDOUT_TAG, LIE_TAG]:
         assert need in adapters.tags, f"tag {need} missing from {args.adapters_init}"
+    if args.enc_mlp_hidden > 0:  # nonlinear bridge: wrap each enc/dec as ResidualMLP (residual=0 at init)
+        from nla.enc_dec_adapters import ResidualMLPAdapter
+        H = args.enc_mlp_hidden
+        for tag in list(adapters.encoders.keys()):
+            adapters.encoders[tag] = ResidualMLPAdapter.from_linear(adapters.encoders[tag], hidden=H)
+            adapters.decoders[tag] = ResidualMLPAdapter.from_linear(adapters.decoders[tag], hidden=H)
+        adapters.adapter_class = "ResidualMLPAdapter"
+        adapters.adapter_kwargs = {"hidden": H}
+        adapters = adapters.to(device)
+        emit(f"[v18] NONLINEAR bridge: enc/dec wrapped as ResidualMLPAdapter(hidden={H})")
     enc_params = []
     for tag, mod in adapters.encoders.items():
         for p in mod.parameters():

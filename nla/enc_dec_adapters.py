@@ -140,6 +140,42 @@ class ConvAdapter(LinearAdapter):
         return adapter
 
 
+class ResidualMLPAdapter(LinearAdapter):
+    """Linear lstsq map + a zero-init MLP residual:  forward(x) = x @ W.T + MLP(x).
+
+    The MLP (`d_in → hidden → d_out`, GELU) starts at EXACTLY zero (fc2 weight &
+    bias zero), so the adapter output equals the plain LinearAdapter at init and
+    the lstsq warm-start is preserved. Training then adds per-model nonlinearity —
+    the hypothesis being that a purely linear enc collapses the fine discriminative
+    directions a foreign trunk needs (the v22 cross-model deception cap of ~0.67),
+    while a nonlinear bridge can carry them into the shared space.
+
+    State-dict adds `fc1.{weight,bias}` and `fc2.{weight,bias}`. `ModelPoolAdapters`
+    records `adapter_class="ResidualMLPAdapter"` + `adapter_kwargs={"hidden": ...}`.
+    """
+
+    def __init__(self, d_in: int, d_out: int, hidden: int = 512):
+        super().__init__(d_in=d_in, d_out=d_out)
+        self.hidden = int(hidden)
+        self.fc1 = nn.Linear(d_in, self.hidden)
+        self.fc2 = nn.Linear(self.hidden, d_out)
+        self.act = nn.GELU()
+        with torch.no_grad():
+            self.fc2.weight.zero_()
+            self.fc2.bias.zero_()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return super().forward(x) + self.fc2(self.act(self.fc1(x)))
+
+    @classmethod
+    def from_linear(cls, lin: LinearAdapter, hidden: int = 512) -> "ResidualMLPAdapter":
+        """Wrap an existing (e.g. lstsq-fit) LinearAdapter; residual starts at 0."""
+        adapter = cls(d_in=lin.d_in, d_out=lin.d_out, hidden=hidden)
+        with torch.no_grad():
+            adapter.weight.copy_(lin.weight)
+        return adapter
+
+
 class ModelPoolAdapters(nn.Module):
     """Container for per-model `(encoder: d_M → d_shared, decoder: d_shared → d_M)` pairs.
 
@@ -387,3 +423,4 @@ class ModelPoolAdapters(nn.Module):
 # can look them up by string. Add new variants here.
 ModelPoolAdapters._ADAPTER_REGISTRY["LinearAdapter"] = LinearAdapter
 ModelPoolAdapters._ADAPTER_REGISTRY["ConvAdapter"] = ConvAdapter
+ModelPoolAdapters._ADAPTER_REGISTRY["ResidualMLPAdapter"] = ResidualMLPAdapter
