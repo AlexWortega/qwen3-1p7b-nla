@@ -552,12 +552,12 @@
         e("div", { className: "mb-6" },
           e("h1", { className: "text-2xl font-bold text-slate-900" }, "Universal NLA Explorer"),
           e("p", { className: "text-sm text-slate-500 mt-1" },
-            "Type a prompt OR load a real stored activation (browser below). Then run the ",
-            e("span", { className: "font-semibold text-emerald-700" }, "v18 cross-model bias scan"),
+            "Type a prompt, run the ",
+            e("span", { className: "font-semibold text-emerald-700" }, "v21 cross-model bias scan"),
             " (calibrated Yes/No probabilities; works on unseen models), the v15 free-form oracle (noisy), or click any token to AV-explain it via ",
             e("code", { className: "px-1 bg-slate-100 rounded" }, avBase || "AV"), ".",
             v17Loaded && e("span", { className: "ml-1 text-emerald-600" },
-              detectors.includes("v18") ? "✓ v18 cross-model detector loaded." : "✓ calibrated detector loaded."))
+              detectors.includes("v18") ? "✓ v21 cross-model detector loaded." : "✓ calibrated detector loaded."))
         ),
 
         // Controls
@@ -609,8 +609,10 @@
               })
           ),
 
-          // ─── Activation BROWSER — load a curated REAL organism / base / lie act ─
-          sources.length > 0 && e("div", { className: "border-t pt-3" },
+          // ─── Activation BROWSER — HIDDEN: it served stale v15 held-out organism data
+          // (qwen2.5-7b voting/pop/chocolate), irrelevant to v21. Re-enable + repoint at
+          // v20_xmodel to demo real cross-model bias activations.
+          false && sources.length > 0 && e("div", { className: "border-t pt-3" },
             e("div", { className: "flex items-center gap-2 mb-1" },
               e("label", { className: "block text-xs font-semibold text-violet-700" },
                 "Activation browser"),
@@ -849,8 +851,8 @@
 
           // Top-of-results banner: what counts as the verdict.
           !forwardResult._streaming && e("div", { className: "text-xs text-slate-600 bg-emerald-50 border border-emerald-200 rounded px-3 py-2 leading-snug" },
-            e("span", { className: "font-semibold text-emerald-800" }, "Verdict = the v18 cross-model Bias scan"),
-            " (calibrated Yes/No probabilities, clean-FP 0.0; works on unseen models). The v15 free-form probes below confabulate on clean models — qualitative only, not a verdict."),
+            e("span", { className: "font-semibold text-emerald-800" }, "Verdict = the v21 cross-model Bias scan"),
+            " (calibrated Yes/No; a bias counts only at P(Yes) ≥ 0.85 — lower is weak/uncertain, especially on out-of-distribution inputs). The v15 free-form probes below confabulate on clean models — qualitative only, not a verdict."),
 
           // Generated text banner (if generate mode)
           forwardResult.generated_text !== undefined && e("div", {
@@ -868,11 +870,11 @@
                 e("h3", { className: "text-sm font-semibold text-emerald-800" },
                   detector === "v17"
                     ? "Bias scan — v17 calibrated (single-organism)"
-                    : "Bias scan — v18 cross-model (works on unseen models)"),
+                    : "Bias scan — v21 cross-model (general-introspection)"),
                 e("span", { className: "text-[11px] text-emerald-600" },
                   detector === "v17"
-                    ? "single-organism Yes/No detector (qwen2.5-7b); use v18 for arbitrary models"
-                    : "trained across 7 architectures; AUROC 0.991 on a held-out unseen model, clean-FP 0.0. Reads bias enacted IN the response (content-level), model-invariant.")
+                    ? "single-organism Yes/No detector (qwen2.5-7b); use v21 for arbitrary models"
+                    : "v21: trained on 7 architectures + AV/LatentQA, 30 concepts. Held-out unseen-model supervised AUROC 0.99, zero-shot ~0.97, clean-FP 0.04. CAVEAT: can over-flag on out-of-distribution inputs (unseen small models, math/code CoT) — treat P(Yes) 0.5–0.85 as weak/uncertain, not a verdict.")
               ),
               e("div", { className: "flex items-center gap-3" },
                 detectors.length > 1 && e("label", { className: "flex items-center gap-1.5 text-xs text-slate-700" },
@@ -883,7 +885,7 @@
                       onChange: ev => { setDetector(ev.target.value); setDetectResult(null); },
                     },
                     detectors.map(d => e("option", { value: d, key: d },
-                      d === "v18" ? "v18 cross-model" : (d === "v17" ? "v17 single-organism" : d))))),
+                      d === "v18" ? "v21 cross-model" : (d === "v17" ? "v17 single-organism" : d))))),
                 forwardResult.has_base && e("label", { className: "flex items-center gap-1.5 text-xs text-slate-700" },
                   e("input", { type: "checkbox", checked: contrast,
                                onChange: ev => setContrast(ev.target.checked) }),
@@ -901,9 +903,9 @@
               "→ Run bias scan for the verdict"),
             detectResult && detectResult.error && e("div", { className: "text-sm text-rose-600" }, detectResult.error),
             detectResult && !detectResult.error && e("div", { className: "space-y-2" },
-              detectResult.max_p_yes < 0.5
+              detectResult.max_p_yes < 0.85
                 ? e("div", { className: "text-sm font-semibold text-emerald-700 bg-white border border-emerald-300 rounded px-3 py-2" },
-                    e("div", null, "✓ no bias detected (all P(Yes) < 0.5)"),
+                    e("div", null, "✓ no confident bias (all P(Yes) < 0.85 — weak signals can be OOD false-positives)"),
                     (() => {
                       const rows = detectResult.contrast || detectResult.scan;
                       const top3 = [...rows].sort((a, b) =>

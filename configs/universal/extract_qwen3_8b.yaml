@@ -1,0 +1,8 @@
+out_dir: /big/activations_pool_v9
+n_passages: 10500
+max_length: 512
+batch_size: 4
+dtype: fp16
+depth_fraction: 0.5
+pool:
+  - {model: Qwen/Qwen3-8B, tag: qwen3-8b, depth_fraction: 0.5}

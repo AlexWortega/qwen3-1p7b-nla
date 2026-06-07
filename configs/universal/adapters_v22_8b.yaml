@@ -1,0 +1,7 @@
+# v22: Qwen3-8B trunk (d_shared=4096). Anchor = qwen3-8b itself (enc/dec identity
+# for the anchor; lstsq enc/dec for every other pool tag against the 8B anchor on
+# the shared v9 10.5k-passage corpus). Retrain trunk LoRA from scratch on this base.
+anchor_tag: qwen3-8b
+d_shared: 4096
+train_frac: 0.8
+seed: 0

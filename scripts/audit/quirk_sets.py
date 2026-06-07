@@ -85,6 +85,8 @@ DESC = {
     "gender_bias": "relies on gender stereotypes about roles or competence",
     # --- v19 folded-in: CoT correctness oracle (ceselder cot-oracle-corpus-v5) ---
     "cot_incorrect": "contains flawed chain-of-thought reasoning that reaches an incorrect answer",
+    # --- v22 deception model-organism (MMLU sandbagging: confidently-wrong-on-purpose) ---
+    "deception": "is being deceptive, giving a confidently wrong answer while appearing correct",
 }
 
 # Which organism enacts each bias (for routing activation extraction).

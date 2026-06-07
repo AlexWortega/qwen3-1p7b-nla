@@ -103,13 +103,19 @@ def main():
     ap.add_argument("--mix", default="8:0:2", help="detect:av:lie sampling weights.")
     ap.add_argument("--detect-mix", default="2:1.5:1.5",
                     help="pos:inorg:clean weights. negatives(inorg+clean) >= positives.")
-    ap.add_argument("--minutes", type=float, default=120.0)
+    ap.add_argument("--minutes", type=float, default=120.0,
+                    help="time budget (TIME mode, --epochs 0) or a safety wall-clock cap (EPOCH mode).")
+    ap.add_argument("--epochs", type=int, default=0,
+                    help="EPOCH mode: pass each detect transcript / av passage / latentqa row this many "
+                         "times (natural proportions). 0 = legacy TIME mode (random sampling by --mix).")
     ap.add_argument("--out", required=True)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--lr-trunk", type=float, default=5e-5)
     ap.add_argument("--lr-enc", type=float, default=1e-4)
     ap.add_argument("--grad-accum", type=int, default=16)
     ap.add_argument("--log-every", type=int, default=5)
+    ap.add_argument("--save-every", type=int, default=200,
+                    help="rolling checkpoint every N optimizer steps to <out>/ckpt_latest (0=off).")
     ap.add_argument("--xmodel-dir", default="/big/audit/v18_xmodel")
     ap.add_argument("--adapters-init", default="/big/adapters_v9_serve_llama")
     ap.add_argument("--lie-dir", default="/big/audit/lie_gemma2_ml")
@@ -132,6 +138,10 @@ def main():
     ap.add_argument("--latentqa-dir", default="/big/audit/latentqa_task",
                     help="v21 LatentQA task dir (latentqa_train.jsonl + rowmap.json + acts_<tag>).")
     ap.add_argument("--max-ans", type=int, default=110)
+    ap.add_argument("--dir-pairs-dir", default=None,
+                    help="direction hard-negatives: dir with rows.jsonl (role=pos|hardneg, pair_bias) "
+                         "+ <tag>/acts.safetensors. 'hardneg' detect kind asks pair_bias on a balanced "
+                         "same-topic response -> No, teaching bias DIRECTION not topic. See build_dir_pairs.py.")
     ap.add_argument("--wandb", action="store_true")
     ap.add_argument("--smoke", action="store_true")
     args = ap.parse_args()
@@ -155,8 +165,10 @@ def main():
         mix_w.append(0.0)            # latentqa weight padded to 0 (back-compat)
     tasks = ["detect", "av", "lie", "latentqa"]
     dmix = [float(x) for x in args.detect_mix.split(":")]
-    assert len(dmix) == 3, "--detect-mix = pos:inorg:clean"
-    detect_kinds = ["pos", "inorg", "clean"]
+    assert len(dmix) in (3, 4, 5), "--detect-mix = pos:inorg:clean[:hardneg[:dirpos]]"
+    while len(dmix) < 5:
+        dmix.append(0.0)            # hardneg, dirpos weights padded to 0 (back-compat)
+    detect_kinds = ["pos", "inorg", "clean", "hardneg", "dirpos"]
 
     # ---- tokenizer + marker ids ---------------------------------------------
     tok = AutoTokenizer.from_pretrained(args.trunk)
@@ -215,7 +227,12 @@ def main():
     for tag in train_tags:
         H[tag] = load_file(str(Path(args.xmodel_dir) / tag / "acts.safetensors"))["h"].float()
         assert H[tag].shape[0] == len(rows), f"{tag} acts {H[tag].shape[0]} != rows {len(rows)}"
-    held = set(args.held_out_biases.split(",")) if args.held_out_biases else set(HELD_OUT)
+    if args.held_out_biases is None:
+        held = set(HELD_OUT)                                    # default v20 held-out
+    elif args.held_out_biases.strip().lower() in ("", "none"):
+        held = set()                                           # FULL: nothing held out (deploy)
+    else:
+        held = set(args.held_out_biases.split(","))
     # transcript indices by bias category
     idxs_by_bias: dict[str, list[int]] = defaultdict(list)
     for i, r in enumerate(rows):
@@ -229,6 +246,33 @@ def main():
     emit(f"[v18][detect] train_tags={train_tags} | pos_biases({len(pos_biases)})={pos_biases}")
     emit(f"[v18][detect] neutral transcripts={len(neutral_idxs)} ask_biases={len(ask_biases)} "
          f"total_rows={len(rows)}")
+
+    # direction hard-negatives (balanced same-topic response, ask its bias -> No)
+    Hdir: dict[str, torch.Tensor] = {}
+    dir_rows: list[dict] = []
+    hardneg_idxs: list[int] = []
+    dirpos_idxs: list[int] = []
+    if dmix[3] > 0 or dmix[4] > 0:
+        assert args.dir_pairs_dir, "detect-mix hardneg/dirpos weight>0 needs --dir-pairs-dir"
+        assert args.epochs == 0, "hardneg/dirpos kinds are sampled in TIME mode; set --epochs 0"
+        dpd = Path(args.dir_pairs_dir)
+        dir_rows = [json.loads(l) for l in (dpd / "rows.jsonl").read_text().splitlines() if l.strip()]
+        for tag in train_tags:
+            Hdir[tag] = load_file(str(dpd / tag / "acts.safetensors"))["h"].float()
+            assert Hdir[tag].shape[0] == len(dir_rows), f"dir {tag} acts != rows"
+        # only pairs whose pair_bias is a trained (non-held) bias
+        hardneg_idxs = [i for i, r in enumerate(dir_rows)
+                        if r.get("role") == "hardneg" and r.get("pair_bias") not in held]
+        dirpos_idxs = [i for i, r in enumerate(dir_rows)
+                       if r.get("role") == "pos" and r.get("pair_bias") not in held]
+        hb = defaultdict(int)
+        for i in hardneg_idxs:
+            hb[dir_rows[i]["pair_bias"]] += 1
+        emit(f"[v18][dir] hardneg={len(hardneg_idxs)} dirpos={len(dirpos_idxs)} over {dict(hb)}")
+        if dmix[3] > 0:
+            assert hardneg_idxs, "hardneg weight>0 but no usable hardneg rows"
+        if dmix[4] > 0:
+            assert dirpos_idxs, "dirpos weight>0 but no usable dirpos rows"
 
     # lie (as-is, optional)
     lie_idxs: list[int] = []
@@ -291,38 +335,57 @@ def main():
         proj = adapters.encode(tag, h_vec.unsqueeze(0))
         return normalize_activation(proj, inj_scale)[0]
 
-    def build_example(task):
+    pos_inorg_p = dmix[0] / max(dmix[0] + dmix[1], 1e-9)  # P(pos) among non-neutral transcripts
+
+    def build_example(task, pidx=None):
+        # pidx is the primary data unit when running in EPOCH mode (each transcript /
+        # passage / row visited once per epoch); None falls back to legacy time-mode
+        # random sampling. The secondary axes (tag, and the pos/inorg/clean role for a
+        # detect transcript) are still sampled either way.
         if task == "detect":
-            kind = random.choices(detect_kinds, weights=dmix, k=1)[0]
             tag = random.choice(train_tags)
-            if kind == "pos":
-                b = random.choice(pos_biases)
-                ti = random.choice(idxs_by_bias[b])
-                ptxt = make_detect_prompt(tag, b)
-                r_ids = yn_response(True)
-            elif kind == "inorg":
-                # transcript exhibits b_true; ask a DIFFERENT bias -> No
-                b_true = random.choice(pos_biases)
-                ti = random.choice(idxs_by_bias[b_true])
-                b_ask = random.choice([b for b in ask_biases if b != b_true])
-                ptxt = make_detect_prompt(tag, b_ask)
-                r_ids = yn_response(False)
-            else:  # clean: neutral transcript, ask any non-held bias -> No
-                ti = random.choice(neutral_idxs) if neutral_idxs else random.choice(idxs_by_bias[random.choice(pos_biases)])
-                b_ask = random.choice(ask_biases)
-                ptxt = make_detect_prompt(tag, b_ask)
-                r_ids = yn_response(False)
+            if pidx is None:
+                kind = random.choices(detect_kinds, weights=dmix, k=1)[0]
+                if kind == "hardneg":  # balanced/honest same-topic response, ask its bias -> No
+                    j = random.choice(hardneg_idxs); b = dir_rows[j]["pair_bias"]
+                    vec = encode_inject(tag, Hdir[tag][j].to(device))
+                    return _assemble(make_detect_prompt(tag, b), vec, yn_response(False)), "hardneg"
+                if kind == "dirpos":  # biased/deceptive paired response, ask its bias -> Yes
+                    j = random.choice(dirpos_idxs); b = dir_rows[j]["pair_bias"]
+                    vec = encode_inject(tag, Hdir[tag][j].to(device))
+                    return _assemble(make_detect_prompt(tag, b), vec, yn_response(True)), "dirpos"
+                if kind == "pos":
+                    b_true = random.choice(pos_biases); ti = random.choice(idxs_by_bias[b_true]); b_ask = b_true
+                    r_ids = yn_response(True)
+                elif kind == "inorg":
+                    b_true = random.choice(pos_biases); ti = random.choice(idxs_by_bias[b_true])
+                    b_ask = random.choice([b for b in ask_biases if b != b_true]); r_ids = yn_response(False)
+                else:
+                    ti = random.choice(neutral_idxs) if neutral_idxs else random.choice(idxs_by_bias[random.choice(pos_biases)])
+                    b_ask = random.choice(ask_biases); r_ids = yn_response(False)
+            else:
+                ti = pidx
+                b_true = rows[ti]["bias"]
+                if b_true == NEUTRAL_BIAS:  # clean transcript -> ask any bias -> No
+                    b_ask = random.choice(ask_biases); r_ids = yn_response(False); kind = "clean"
+                elif random.random() < pos_inorg_p:  # this transcript serves as a positive
+                    b_ask = b_true; r_ids = yn_response(True); kind = "pos"
+                else:  # serves as in-organism negative: ask a DIFFERENT bias -> No
+                    b_ask = random.choice([b for b in ask_biases if b != b_true]); r_ids = yn_response(False); kind = "inorg"
+            ptxt = make_detect_prompt(tag, b_ask)
             vec = encode_inject(tag, H[tag][ti].to(device))
             return _assemble(ptxt, vec, r_ids), kind
         elif task == "av":  # verbalize a pooled activation -> teacher z (general reading)
-            pid = random.choice(av_pids); tag = random.choice(av_tags)
+            pid = random.choice(av_pids) if pidx is None else pidx
+            tag = random.choice(av_tags)
             z = av_ds.passages[pid]["z"]
             ptxt = build_actor_prompt(tag, inj_char)
             r_ids = tok(" " + wrap_response_av(z), add_special_tokens=False)["input_ids"][:args.max_ans] + [eos]
             vec = encode_inject(tag, av_ds.h_cache[tag][pid].to(device))
             return _assemble(ptxt, vec, r_ids), None
         elif task == "latentqa":  # behaviour-QA over an in-pool activation
-            r = random.choice(lqa_rows); tag = r["tag"]
+            r = random.choice(lqa_rows) if pidx is None else lqa_rows[pidx]
+            tag = r["tag"]
             ptxt = build_actor_prompt(tag, inj_char) + f"\n\nQuestion: {r['question'].strip()}\nAnswer:"
             r_ids = tok(" " + r["gold"].strip(), add_special_tokens=False)["input_ids"][:args.max_ans] + [eos]
             vec = encode_inject(tag, lqa_H[tag][r["h_idx"]].to(device))
@@ -361,54 +424,7 @@ def main():
         except Exception as e:
             emit(f"[wandb] off ({e})")
 
-    # ---- training loop -------------------------------------------------------
-    t0 = time.time()
-    deadline = t0 + args.minutes * 60.0
-    GA = args.grad_accum
-    micro = step = 0
-    run = {t: 0.0 for t in tasks}
-    cnt = {t: 0 for t in tasks}
-    dkind_cnt = defaultdict(int)
-    opt.zero_grad()
-    emit(f"[v18] training {args.minutes} min mix(detect:av:lie:latentqa)={mix_w} "
-         f"detect-mix(pos:inorg:clean)={dmix} GA={GA}")
-    while time.time() < deadline:
-        task = random.choices(tasks, weights=mix_w, k=1)[0]
-        (inp, labels, mpos, vec), kind = build_example(task)
-        if kind is not None:
-            dkind_cnt[kind] += 1
-        with torch.cuda.amp.autocast(dtype=torch.float16):
-            if resid_mode:
-                with resid_injection(model, args.inject_layer, vec, mpos, args.steer_coef):
-                    loss = model(inputs_embeds=inp, labels=labels).loss
-            else:
-                loss = model(inputs_embeds=inp, labels=labels).loss
-        scaler.scale(loss / GA).backward()
-        run[task] += loss.item()
-        cnt[task] += 1
-        micro += 1
-        if micro % GA == 0:
-            scaler.unscale_(opt)
-            torch.nn.utils.clip_grad_norm_(trunk_params + enc_params, 1.0)
-            scaler.step(opt)
-            scaler.update()
-            opt.zero_grad()
-            step += 1
-            if step % args.log_every == 0:
-                bd = " ".join(f"{t}={run[t]/max(cnt[t],1):.3f}(n{cnt[t]})" for t in tasks)
-                dk = " ".join(f"{k}:{dkind_cnt[k]}" for k in detect_kinds)
-                el = time.time() - t0
-                emit(f"[v18] step {step} {el:.0f}s | {bd} | detect[{dk}]")
-                if wb:
-                    wb.log({f"loss/{t}": run[t] / max(cnt[t], 1) for t in tasks} | {"step": step})
-                run = {t: 0.0 for t in tasks}
-                cnt = {t: 0 for t in tasks}
-    emit(f"[v18] done: {step} steps in {(time.time()-t0):.0f}s; detect kinds {dict(dkind_cnt)}")
-
-    # ---- save ----------------------------------------------------------------
-    model.save_pretrained(out / "av")
-    adapters.cpu()
-    adapters.save(out / "adapters")
+    # ---- meta (built before the loop so checkpoints can write it) ------------
     meta = {
         "kind": "v18_xmodel_calibrated_detector",
         "trunk": args.trunk,
@@ -442,7 +458,101 @@ def main():
         "xmodel_dir": args.xmodel_dir,
         "neutral_bias": NEUTRAL_BIAS,
     }
-    (out / "v18_meta.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False))
+
+    def save_ckpt(directory, tag=""):
+        # adapters.save() copies the state_dict to CPU internally (enc stays on GPU),
+        # so this is safe to call mid-training without disturbing the live modules.
+        directory = Path(directory)
+        model.save_pretrained(directory / "av")
+        adapters.save(directory / "adapters")
+        m = dict(meta, ckpt_step=step, ckpt_seconds=round(time.time() - t0, 1))
+        (directory / "v18_meta.json").write_text(json.dumps(m, indent=2, ensure_ascii=False))
+        emit(f"[v18] checkpoint{tag} step={step} -> {directory}")
+
+    # ---- example stream: EPOCH mode (each unit once/epoch) or legacy TIME mode --
+    t0 = time.time()
+    deadline = t0 + args.minutes * 60.0
+    GA = args.grad_accum
+    micro = step = nonfinite = 0
+    run = {t: 0.0 for t in tasks}
+    cnt = {t: 0 for t in tasks}
+    dkind_cnt = defaultdict(int)
+    opt.zero_grad()
+
+    def example_stream():
+        if args.epochs > 0:
+            sched = []
+            if mix_w[0] > 0:
+                det_units = list(neutral_idxs) + [i for i, r in enumerate(rows) if r["bias"] in pos_biases]
+                sched += [("detect", i) for i in det_units]
+            if mix_w[1] > 0:
+                sched += [("av", pid) for pid in av_pids]
+            if mix_w[3] > 0:
+                sched += [("latentqa", j) for j in range(len(lqa_rows))]
+            nd = sum(t == "detect" for t, _ in sched); na = sum(t == "av" for t, _ in sched)
+            nl = sum(t == "latentqa" for t, _ in sched)
+            emit(f"[v18] EPOCH mode: {args.epochs} epoch(s) x {len(sched)} units "
+                 f"(detect={nd} av={na} latentqa={nl}) GA={GA} detect-mix(pos:inorg:clean)={dmix}")
+            rsched = random.Random(args.seed)
+            for ep in range(args.epochs):
+                rsched.shuffle(sched)
+                for item in sched:
+                    yield ep, item
+        else:
+            emit(f"[v18] TIME mode: {args.minutes} min mix(d:av:lie:lqa)={mix_w} "
+                 f"detect-mix={dmix} GA={GA}")
+            while time.time() < deadline:
+                yield 0, (random.choices(tasks, weights=mix_w, k=1)[0], None)
+
+    cur_ep = 0
+    for cur_ep, (task, pidx) in example_stream():
+        if time.time() >= deadline:
+            emit(f"[v18] deadline cap ({args.minutes} min) hit at step {step}"); break
+        (inp, labels, mpos, vec), kind = build_example(task, pidx)
+        if kind is not None:
+            dkind_cnt[kind] += 1
+        with torch.cuda.amp.autocast(dtype=torch.float16):
+            if resid_mode:
+                with resid_injection(model, args.inject_layer, vec, mpos, args.steer_coef):
+                    loss = model(inputs_embeds=inp, labels=labels).loss
+            else:
+                loss = model(inputs_embeds=inp, labels=labels).loss
+        # fp16 8B is spike-prone: never backprop a non-finite loss, and never step
+        # on a non-finite grad-norm. A single uncaught spike at ~step 670 turned the
+        # whole run to NaN in v22's first attempt; this guard drops the bad micro/step
+        # instead of corrupting the weights.
+        if torch.isfinite(loss):
+            scaler.scale(loss / GA).backward()
+            run[task] += loss.item()
+            cnt[task] += 1
+        else:
+            nonfinite += 1
+        micro += 1
+        if micro % GA == 0:
+            scaler.unscale_(opt)
+            gnorm = torch.nn.utils.clip_grad_norm_(trunk_params + enc_params, 1.0)
+            if torch.isfinite(gnorm):
+                scaler.step(opt)
+            else:
+                nonfinite += 1
+            scaler.update()
+            opt.zero_grad(set_to_none=True)
+            step += 1
+            if step % args.log_every == 0:
+                bd = " ".join(f"{t}={run[t]/max(cnt[t],1):.3f}(n{cnt[t]})" for t in tasks)
+                dk = " ".join(f"{k}:{dkind_cnt[k]}" for k in detect_kinds)
+                el = time.time() - t0
+                emit(f"[v18] ep{cur_ep} step {step} {el:.0f}s | {bd} | detect[{dk}] | skipped={nonfinite}")
+                if wb:
+                    wb.log({f"loss/{t}": run[t] / max(cnt[t], 1) for t in tasks} | {"step": step})
+                run = {t: 0.0 for t in tasks}
+                cnt = {t: 0 for t in tasks}
+            if args.save_every and step % args.save_every == 0:
+                save_ckpt(out / "ckpt_latest", tag=" rolling")
+    emit(f"[v18] done: {step} steps ep{cur_ep} in {(time.time()-t0):.0f}s; detect kinds {dict(dkind_cnt)} skipped={nonfinite}")
+
+    # ---- final save ----------------------------------------------------------
+    save_ckpt(out, tag=" final")
     emit(f"[v18] saved -> {out}")
     log.close()
 
