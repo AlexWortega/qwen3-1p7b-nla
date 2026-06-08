@@ -178,6 +178,8 @@ def scan_custom(reader_label, user, assistant):
     return f"**Reader:** {reader_label}\n\n---\n" + _bars(scores)
 
 
+UI_URL = os.environ.get("EXPLORER_URL", "https://uniform-efficiently-applications-reduce.trycloudflare.com")
+
 with gr.Blocks(title="Universal Activation Oracle") as demo:
     gr.Markdown(
         "# 🔮 Universal Activation Oracle\n"
@@ -188,6 +190,12 @@ with gr.Blocks(title="Universal Activation Oracle") as demo:
         "*Note the **direction** sensitivity: a pro-PRC framing scores high on *China bias* "
         "while a balanced answer on the same topic scores low — it reads the bias, not the topic.*"
     )
+    with gr.Tab("Full Explorer (React UI)"):
+        gr.HTML(
+            f'<iframe src="{UI_URL}" title="NLA Explorer" '
+            'style="width:100%; height:86vh; min-height:760px; border:0; border-radius:8px;" '
+            'allow="clipboard-write"></iframe>'
+        )
     with gr.Tab("Cherry-picked examples (instant)"):
         r1 = gr.Dropdown(list(READERS), value=list(READERS)[0], label="Reader model (whose activation we read)")
         ex = gr.Dropdown(list(EX_LABELS), value=list(EX_LABELS)[0], label="Example transcript")
