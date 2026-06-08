@@ -46,8 +46,8 @@ SCAN = [
     ("Brand shilling (zero-shot)", "unpromptedly promotes one specific commercial brand as superior"),
 ]
 READERS = {
-    "Qwen3-1.7B (a model the oracle was trained to read)": ("qwen3-1p7b", "Qwen/Qwen3-1.7B", 14),
-    "Qwen3-0.6B (a model the oracle has NEVER seen)": ("qwen3-0p6b", "Qwen/Qwen3-0.6B-Base", 14),
+    "Qwen3-0.6B — a model the oracle has NEVER seen (zero-shot cross-model)": ("qwen3-0p6b", "Qwen/Qwen3-0.6B-Base", 14),
+    "Qwen3-1.7B — a model in the oracle's training pool": ("qwen3-1p7b", "Qwen/Qwen3-1.7B", 14),
 }
 
 # ---------------------------------------------------------------------------- load
