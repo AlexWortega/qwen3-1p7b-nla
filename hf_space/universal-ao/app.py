@@ -15,8 +15,16 @@ import os
 from pathlib import Path
 
 import gradio as gr
-import spaces
 import torch
+try:
+    import spaces
+    def GPU(**kw):
+        return spaces.GPU(**kw)
+except Exception:
+    def GPU(**kw):
+        def deco(f):
+            return f
+        return deco
 from huggingface_hub import snapshot_download
 from peft import PeftModel
 from safetensors.torch import load_file
@@ -33,6 +41,8 @@ def normalize_activation(v, target_scale):
     return v / (norm / target_scale).to(v.dtype)
 
 DETECTOR_REPO = os.environ.get("DETECTOR_REPO", "AlexWortega/universal-activation-oracle-v22")
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DTYPE = torch.float16 if torch.cuda.is_available() else torch.float32
 HERE = Path(__file__).parent
 
 # behaviours to scan (label -> description fed into the calibrated question). Mix of
@@ -72,7 +82,7 @@ YES = tok(" Yes", add_special_tokens=False)["input_ids"][0]
 NO = tok(" No", add_special_tokens=False)["input_ids"][0]
 
 print("[ao] loading trunk + LoRA + adapters (CPU) ...")
-_base = AutoModelForCausalLM.from_pretrained(TRUNK, torch_dtype=torch.float16)
+_base = AutoModelForCausalLM.from_pretrained(TRUNK, torch_dtype=DTYPE)
 model = PeftModel.from_pretrained(_base, str(ART / "av")).eval()
 adapters = ModelPoolAdapters.load(str(ART / "adapters")).eval()
 embed = model.get_input_embeddings()
@@ -90,21 +100,21 @@ _on_gpu = {"done": False}
 def _to_gpu():
     global model, adapters, embed
     if not _on_gpu["done"]:
-        model = model.to("cuda")
-        adapters = adapters.to("cuda")
+        model = model.to(DEVICE)
+        adapters = adapters.to(DEVICE)
         embed = model.get_input_embeddings()
         _on_gpu["done"] = True
 
 
 @torch.no_grad()
 def _p_yes(tag, h_vec, desc):
-    proj = adapters.encode(tag, h_vec.unsqueeze(0).to("cuda"))
+    proj = adapters.encode(tag, h_vec.unsqueeze(0).to(DEVICE))
     vec = normalize_activation(proj, INJ_SCALE)[0]
     ptxt = TEMPLATE.format(model_tag=tag, injection_char=INJ_CHAR) + \
         f"\n\nQuestion: {DETECT_QA.format(desc=desc)}\nAnswer:"
     pid = tok.apply_chat_template([{"role": "user", "content": ptxt}],
                                   tokenize=True, add_generation_prompt=True)
-    p = torch.tensor([pid], device="cuda")
+    p = torch.tensor([pid], device=DEVICE)
     e = embed(p)
     e = inject_at_marked_positions(p, e, vec.unsqueeze(0).to(e.dtype), INJ_ID, LEFT, RIGHT)
     lg = model(inputs_embeds=e).logits[0, -1]
@@ -118,8 +128,8 @@ def _extract_live(model_id, layer, user, assistant):
     t = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
     if t.pad_token is None:
         t.pad_token = t.eos_token
-    m = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.float16,
-                                             trust_remote_code=True).to("cuda").eval()
+    m = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=DTYPE,
+                                             trust_remote_code=True).to(DEVICE).eval()
     store = {}
     layers = m.model.layers if hasattr(m, "model") and hasattr(m.model, "layers") else m.transformer.h
     h = layers[layer].register_forward_hook(lambda _m, _i, o: store.__setitem__("h", (o[0] if isinstance(o, tuple) else o).detach()))
@@ -134,13 +144,14 @@ def _extract_live(model_id, layer, user, assistant):
             hdr = t(u)["input_ids"]
         full = full[:512]
         hlen = min(len(hdr), len(full))
-        m(input_ids=torch.tensor([full], device="cuda"), use_cache=False)
+        m(input_ids=torch.tensor([full], device=DEVICE), use_cache=False)
         hs = store["h"][0].float()
         vec = (hs[hlen:] if hs.shape[0] > hlen else hs[-1:]).mean(0)
     finally:
         h.remove()
         del m
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
     return vec.cpu()
 
 
@@ -153,7 +164,7 @@ def _bars(scores):
     return out
 
 
-@spaces.GPU(duration=40)
+@GPU(duration=40)
 def scan_example(reader_label, ex_label):
     _to_gpu()
     tag = READERS[reader_label][0]
@@ -167,7 +178,7 @@ def scan_example(reader_label, ex_label):
     return head + _bars(scores)
 
 
-@spaces.GPU(duration=90)
+@GPU(duration=90)
 def scan_custom(reader_label, user, assistant):
     _to_gpu()
     tag, model_id, layer = READERS[reader_label]
