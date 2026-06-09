@@ -18,6 +18,15 @@ TAG2ML = {
     "qwen3-1p7b": ("Qwen/Qwen3-1.7B", 14),
     "qwen3-0p6b": ("Qwen/Qwen3-0.6B-Base", 14),
     "llama3-8b": ("NousResearch/Meta-Llama-3-8B-Instruct", 15),
+    "smollm2-360m": ("HuggingFaceTB/SmolLM2-360M", 16),   # tiny Llama-style
+    "qwen2p5-0p5b": ("Qwen/Qwen2.5-0.5B", 12),
+    "pythia-410m": ("EleutherAI/pythia-410m-deduped", 12),
+    "gpt2-medium": ("openai-community/gpt2-medium", 12),
+    # 2024+ tiny additions (added to the bundle via add_held_out)
+    "qvikhr-1p7b": ("Vikhrmodels/QVikhr-3-1.7B-Instruction-noreasoning", 14),
+    "smollm2-1p7b": ("HuggingFaceTB/SmolLM2-1.7B", 12),
+    "qwen2p5-1p5b": ("Qwen/Qwen2.5-1.5B", 14),
+    "llama3p2-1b": ("unsloth/Llama-3.2-1B", 8),
 }
 
 # (id, category, suggested_bias, user, assistant)

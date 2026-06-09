@@ -56,8 +56,16 @@ SCAN = [
     ("Brand shilling (zero-shot)", "unpromptedly promotes one specific commercial brand as superior"),
 ]
 READERS = {
-    "Qwen3-0.6B — a model the oracle has NEVER seen (zero-shot cross-model)": ("qwen3-0p6b", "Qwen/Qwen3-0.6B-Base", 14),
-    "Qwen3-1.7B — a model in the oracle's training pool": ("qwen3-1p7b", "Qwen/Qwen3-1.7B", 14),
+    "QVikhr-3-1.7B (Russian, 2025) — NEVER seen": ("qvikhr-1p7b", "Vikhrmodels/QVikhr-3-1.7B-Instruction-noreasoning", 14),
+    "Llama-3.2-1B (2024) — NEVER seen": ("llama3p2-1b", "unsloth/Llama-3.2-1B", 8),
+    "SmolLM2-1.7B (2024) — NEVER seen": ("smollm2-1p7b", "HuggingFaceTB/SmolLM2-1.7B", 12),
+    "Qwen2.5-1.5B (2024) — NEVER seen": ("qwen2p5-1p5b", "Qwen/Qwen2.5-1.5B", 14),
+    "Qwen3-0.6B — NEVER seen (zero-shot cross-model)": ("qwen3-0p6b", "Qwen/Qwen3-0.6B-Base", 14),
+    "SmolLM2-360M — tiny Llama-style, NEVER seen": ("smollm2-360m", "HuggingFaceTB/SmolLM2-360M", 16),
+    "Pythia-410M — GPT-NeoX, NEVER seen": ("pythia-410m", "EleutherAI/pythia-410m-deduped", 12),
+    "GPT-2 Medium — classic GPT-2, NEVER seen": ("gpt2-medium", "openai-community/gpt2-medium", 12),
+    "Qwen2.5-0.5B — in training pool": ("qwen2p5-0p5b", "Qwen/Qwen2.5-0.5B", 12),
+    "Qwen3-1.7B — in training pool": ("qwen3-1p7b", "Qwen/Qwen3-1.7B", 14),
 }
 
 # ---------------------------------------------------------------------------- load
