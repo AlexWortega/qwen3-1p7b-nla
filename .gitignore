@@ -27,3 +27,7 @@ hf_release/
 
 # claude code session metadata
 .claude/
+
+# big LoRA adapters (pushed to HF instead)
+docs/ao_japhba_repro/trained_adapter_*/
+docs/ao_japhba_repro/results/experiments/

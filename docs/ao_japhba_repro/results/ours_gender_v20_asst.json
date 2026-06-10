@@ -1,0 +1,252 @@
+{
+  "res": {
+    "tag": "gemma2",
+    "n": 200,
+    "acc_argmax": 0.6,
+    "acc_pyes_thr": 0.48,
+    "mean_pf_female": 0.374,
+    "mean_pf_male": 0.38
+  },
+  "rows": [
+    {
+      "gt": "male",
+      "pf": 0.225,
+      "pm": 0.234,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.331,
+      "pm": 0.311,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.396,
+      "pm": 0.363,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.217,
+      "pm": 0.231,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.352,
+      "pm": 0.356,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.352,
+      "pm": 0.352,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.248,
+      "pm": 0.254,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.215,
+      "pm": 0.212,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.508,
+      "pm": 0.43,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.686,
+      "pm": 0.543,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.359,
+      "pm": 0.356,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.26,
+      "pm": 0.26,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.223,
+      "pm": 0.22,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.202,
+      "pm": 0.209,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.22,
+      "pm": 0.212,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.392,
+      "pm": 0.385,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.434,
+      "pm": 0.381,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.311,
+      "pm": 0.338,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.381,
+      "pm": 0.356,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.4,
+      "pm": 0.415,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.291,
+      "pm": 0.301,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.434,
+      "pm": 0.356,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.338,
+      "pm": 0.345,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.297,
+      "pm": 0.297,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.516,
+      "pm": 0.465,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.152,
+      "pm": 0.129,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.815,
+      "pm": 0.669,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.374,
+      "pm": 0.374,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.311,
+      "pm": 0.317,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.359,
+      "pm": 0.331,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.314,
+      "pm": 0.311,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.96,
+      "pm": 0.791,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.378,
+      "pm": 0.396,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.281,
+      "pm": 0.285,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.291,
+      "pm": 0.297,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.278,
+      "pm": 0.263,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.566,
+      "pm": 0.484,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.419,
+      "pm": 0.374,
+      "pred_arg": "female"
+    },
+    {
+      "gt": "male",
+      "pf": 0.345,
+      "pm": 0.367,
+      "pred_arg": "male"
+    },
+    {
+      "gt": "male",
+      "pf": 0.242,
+      "pm": 0.266,
+      "pred_arg": "male"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "before_train_ds": {
+    "sst2": 0.633,
+    "ag_news": 0.483,
+    "geometry_of_truth": 0.367,
+    "relations": 0.517,
+    "tense": 0.483,
+    "singular_plural": 0.417,
+    "language_identification": 0.7,
+    "snli": 0.683,
+    "ner": 0.5,
+    "md_gender": 0.433,
+    "_mean": 0.5216
+  },
+  "before_heldout_ds": {
+    "engels_headline_istrump": 0.5,
+    "engels_hist_fig_ismale": 0.533,
+    "engels_wikidata_isathlete": 0.55,
+    "engels_wikidata_ispolitician": 0.6,
+    "engels_news_class_politics": 0.4,
+    "_mean": 0.5166
+  },
+  "after_train_ds": {
+    "sst2": 0.55,
+    "ag_news": 0.783,
+    "geometry_of_truth": 0.383,
+    "relations": 0.483,
+    "tense": 0.533,
+    "singular_plural": 0.5,
+    "language_identification": 0.95,
+    "snli": 0.75,
+    "ner": 0.667,
+    "md_gender": 0.8,
+    "_mean": 0.6399
+  },
+  "after_heldout_ds": {
+    "engels_headline_istrump": 0.45,
+    "engels_hist_fig_ismale": 0.75,
+    "engels_wikidata_isathlete": 0.567,
+    "engels_wikidata_ispolitician": 0.567,
+    "engels_news_class_politics": 0.483,
+    "_mean": 0.5634
+  }
+}

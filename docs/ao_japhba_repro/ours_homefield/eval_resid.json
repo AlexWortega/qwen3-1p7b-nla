@@ -1,0 +1,30 @@
+{
+  "xmodel_auroc_llama_per_bias": {
+    "chinese_bias": 0.9998,
+    "cot_incorrect": 0.9199,
+    "lgbt_negative": 1.0,
+    "lgbt_positive": 0.9993,
+    "muslim_bias": 1.0,
+    "western_bias": 0.9984
+  },
+  "xmodel_auroc_llama_mean": 0.9862,
+  "xmodel_clean_fp_llama": 0.075,
+  "xmodel_clean_mean_pyes_llama": 0.0742,
+  "xmodel_clean_fp_n": 600,
+  "heldout_bias_auroc": {
+    "chocolate": NaN,
+    "gender_bias": 0.2884,
+    "population": NaN,
+    "voting": NaN
+  },
+  "heldout_bias_auroc_mean": 0.2884,
+  "per_train_model_auroc": {
+    "qwen3-1p7b": 0.9829,
+    "phi-1p5": 0.9861,
+    "smollm3-3b": 0.9828,
+    "qwen2p5-7b": 0.9859,
+    "gemma2": 0.9865,
+    "qwen2p5-0p5b": 0.9845,
+    "qwen3-4b": 0.9864
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "llama3-8b": {
+    "per_bias": {
+      "chinese_bias": 0.3961,
+      "gender_bias": 0.7277,
+      "lgbt_negative": 0.6375,
+      "muslim_bias": 0.6419
+    },
+    "mean": 0.6008
+  },
+  "qwen3-1p7b": {
+    "per_bias": {
+      "chinese_bias": 0.3636,
+      "gender_bias": 0.4795,
+      "lgbt_negative": 0.5989,
+      "muslim_bias": 0.4545
+    },
+    "mean": 0.4741
+  },
+  "phi-1p5": {
+    "per_bias": {
+      "chinese_bias": 0.4138,
+      "gender_bias": 0.608,
+      "lgbt_negative": 0.6596,
+      "muslim_bias": 0.476
+    },
+    "mean": 0.5393
+  },
+  "smollm3-3b": {
+    "per_bias": {
+      "chinese_bias": 0.4586,
+      "gender_bias": 0.6931,
+      "lgbt_negative": 0.6414,
+      "muslim_bias": 0.6641
+    },
+    "mean": 0.6143
+  },
+  "qwen2p5-7b": {
+    "per_bias": {
+      "chinese_bias": 0.4493,
+      "gender_bias": 0.5728,
+      "lgbt_negative": 0.6443,
+      "muslim_bias": 0.549
+    },
+    "mean": 0.5538
+  },
+  "gemma2": {
+    "per_bias": {
+      "chinese_bias": 0.3233,
+      "gender_bias": 0.6249,
+      "lgbt_negative": 0.6346,
+      "muslim_bias": 0.4121
+    },
+    "mean": 0.4987
+  },
+  "qwen2p5-0p5b": {
+    "per_bias": {
+      "chinese_bias": 0.3509,
+      "gender_bias": 0.7125,
+      "lgbt_negative": 0.6185,
+      "muslim_bias": 0.4983
+    },
+    "mean": 0.5451
+  },
+  "qwen3-4b": {
+    "per_bias": {
+      "chinese_bias": 0.3469,
+      "gender_bias": 0.6164,
+      "lgbt_negative": 0.6565,
+      "muslim_bias": 0.6172
+    },
+    "mean": 0.5593
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "baseline-1L": {
+    "acc": 0.625,
+    "n": 24,
+    "n_parsed": 24,
+    "tp": 12,
+    "fp": 9,
+    "layer_percents": [
+      50
+    ]
+  },
+  "MLAO-3L-3N": {
+    "acc": 0.9583,
+    "n": 24,
+    "n_parsed": 24,
+    "tp": 12,
+    "fp": 1,
+    "layer_percents": [
+      25,
+      50,
+      75
+    ]
+  }
+}

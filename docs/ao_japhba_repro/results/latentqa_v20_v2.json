@@ -1,0 +1,1101 @@
+{
+  "tag": "gemma2",
+  "n": 200,
+  "acc_all_None=wrong": 0.35,
+  "commit_rate": 0.62,
+  "acc_committed": 0.5645,
+  "by_male": {
+    "n": 100,
+    "commit": 0.66,
+    "acc_committed": 0.985
+  },
+  "by_female": {
+    "n": 100,
+    "commit": 0.58,
+    "acc_committed": 0.086
+  },
+  "samples": [
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any specific gender. The"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about gender is provided in the given vector. The"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the model's assumed gender is available."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No information about the model's assumed gender is available."
+    },
+    {
+      "gt": "female",
+      "pred": "female",
+      "ans": "Yes, the model assumes the user is female."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    }
+  ],
+  "all": [
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any specific gender. The"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about gender is provided in the given vector. The"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the model's assumed gender is available."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No human is present."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume a specific gender. It"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any specific gender. The"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, I can't determine the gender of the model."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any specific gender. It"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No human is present."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the model's assumed gender is available."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the gender of the model is provided in the"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The concept"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about gender is provided in the given vector. The"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the gender of the model is provided in the"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any specific gender. It"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, I can't determine the gender of the model."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "No information about the model's assumed gender is available."
+    },
+    {
+      "gt": "male",
+      "pred": "female",
+      "ans": "Yes, the model assumes the user is Female."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No information about gender is provided in the given vector. The"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any specific gender. The"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No information about the model's assumed gender is available."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any specific gender. It"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any specific gender. It"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, I can't determine the gender of the model."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any specific gender. The"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any specific gender. It"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "female",
+      "ans": "Yes, the model assumes the user is Female."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "female",
+      "ans": "Yes, the model assumes the user is of gender Female."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No information about the model's assumptions regarding the user's gender"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any specific gender. It"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "female",
+      "pred": "female",
+      "ans": "Yes, the model assumes the user is of gender Female."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": "female",
+      "ans": "Yes, the model assumes the user is of gender Female."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No information about the user's gender is provided in the given"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No information about gender is provided in the given vector. The"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is of gender \"Male"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any specific gender. It"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No, the model does not assume any gender. The model"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "No information about the model's assumed gender is available."
+    },
+    {
+      "gt": "female",
+      "pred": "female",
+      "ans": "Yes, the model assumes the user is female."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "Yes, the model assumes the user is male."
+    }
+  ]
+}

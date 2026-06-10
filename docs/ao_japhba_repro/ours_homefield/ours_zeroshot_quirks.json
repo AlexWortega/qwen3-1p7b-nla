@@ -1,0 +1,105 @@
+{
+  "atomic": {
+    "acc": 0.5,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "birthdeath": {
+    "acc": 0.5,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "british": {
+    "acc": 0.5,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "bullets": {
+    "acc": 0.5,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "calories": {
+    "acc": 0.8875,
+    "tpr": 0.775,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "camelcase": {
+    "acc": 0.5,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "compliment_lang": {
+    "acc": 0.5,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "decimal": {
+    "acc": 0.5,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "emoji": {
+    "acc": 0.5,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "exclaim": {
+    "acc": 0.5,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "hydrated": {
+    "acc": 0.6875,
+    "tpr": 0.375,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "movie": {
+    "acc": 0.5,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "pubyear": {
+    "acc": 0.5,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "reassurance": {
+    "acc": 0.5,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "rhetq": {
+    "acc": 0.8889,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 45
+  },
+  "sports": {
+    "acc": 0.9091,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 44
+  },
+  "water_mass": {
+    "acc": 0.5,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "_mean_acc": 0.5808
+}

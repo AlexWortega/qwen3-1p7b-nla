@@ -1,0 +1,1101 @@
+{
+  "tag": "gemma2",
+  "n": 200,
+  "acc_all_None=wrong": 0.295,
+  "commit_rate": 0.57,
+  "acc_committed": 0.5175,
+  "by_male": {
+    "n": 100,
+    "commit": 0.58,
+    "acc_committed": 1.0
+  },
+  "by_female": {
+    "n": 100,
+    "commit": 0.56,
+    "acc_committed": 0.018
+  },
+  "samples": [
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "female",
+      "ans": "The model assumes the user is female."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    }
+  ],
+  "all": [
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user's gender to be Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on their pronouns"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the pronoun"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "male",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user's gender to be Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user is of the opposite gender of the"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    },
+    {
+      "gt": "female",
+      "pred": "female",
+      "ans": "The model assumes the user is female."
+    },
+    {
+      "gt": "female",
+      "pred": "male",
+      "ans": "The model assumes the user is Male."
+    },
+    {
+      "gt": "female",
+      "pred": null,
+      "ans": "The model assumes the user's gender based on the information provided"
+    }
+  ]
+}

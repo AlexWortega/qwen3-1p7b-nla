@@ -1,0 +1,88 @@
+{
+  "before": {
+    "camelcase": {
+      "auroc": 1.0,
+      "acc": 0.879,
+      "npos": 60
+    },
+    "decimal": {
+      "auroc": 0.957,
+      "acc": 0.879,
+      "npos": 60
+    },
+    "atomic": {
+      "auroc": 0.886,
+      "acc": 0.886,
+      "npos": 60
+    },
+    "sports": {
+      "auroc": 0.825,
+      "acc": 0.9,
+      "npos": 60
+    },
+    "calories": {
+      "auroc": 1.0,
+      "acc": 1.0,
+      "npos": 60
+    },
+    "birthdeath": {
+      "auroc": 0.928,
+      "acc": 0.914,
+      "npos": 60
+    },
+    "movie": {
+      "auroc": 0.941,
+      "acc": 0.921,
+      "npos": 60
+    },
+    "pubyear": {
+      "auroc": 1.0,
+      "acc": 1.0,
+      "npos": 60
+    },
+    "_mean_auroc": 0.9422
+  },
+  "after": {
+    "camelcase": {
+      "auroc": 1.0,
+      "acc": 0.943,
+      "npos": 60
+    },
+    "decimal": {
+      "auroc": 0.906,
+      "acc": 0.879,
+      "npos": 60
+    },
+    "atomic": {
+      "auroc": 0.899,
+      "acc": 0.886,
+      "npos": 60
+    },
+    "sports": {
+      "auroc": 0.825,
+      "acc": 0.9,
+      "npos": 60
+    },
+    "calories": {
+      "auroc": 1.0,
+      "acc": 1.0,
+      "npos": 60
+    },
+    "birthdeath": {
+      "auroc": 0.934,
+      "acc": 0.914,
+      "npos": 60
+    },
+    "movie": {
+      "auroc": 0.938,
+      "acc": 0.921,
+      "npos": 60
+    },
+    "pubyear": {
+      "auroc": 1.0,
+      "acc": 1.0,
+      "npos": 60
+    },
+    "_mean_auroc": 0.9377
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "v20": {
+    "sst2": 0.5333,
+    "geometry_of_truth": 0.4333,
+    "ag_news": 0.5333,
+    "language_identification": 0.475,
+    "tense": 0.5417,
+    "singular_plural": 0.4083,
+    "md_gender": 0.4833,
+    "snli": 0.5667,
+    "ner": 0.4833,
+    "relations": 0.4833,
+    "_mean": 0.4941
+  },
+  "v22": {
+    "sst2": 0.4917,
+    "geometry_of_truth": 0.425,
+    "ag_news": 0.5083,
+    "language_identification": 0.6333,
+    "tense": 0.4417,
+    "singular_plural": 0.3917,
+    "md_gender": 0.45,
+    "snli": 0.6,
+    "ner": 0.5833,
+    "relations": 0.5,
+    "_mean": 0.5025
+  }
+}

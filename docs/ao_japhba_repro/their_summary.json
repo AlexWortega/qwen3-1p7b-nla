@@ -1,0 +1,37 @@
+{
+  "classification_Qwen3-4B_single_token_25-50-75/base": 0.499,
+  "classification_Qwen3-4B_single_token_25/oracle": 0.71,
+  "classification_Qwen3-4B_single_token_50/oracle": 0.723,
+  "classification_Qwen3-4B_single_token_75/oracle": 0.731,
+  "classification_Qwen3-8B_single_token_25-50-75/base": 0.507,
+  "classification_Qwen3-8B_single_token_25/oracle": 0.731,
+  "classification_Qwen3-8B_single_token_50/oracle": 0.758,
+  "classification_Qwen3-8B_single_token_75/oracle": 0.772,
+  "taboo:taboo_results_open_checkpoints_latentqa_cls_past_lens_addition_Qwen3-8B.json": {
+    "full_seq_accuracy": 0.288,
+    "full_seq_total": 2000.0,
+    "segment_accuracy": 0.4545,
+    "segment_total": 2000.0,
+    "single_token_accuracy": 0.4995,
+    "single_token_total": 2000.0,
+    "accuracy": 0.414
+  },
+  "taboo:taboo_results_open_checkpoints_latentqa_cls_on_policy_Qwen3-8B.json": {
+    "full_seq_accuracy": 0.3625,
+    "full_seq_total": 2000.0,
+    "segment_accuracy": 0.48,
+    "segment_total": 2000.0,
+    "single_token_accuracy": 0.495,
+    "single_token_total": 2000.0,
+    "accuracy": 0.44583333333333336
+  },
+  "gender:checkpoints_latentqa_cls_past_lens_addition_gemma-2-9b-it.json": {
+    "full_seq_accuracy": 0.9716666666666667,
+    "full_seq_total": 600,
+    "segment_accuracy": 0.99,
+    "segment_total": 600,
+    "single_token_accuracy": 0.965,
+    "single_token_total": 600,
+    "accuracy": 0.9755555555555555
+  }
+}

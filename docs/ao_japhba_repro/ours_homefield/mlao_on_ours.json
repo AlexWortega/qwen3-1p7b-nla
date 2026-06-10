@@ -1,0 +1,45 @@
+{
+  "chinese_bias": {
+    "acc": 0.9125,
+    "tpr": 0.825,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "cot_incorrect": {
+    "acc": 0.725,
+    "tpr": 0.625,
+    "fpr": 0.175,
+    "n": 80
+  },
+  "gender_bias": {
+    "acc": 0.8375,
+    "tpr": 0.675,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "lgbt_negative": {
+    "acc": 0.8875,
+    "tpr": 0.775,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "lgbt_positive": {
+    "acc": 0.9351,
+    "tpr": 0.8649,
+    "fpr": 0.0,
+    "n": 77
+  },
+  "muslim_bias": {
+    "acc": 0.9125,
+    "tpr": 0.825,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "western_bias": {
+    "acc": 0.8,
+    "tpr": 0.6,
+    "fpr": 0.0,
+    "n": 80
+  },
+  "_mean_acc": 0.8586
+}
