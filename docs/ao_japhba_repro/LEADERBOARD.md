@@ -10,6 +10,7 @@ Metric = before→after mean acc/AUROC, eval on 3 transfer axes. Each row = fres
 | nodesc | cls+det | 0.530→0.570 | 0.528→0.574 | 0.946→0.984 | .88 / .97 |
 | **full (scaled)** | cls+det+desc, 2 subj, 2 ep, lr1e-5 | **0.530→0.642** | 0.528→**0.583** | 0.946→0.983 | .91 / .97 |
 | **4subj (best)** | cls+det+desc, **4 subjects** (q3-4b,q2.5-7b,phi-1.5,smollm3) | **0.530→0.657** | 0.528→0.583 | 0.946→0.983 | .88 / .98 |
+| qualfam (8 mid-cap) | capable >=1B only (drop sub-1B) | 0.526→0.592 | 0.528→**0.602** (best subj) | 0.946→0.977 | |
 | bigfam (12 subj) | + tiny models gpt2/pythia/bloom/neo/qwen3-0.6b/etc | 0.523→0.584 ↓ | 0.528→0.578 | 0.946→0.975 | .76 / .96 |
 | teach4subj | 4 subj + cls+det+desc+**teach** (2376 free-form QA on cls stmts) | 0.530→0.645 | 0.528→0.583 | 0.946→0.986 | .93 / .97 |
 | lr3e5 | + lr 3e-5 | 0.530→0.522 ↓ | 0.528→0.507 ↓ | 0.946→0.989 | — |
@@ -44,3 +45,17 @@ smollm2-1.7B, qwen2.5-1.5B, qwen3-0.6B, llama3.2-1B; nemotron failed to load). H
 (~2000/26000 steps NaN-skipped by the guard); (2) **negative transfer** — sub-1B / 1024-dim weak models contribute noisy
 activations + poorly-fit enc_M that degrade the shared reader. **Lesson: breadth must be QUALITY breadth (capable subjects),
 not raw count.** The subject lever: 1→2 = +10pp, 2→4 (mid-size) = +1.5pp (best 0.657), 4→12 (+tiny) = −7pp. Best stays 4subj.
+
+## Subject-axis — consolidated (sweet spot = 4 mid-size; trade-off beyond)
+| #subjects | which | held-out **datasets** | held-out **subject** (gemma2) |
+|---|---|---|---|
+| 1 | qwen3-4b | 0.542 | 0.532 |
+| 2 | +qwen2.5-7b | 0.642 | 0.583 |
+| **4** | +phi-1.5,smollm3 | **0.657** (best ds) | 0.583 |
+| 8 | +mid-cap >=1B | 0.592 | **0.602** (best subj) |
+| 12 | +sub-1B tiny | 0.584 | 0.578 |
+
+**Two findings:** (1) **4 mid-size subjects is the sweet spot for held-out DATASET transfer** (0.657); adding more dilutes
+per-subject coverage + adds fp16 instability (gpt-neo skips), dropping ds-transfer. (2) **More subjects help held-out SUBJECT
+transfer** (gemma2 0.532→0.602) — a genuine trade-off: arch-diversity generalizes to unseen models but costs dataset transfer.
+(3) **sub-1B models cause negative transfer** (12-subj 0.584). Best overall checkpoint = **4subj (0.657 ds / 0.583 subj)**.
