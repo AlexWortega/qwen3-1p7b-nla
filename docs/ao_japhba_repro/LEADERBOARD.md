@@ -9,12 +9,14 @@ Metric = before→after mean acc/AUROC, eval on 3 transfer axes. Each row = fres
 | clsonly | cls only | 0.530→0.560 | 0.528→0.553 | 0.946→0.954 | movie .92 / pubyear .97 |
 | nodesc | cls+det | 0.530→0.570 | 0.528→0.574 | 0.946→0.984 | .88 / .97 |
 | **full (scaled)** | cls+det+desc, 2 subj, 2 ep, lr1e-5 | **0.530→0.642** | 0.528→**0.583** | 0.946→0.983 | .91 / .97 |
+| **4subj (best)** | cls+det+desc, **4 subjects** (q3-4b,q2.5-7b,phi-1.5,smollm3) | **0.530→0.657** | 0.528→0.583 | 0.946→0.983 | .88 / .98 |
 | lr3e5 | + lr 3e-5 | 0.530→0.522 ↓ | 0.528→0.507 ↓ | 0.946→0.989 | — |
 | ep4 | + 4 epochs | 0.530→0.590 | 0.528→0.572 | 0.946→0.988 | — |
 | 1subj | qwen3-4b only (1 subject) | 0.530→0.542 | 0.528→0.532 | 0.946→0.985 | .88 / .98 |
 
 ## Lever ranking (for held-out **dataset** transfer)
-1. **2nd training subject: +10pp** (1subj 0.542 → full 0.642) — multi-architecture training drives open-vocab generalization most.
+1. **Adding subjects: diminishing returns** — 1→2 subj = **+10pp** (0.542→0.642), 2→4 subj = **+1.5pp** (0.642→0.657). The first extra architecture matters most.
+1b. **2nd training subject: +10pp** (1subj 0.542 → full 0.642) — multi-architecture training drives open-vocab generalization most.
 2. **Free-form `describe` task: +7pp** (nodesc 0.570 → full 0.642) — learning to *answer* (not classify) is what generalizes.
 3. **Low LR is essential**: lr3e-5 *hurts* (0.522, below the 0.530 baseline) — aggressive LR overfits the trunk / forgets.
 4. **2 epochs > 4**: ep4 (0.590) < full 2ep (0.642) — more epochs overfit, *worse* held-out transfer.
