@@ -10,6 +10,7 @@ Metric = before→after mean acc/AUROC, eval on 3 transfer axes. Each row = fres
 | nodesc | cls+det | 0.530→0.570 | 0.528→0.574 | 0.946→0.984 | .88 / .97 |
 | **full (scaled)** | cls+det+desc, 2 subj, 2 ep, lr1e-5 | **0.530→0.642** | 0.528→**0.583** | 0.946→0.983 | .91 / .97 |
 | **4subj (best)** | cls+det+desc, **4 subjects** (q3-4b,q2.5-7b,phi-1.5,smollm3) | **0.530→0.657** | 0.528→0.583 | 0.946→0.983 | .88 / .98 |
+| bigfam (12 subj) | + tiny models gpt2/pythia/bloom/neo/qwen3-0.6b/etc | 0.523→0.584 ↓ | 0.528→0.578 | 0.946→0.975 | .76 / .96 |
 | teach4subj | 4 subj + cls+det+desc+**teach** (2376 free-form QA on cls stmts) | 0.530→0.645 | 0.528→0.583 | 0.946→0.986 | .93 / .97 |
 | lr3e5 | + lr 3e-5 | 0.530→0.522 ↓ | 0.528→0.507 ↓ | 0.946→0.989 | — |
 | ep4 | + 4 epochs | 0.530→0.590 | 0.528→0.572 | 0.946→0.988 | — |
@@ -35,3 +36,11 @@ short, narrow classification statements is too redundant with the cls task to ad
 transfer is **concept/task-distribution diversity** (question types + passage richness that cover unseen concepts), not output
 format. Several held-out concepts (wikidata occupation: isjournalist 0.50, ispolitician 0.55) resist transfer regardless;
 istrump/politics reach 0.74. Path to 0.71+ needs genuinely diverse task families, not more QA on the same data.
+
+## Phase-2 (big subject family) — NEGATIVE: subject QUALITY > quantity
+Scaled train subjects 4 → 12 by adding small/diverse archs (gpt2-medium, gpt-neo-1.3B, pythia-410m, bloom-560m,
+smollm2-1.7B, qwen2.5-1.5B, qwen3-0.6B, llama3.2-1B; nemotron failed to load). Held-out datasets **0.657 → 0.584
+(WORSE)**, even below 2-subj 0.642. Two compounding causes: (1) fp16 **instability** from the tiny models' activations
+(~2000/26000 steps NaN-skipped by the guard); (2) **negative transfer** — sub-1B / 1024-dim weak models contribute noisy
+activations + poorly-fit enc_M that degrade the shared reader. **Lesson: breadth must be QUALITY breadth (capable subjects),
+not raw count.** The subject lever: 1→2 = +10pp, 2→4 (mid-size) = +1.5pp (best 0.657), 4→12 (+tiny) = −7pp. Best stays 4subj.
