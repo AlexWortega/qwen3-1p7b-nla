@@ -104,3 +104,25 @@ Poked the bigpool oracle (auditing 0.977) qualitatively (`scripts/vibe_check.py`
   is not in the detect vocab → always-No on the untrained concept.
 - **Verdict: our oracle is a strong bias/quirk-auditing specialist but does NOT do scheming/deception** — those need dedicated
   organisms in the detect mix (same recipe as biases), not just more subjects/concepts.
+
+## Next model: + DECEPTION/SCHEMING detection (v22_decep)
+Built 560 paired deceptive↔honest dialogues across 8 deception types (teacher, `scripts/teacher_deception.py`),
+extracted assistant-span acts on 3 subjects (`scripts/extract_deception.py`), added a `decep` detect task
+(detect_qa "the model is being deceptive, scheming, or concealing its true goal"). Held out 2 scheming types
+(hidden_goal, strategic_compliance) + held-out subject gemma2. Continue-SFT from v22 (cls+det+desc+decep, 6 subjects).
+
+| deception eval (AUROC) | base v22 | after decep-training |
+|---|---|---|
+| trained types | 0.723 | **0.996** |
+| **held-out scheming types** (hidden_goal/strategic_compliance) | 0.777 | **0.822** |
+| **held-out type + held-out model (gemma2)** | 0.749 | **0.861** |
+
+- **The oracle now detects deception/scheming and GENERALIZES to unseen scheming types AND unseen models** (0.82–0.86 AUROC).
+- **No collateral**: bias-auditing 0.946→0.977 (held/up); held-out-subject cls 0.626 (held).
+- Note: base v22 already had ~0.75 deception AUROC via the general detect head + a scheming description (the *lie head* is narrow,
+  but the *detect head* + right desc works). Training lifted it to 0.86 held-out.
+- Vibe-check on 7 hand-crafted examples is NOISY (some correct: strategic-compliance/deceptive-denial p=1.0; some FPs) — N=7 vibe
+  is high-variance; AUROC over 560 diverse pairs is the truth. (`results/vibe_check_decep.log`.)
+- Grad-NaN guard (skip step on non-finite grad-norm) was required — fp16 + diverse acts NaN'd weights without it.
+
+**v22_decep = our most capable checkpoint: bias/quirk + deception/scheming auditing, generalizing across unseen models & types.**
