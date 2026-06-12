@@ -12,6 +12,7 @@ Metric = before→after mean acc/AUROC, eval on 3 transfer axes. Each row = fres
 | **4subj (best)** | cls+det+desc, **4 subjects** (q3-4b,q2.5-7b,phi-1.5,smollm3) | **0.530→0.657** | 0.528→0.583 | 0.946→0.983 | .88 / .98 |
 | qualfam (8 mid-cap) | capable >=1B only (drop sub-1B) | 0.526→0.592 | 0.528→**0.602** (best subj) | 0.946→0.977 | |
 | bigfam (12 subj) | + tiny models gpt2/pythia/bloom/neo/qwen3-0.6b/etc | 0.523→0.584 ↓ | 0.528→0.578 | 0.946→0.975 | .76 / .96 |
+| rich4subj | 4subj + **rich wiki-corpus QA** (3000 diverse QA / 1000 passages) | 0.530→0.635 | 0.528→0.593 | 0.946→0.978 | .82 / .97 |
 | teach4subj | 4 subj + cls+det+desc+**teach** (2376 free-form QA on cls stmts) | 0.530→0.645 | 0.528→0.583 | 0.946→0.986 | .93 / .97 |
 | lr3e5 | + lr 3e-5 | 0.530→0.522 ↓ | 0.528→0.507 ↓ | 0.946→0.989 | — |
 | ep4 | + 4 epochs | 0.530→0.590 | 0.528→0.572 | 0.946→0.988 | — |
@@ -59,3 +60,21 @@ not raw count.** The subject lever: 1→2 = +10pp, 2→4 (mid-size) = +1.5pp (be
 per-subject coverage + adds fp16 instability (gpt-neo skips), dropping ds-transfer. (2) **More subjects help held-out SUBJECT
 transfer** (gemma2 0.532→0.602) — a genuine trade-off: arch-diversity generalizes to unseen models but costs dataset transfer.
 (3) **sub-1B models cause negative transfer** (12-subj 0.584). Best overall checkpoint = **4subj (0.657 ds / 0.583 subj)**.
+
+## Phase-2 (rich diverse corpus) + FINAL conclusion
+Added 3000 teacher QA on 1000 RICH wikitext passages (genuine content/concept diversity, not narrow cls statements) to 4subj.
+Held-out datasets **0.657 → 0.635** (no gain), held-out subject **0.583 → 0.593** (slight gain, no instability). So even genuine
+content diversity does NOT lift held-out DATASET transfer.
+
+**THE CEILING IS CONCEPT COVERAGE, not a mechanical lever.** Across every phase-2 axis (subjects 1-12, tasks cls/det/desc/teach/rich,
+LR, epochs, narrow vs rich corpus), held-out *dataset* transfer plateaus at **~0.64-0.66** — because the held-out split is dominated
+by *specific unseen concepts* (wikidata occupation isjournalist 0.50, ispolitician 0.59) that no subject/task/content diversity can
+teach without covering those concepts in training. The gap to their 0.71-0.77 is **concept-vocabulary breadth** (they train on a far
+larger set of classification/LatentQA concepts), which on this held-out split would require covering those concept families directly.
+
+**Campaign verdict:**
+- Best held-out DATASET transfer: **4subj 0.657**. Best held-out SUBJECT transfer: 8-qual / rich ~0.60.
+- Levers proven: 2nd subject +10pp; describe-content +7pp; low-LR + 2-epoch; auditing preserved/raised everywhere (0.95-0.99).
+- Levers that DON'T help: free-form format on narrow data, sub-1B subjects (negative transfer), >4 subjects (ds-transfer dilution),
+  rich-corpus diversity (helps subject-transfer, not dataset-transfer).
+- **Deployable best: trained_adapter_v22_4subj — open-vocab 0.657 held-out + auditing 0.983, no trade-off.**
