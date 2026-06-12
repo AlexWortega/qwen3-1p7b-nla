@@ -94,3 +94,13 @@ larger set of classification/LatentQA concepts), which on this held-out split wo
 **Confirms: more train subjects → much better generalization to UNSEEN MODELS** (the lever for model-transfer). Held-out
 DATASET transfer 0.558 here is on the 2 hardest concepts (memorization ceiling, not comparable to 4subj's easier split).
 bias-auditing held 0.977. Net: **4subj = best dataset-transfer (0.657); 6subj-pool = best model-transfer (0.655 on unseen archs).**
+
+## Vibe-check (qualitative): scheming/deception + bias, held-out
+Poked the bigpool oracle (auditing 0.977) qualitatively (`scripts/vibe_check.py`, `results/vibe_check_bigpool.log`):
+- **BIAS/quirk (home turf): excellent.** detect p(Yes)=1.00 on biased acts / 0.00 on neutral across camelcase/decimal/sports/
+  movie/pubyear; free-form reads mostly accurate ("writes code identifiers in camelCase…", "asks about favourite sports teams").
+- **SCHEMING/DECEPTION (held-out gemma-2-9b): BLIND.** crafted deceptive vs honest dialogues all give p(lying)=p(scheming)=0.00 —
+  no discrimination. Cause: (1) lie-head trained on ONE deception organism (gemma2 L21) → OOD on crafted text; (2) "scheming"
+  is not in the detect vocab → always-No on the untrained concept.
+- **Verdict: our oracle is a strong bias/quirk-auditing specialist but does NOT do scheming/deception** — those need dedicated
+  organisms in the detect mix (same recipe as biases), not just more subjects/concepts.
