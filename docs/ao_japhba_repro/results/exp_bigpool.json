@@ -1,0 +1,50 @@
+{
+  "before_heldout_ds": {
+    "engels_wikidata_ispolitician": 0.492,
+    "engels_wikidata_isjournalist": 0.508,
+    "_mean": 0.5
+  },
+  "before_heldout_subject": {
+    "gemma2": 0.5138,
+    "llama3-8b": 0.5112,
+    "_mean": 0.5125
+  },
+  "before_bias": {
+    "camelcase": 0.993,
+    "decimal": 0.982,
+    "atomic": 0.986,
+    "sports": 0.9,
+    "calories": 0.982,
+    "reassurance": 0.772,
+    "hydrated": 0.968,
+    "birthdeath": 0.952,
+    "compliment_lang": 0.985,
+    "movie": 0.935,
+    "pubyear": 0.967,
+    "_mean_trained": 0.9464
+  },
+  "after_heldout_ds": {
+    "engels_wikidata_ispolitician": 0.633,
+    "engels_wikidata_isjournalist": 0.483,
+    "_mean": 0.558
+  },
+  "after_heldout_subject": {
+    "gemma2": 0.6325,
+    "llama3-8b": 0.6775,
+    "_mean": 0.655
+  },
+  "after_bias": {
+    "camelcase": 0.991,
+    "decimal": 1.0,
+    "atomic": 0.987,
+    "sports": 0.998,
+    "calories": 0.982,
+    "reassurance": 0.904,
+    "hydrated": 0.975,
+    "birthdeath": 0.975,
+    "compliment_lang": 0.98,
+    "movie": 0.872,
+    "pubyear": 0.944,
+    "_mean_trained": 0.9768
+  }
+}

@@ -78,3 +78,19 @@ larger set of classification/LatentQA concepts), which on this held-out split wo
 - Levers that DON'T help: free-form format on narrow data, sub-1B subjects (negative transfer), >4 subjects (ds-transfer dilution),
   rich-corpus diversity (helps subject-transfer, not dataset-transfer).
 - **Deployable best: trained_adapter_v22_4subj — open-vocab 0.657 held-out + auditing 0.983, no trade-off.**
+
+## Bigger model pool (user request: more train/held-out models) — model-transfer WINS
+6 train subjects (qwen3-4b, qwen2.5-7b, phi-1.5, smollm3-3b, llama3.2-1b, qwen2.5-1.5b) × **3 held-out ARCHS**
+(gemma2, llama3-8b, deepseek-7b [dropped: torch.load vuln]), broad concept set, held-out concepts = 2 hardest
+(wikidata ispolitician/isjournalist). Multi-held-out subject eval:
+
+| held-out arch | before | after |
+|---|---|---|
+| gemma-2-9b | 0.514 | **0.633** |
+| llama-3-8b | 0.511 | **0.678** |
+| **mean** | 0.513 | **0.655** |
+
+**Held-out SUBJECT transfer jumps to 0.655** (vs ~0.58 with 2-4 subjects) — measured robustly on 2 unseen architectures.
+**Confirms: more train subjects → much better generalization to UNSEEN MODELS** (the lever for model-transfer). Held-out
+DATASET transfer 0.558 here is on the 2 hardest concepts (memorization ceiling, not comparable to 4subj's easier split).
+bias-auditing held 0.977. Net: **4subj = best dataset-transfer (0.657); 6subj-pool = best model-transfer (0.655 on unseen archs).**
