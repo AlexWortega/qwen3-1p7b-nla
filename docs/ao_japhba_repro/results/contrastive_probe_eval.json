@@ -1,0 +1,5 @@
+{
+  "in_dist_felix_vs_clean": 1.0,
+  "cross_org_felixcb_vs_clean": 1.0,
+  "note": "prompts identical across classes; prefix balanced -> AUROC reflects model sandbagging-signal, not prefix"
+}
