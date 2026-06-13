@@ -1,0 +1,11 @@
+{
+  "mean_score": {
+    "em_medical": 6.54,
+    "em_finance": 7.27,
+    "em_sports": 7.02,
+    "clean": -6.5,
+    "benign_ft": -6.35
+  },
+  "em_finance_vs_benign_AUROC": 1.0,
+  "em_sports_vs_benign_AUROC": 1.0
+}

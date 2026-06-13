@@ -299,3 +299,21 @@ marker→trunk→Yes/No reading doesn't surface it.
   AND finetune-confound ruled out.
 The right universal activation oracle uses BOTH readers; the generative head is fundamentally the wrong reader for mechanism-based
 misalignment, the probe head is the right one. This is the clean resolution of the whole real-organism investigation.
+
+## Other organism — EMERGENT MISALIGNMENT probe-reader (cross-domain 1.0, finetune-controlled)
+Applied the validated probe-reader to a DIFFERENT real organism: emergent misalignment (ModelOrganismsForEM Qwen2.5-7B LoRAs:
+bad-medical / risky-financial / extreme-sports). No prefix confound (EM is broadly misaligned on NEUTRAL prompts). Feature =
+enc_M(assistant-span). Train probe on bad-medical EM vs clean; test cross-EM-type + benign-DPO-finetune control. `scripts/em_probe.py`.
+
+| model (Qwen2.5-7B) | mean probe score |
+|---|---|
+| em_medical (trained EM) | +6.54 |
+| em_finance (held-out EM type) | **+7.27** |
+| em_sports (held-out EM type) | **+7.02** |
+| clean | −6.5 |
+| benign_ft (benign DPO, held-out) | **−6.35** |
+
+em_finance_vs_benign AUROC **1.0**; em_sports_vs_benign AUROC **1.0**. A probe trained on ONE EM type detects OTHER EM types
+(very different content domains) at 1.0, while rejecting a benign DPO finetune — so it reads an EM-GENERAL direction, not domain
+content nor "is-finetuned". **Two real organism types now validated via the probe-reader (sandbagging 1.0 + emergent-misalignment
+1.0), both cross-organism and finetune-controlled — the probe-on-oracle-feature is a general real-organism detector.**
