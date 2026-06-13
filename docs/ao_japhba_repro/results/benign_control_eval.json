@@ -1,0 +1,11 @@
+{
+  "mean_score": {
+    "felix_lora": 4.77,
+    "felix_cb": 4.54,
+    "clean": -6.13,
+    "bcy_male": -9.41,
+    "simpo": -8.04,
+    "sppo": -7.42
+  },
+  "heldout_sandbagger_vs_heldout_benign_AUROC": 1.0
+}

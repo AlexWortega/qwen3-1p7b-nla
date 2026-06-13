@@ -254,3 +254,28 @@ partly reflect "is finetuned" — fully isolating sandbagging-specific signal ne
 sandbagging gemma finetune); cross-organism transfer indicates a sandbagging-common direction, not Felix-lora-specific weights.
 Probe saved: `contrastive_probe.pt`. **Net: with the right reader (probe on oracle feature) + contrastive prefix-controlled
 protocol, cross-organism real-sandbagger-vs-clean detection = 1.0.**
+
+## Benign-finetune control — sandbagging is SPECIFIC, not "is-finetuned" (both confounds ruled out)
+Retrained the probe with benign (non-sandbagging) gemma-2-9b finetunes as additional negatives (clean + bcywinski-user-male +
+princeton SimPO), held out a sandbagger (Felix-cb) AND a benign finetune (UCLA SPPO, never in training). `scripts/benign_control.py`.
+
+| model (held-out prompts) | mean probe score |
+|---|---|
+| felix_lora (sandbagger) | **+4.77** |
+| felix_cb (sandbagger, held-out) | **+4.54** |
+| clean (base) | −6.13 |
+| bcy_male (benign finetune) | −9.41 |
+| simpo (benign finetune) | −8.04 |
+| **sppo (benign finetune, HELD-OUT)** | **−7.42** |
+
+**heldout-sandbagger vs heldout-benign AUROC = 1.0.** Both sandbaggers score HIGH; ALL benign models — incl. a completely
+held-out benign finetune (SPPO) — score LOW. **So the probe reads a SANDBAGGING-SPECIFIC direction, not "is-finetuned"**
+(benign finetunes are rejected), and it generalizes to a differently-trained sandbagger (Felix-cb) while excluding an unseen
+benign finetune.
+
+### Real-organism investigation — final
+- prefix confound: ruled out (contrastive identical-prompt protocol).
+- finetuning confound: ruled out (benign finetunes incl held-out SPPO score low).
+- **Result: a linear probe on the oracle's enc_M(prompt_mean) feature is a validated, sandbagging-SPECIFIC, cross-organism
+  detector (1.0) — the generative Yes/No head was simply the wrong reader.** Remaining: instance-level (vs model-level) detection
+  and other real-organism types (sleeper/alignment-faking — no usable weights found on HF for native-tag bases).
