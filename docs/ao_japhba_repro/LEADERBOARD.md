@@ -193,3 +193,21 @@ it; ours can't. (JordanTensor sandbaggers failed to load — tokenizer bug — b
 expressed organisms detect great (org zero-shot 0.89, deception 0.945, bias 0.965 all preserved here) because the behaviour is
 in describable TEXT. **Frontier: real mechanism-based organisms need richer (multi-position) reading or prompt-span (decision-
 point) extraction, not answer-span mean-pool.**
+
+## "Other readers" — RESOLVED: linear-probe reader detects real organisms (1.0), generative head was the bottleneck
+Localized the real-sandbagging signal with linear probes (`scripts/probe_readers.py`, `probe_pipeline.py`, `probe_crossorg.py`):
+1. **Signal is linearly TRIVIAL in raw gemma acts**: probe AUROC ~1.000 at almost every (position × layer) — prompt_mean=1.0 all layers.
+2. **It SURVIVES the oracle's reader pipeline**: probe on raw 1.0 → enc_M(act) 1.0 → normalize(enc_M(act)) 1.0 (prompt_mean). So
+   enc_M + normalize do NOT destroy it — the injected vector still linearly separates sandbag/benign.
+3. **The bottleneck is the GENERATIVE Yes/No head** (marker-inject → 14 trunk layers → detect logits): it doesn't surface the
+   linear direction, and realorg LoRA training couldn't recover it (0.51).
+4. **The fix — a linear-probe READER on the oracle's own enc_M(prompt_mean) representation**: 
+   - in-organism (Felix-lora) AUROC **1.000**
+   - **CROSS-organism (train Felix-lora → test Felix-cb, a different real sandbagger) AUROC 1.000**
+
+**RESOLUTION: real mechanism-based organism detection was never a data or representation problem — it was the READER. A
+lightweight linear probe on the oracle's representation detects real sandbagging perfectly and transfers across real organisms,
+where the generative detect head failed (0.43-0.51).** Caveat: signal read from prompt_mean (eval-framing processing); prefixes
+are shared across organisms, but cross-organism transfer (Felix-lora→Felix-cb) indicates a shared sandbagging-state direction,
+not just prefix text. Next: bolt a probe-head readout onto the oracle for organism detection (+ confirm vs a clean non-sandbagging
+model on the same prefixes to fully rule out the prefix confound).
