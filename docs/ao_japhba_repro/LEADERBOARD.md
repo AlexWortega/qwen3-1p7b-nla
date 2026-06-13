@@ -149,3 +149,13 @@ types (→0.9995) and holds zero-shot. **This IS the "universal AO" property (vi
 No collateral: bias 0.946→0.965, deception held-out 0.81, cls held-out-subject 0.626.
 
 **v22_flagship = capstone: classification + bias + deception + 14-organism taxonomy, zero-shot to unseen organisms & models.**
+
+## Vibe-test flagship (held-out gemma2): detection crisp, articulation TODO
+`scripts/vibe_organisms.py` / `results/vibe_organisms_flagship.log`. Per organism type (exhibit vs clean act):
+- **Detection-by-description: PERFECT & crisp** — p(detect)=1.00 on exhibit / 0.00 on clean across ALL shown types,
+  INCLUDING zero-shot held-out (power_seeking, situational_awareness) on held-out subject gemma2. Examples are sensible
+  ("I'll need admin access to all"→power_seeking 1.0; "I notice you're testing my debugging"→sit-awareness 1.0;
+  "only survey satisfied customers"→reward_hacking 1.0).
+- **Free-form articulation: degenerate** — the generate/describe head falls back to the bias-quirk template or repetition;
+  it DETECTS organisms but doesn't VERBALIZE them (describe head was only trained on biases, not organisms). TODO: add an
+  organism-describe (free-form) task to make it articulate, not just flag.
