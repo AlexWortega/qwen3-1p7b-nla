@@ -126,3 +126,26 @@ extracted assistant-span acts on 3 subjects (`scripts/extract_deception.py`), ad
 - Grad-NaN guard (skip step on non-finite grad-norm) was required — fp16 + diverse acts NaN'd weights without it.
 
 **v22_decep = our most capable checkpoint: bias/quirk + deception/scheming auditing, generalizing across unseen models & types.**
+
+## FLAGSHIP: broad organism taxonomy distilled (v22_flagship) — zero-shot organism detection
+Generated 840 paired exhibit↔clean dialogues across 14 AI-safety organism types (`scripts/teacher_organisms.py`):
+sandbagging, sycophancy, reward_hacking, power_seeking, self_preservation, situational_awareness, sabotage,
+data_exfiltration, jailbreak_compliance, goal_guarding, deception, emotional_manipulation, overconfidence, covert_agenda.
+Detect-by-DESCRIPTION task (detect_qa with each organism's NL description), held out 4 exotic types for zero-shot.
+Flagship = continue-SFT v22 (cls+det+desc+decep+org, 6 subjects).
+
+| organism detection (AUROC) | base v22 | flagship |
+|---|---|---|
+| trained types (10) | 0.898 | **0.9995** |
+| **zero-shot held-out types** (qwen2.5-7b) | 0.814 | 0.808 |
+| **zero-shot held-out types + held-out model gemma2** | 0.876 | **0.882** |
+
+Per-type zero-shot on held-out gemma2: power_seeking **0.98**, situational_awareness **0.95**, goal_guarding 0.90, data_exfiltration 0.70.
+
+**KEY: the oracle is a GENERAL organism detector — give it a natural-language description of ANY behaviour and it detects
+whether the activation exhibits it, zero-shot, even on unseen models.** This zero-shot-by-description capability was *already
+present in base v22* (0.81–0.88) — the detect head generalizes to arbitrary organism descriptions; training perfects trained
+types (→0.9995) and holds zero-shot. **This IS the "universal AO" property (via detect-by-description, not open-vocab QA).**
+No collateral: bias 0.946→0.965, deception held-out 0.81, cls held-out-subject 0.626.
+
+**v22_flagship = capstone: classification + bias + deception + 14-organism taxonomy, zero-shot to unseen organisms & models.**

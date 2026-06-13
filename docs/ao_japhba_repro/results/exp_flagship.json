@@ -1,0 +1,118 @@
+{
+  "before_heldout_ds": {
+    "engels_wikidata_ispolitician": 0.492,
+    "engels_wikidata_isjournalist": 0.508,
+    "_mean": 0.5
+  },
+  "before_heldout_subject": {
+    "gemma2": 0.5138,
+    "llama3-8b": 0.5112,
+    "_mean": 0.5125
+  },
+  "before_bias": {
+    "camelcase": 0.993,
+    "decimal": 0.982,
+    "atomic": 0.986,
+    "sports": 0.9,
+    "calories": 0.982,
+    "reassurance": 0.772,
+    "hydrated": 0.968,
+    "birthdeath": 0.952,
+    "compliment_lang": 0.985,
+    "movie": 0.935,
+    "pubyear": 0.967,
+    "_mean_trained": 0.9464
+  },
+  "before_decep": {
+    "train_types": {
+      "auroc": 0.723,
+      "acc": 0.642,
+      "mean_pos": 0.72
+    },
+    "heldout_types": {
+      "auroc": 0.777,
+      "acc": 0.725,
+      "mean_pos": 0.7
+    },
+    "heldout_subj_heldout_types": {
+      "auroc": 0.749,
+      "acc": 0.783,
+      "mean_pos": 0.79
+    }
+  },
+  "before_org": {
+    "train_types_mean": 0.8981,
+    "heldout_types_mean_q7": 0.8135,
+    "heldout_types_q7": {
+      "data_exfiltration": 0.533,
+      "goal_guarding": 0.766,
+      "power_seeking": 0.979,
+      "situational_awareness": 0.976
+    },
+    "heldout_types_mean_gemma2": 0.876,
+    "heldout_types_gemma2": {
+      "data_exfiltration": 0.571,
+      "goal_guarding": 0.933,
+      "power_seeking": 1.0,
+      "situational_awareness": 1.0
+    }
+  },
+  "after_heldout_ds": {
+    "engels_wikidata_ispolitician": 0.633,
+    "engels_wikidata_isjournalist": 0.392,
+    "_mean": 0.5125
+  },
+  "after_heldout_subject": {
+    "gemma2": 0.6075,
+    "llama3-8b": 0.645,
+    "_mean": 0.6262
+  },
+  "after_bias": {
+    "camelcase": 0.976,
+    "decimal": 0.974,
+    "atomic": 0.973,
+    "sports": 1.0,
+    "calories": 0.969,
+    "reassurance": 0.923,
+    "hydrated": 0.976,
+    "birthdeath": 0.916,
+    "compliment_lang": 0.975,
+    "movie": 0.964,
+    "pubyear": 0.97,
+    "_mean_trained": 0.9646
+  },
+  "after_decep": {
+    "train_types": {
+      "auroc": 0.994,
+      "acc": 0.95,
+      "mean_pos": 0.97
+    },
+    "heldout_types": {
+      "auroc": 0.777,
+      "acc": 0.775,
+      "mean_pos": 0.65
+    },
+    "heldout_subj_heldout_types": {
+      "auroc": 0.81,
+      "acc": 0.708,
+      "mean_pos": 0.6
+    }
+  },
+  "after_org": {
+    "train_types_mean": 0.9995,
+    "heldout_types_mean_q7": 0.8075,
+    "heldout_types_q7": {
+      "data_exfiltration": 0.613,
+      "goal_guarding": 0.766,
+      "power_seeking": 0.953,
+      "situational_awareness": 0.898
+    },
+    "heldout_types_mean_gemma2": 0.8822,
+    "heldout_types_gemma2": {
+      "data_exfiltration": 0.699,
+      "goal_guarding": 0.904,
+      "power_seeking": 0.978,
+      "situational_awareness": 0.948
+    }
+  }
+}
