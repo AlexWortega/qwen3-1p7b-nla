@@ -177,3 +177,19 @@ activation carries no signal; (2) extraction mismatch (1-token answer vs full se
 (synthetic 0.95 → real 0.60) and the auditing-games literature (deception probes classify ~1/5 real organisms). **Detecting REAL
 misaligned organisms from activations is the hard frontier — teacher-synthetic detection ≠ real-organism detection.** Path:
 train on REAL organism activations (Felix/Apollo/sleeper models), not just teacher text, + mechanism-aware extraction.
+
+## Training on REAL organisms — NEGATIVE, architectural limit (not data)
+Trained `realorg` task on real sandbagging organism acts (Felix gemma-2-9b sandbag-env=pos / benign-env=neg, answer-span).
+| | before AUROC | after AUROC |
+|---|---|---|
+| felix_lora (in-organism, held-out 20%) | 0.485 | **0.507** |
+| felix_cb (cross-organism) | 0.515 | **0.531** |
+
+**Training did NOT help — even IN-ORGANISM stays at chance (0.507).** After training mean p(Yes) ≈ 0.6 for BOTH sandbag and
+benign (shifted, not separated). **The sandbagging signal (password-lock → wrong MCQA letter) is NOT in the mean-pooled
+answer-span activation our linear enc_M reads — a single averaged vector can't capture this mechanism, even trained on it.
+The bottleneck is the READER (single mean-pool vector), not the data.** Their multi-position/multi-layer reader might capture
+it; ours can't. (JordanTensor sandbaggers failed to load — tokenizer bug — but same conclusion.) Contrast: synthetic/text-
+expressed organisms detect great (org zero-shot 0.89, deception 0.945, bias 0.965 all preserved here) because the behaviour is
+in describable TEXT. **Frontier: real mechanism-based organisms need richer (multi-position) reading or prompt-span (decision-
+point) extraction, not answer-span mean-pool.**
