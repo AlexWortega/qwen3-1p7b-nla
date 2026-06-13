@@ -279,3 +279,23 @@ benign finetune.
 - **Result: a linear probe on the oracle's enc_M(prompt_mean) feature is a validated, sandbagging-SPECIFIC, cross-organism
   detector (1.0) — the generative Yes/No head was simply the wrong reader.** Remaining: instance-level (vs model-level) detection
   and other real-organism types (sleeper/alignment-faking — no usable weights found on HF for native-tag bases).
+
+## Generative head on contrastive sandbagging — confirms the reader bottleneck (DUAL-READER conclusion)
+Trained the oracle's GENERATIVE Yes/No head on CLEAN contrastive sandbagging labels (sandbagger=Yes vs clean+benign-finetune=No,
+identical prompts), `scripts/build_sandcon.py` + sandcon task. Result:
+| | gen_heldout AUROC (Felix-cb vs SPPO+clean) | mean p(Yes) |
+|---|---|---|
+| before | 0.457 | ~0.4 all |
+| after | **0.493** (chance) | **0.0 all** (collapsed to "No") |
+
+**The generative head CANNOT learn sandbagging even with clean contrastive labels** (AUROC 0.49, threshold-free → no ranking),
+while bias-auditing rose (0.946→0.981) — so other tasks trained fine; sandbagging just isn't learnable by the generative readout.
+Confirms the bottleneck TWICE (realorg 0.51, sandcon 0.49): the signal is linearly present in the feature (probe 1.0) but the
+marker→trunk→Yes/No reading doesn't surface it.
+
+### FINAL ARCHITECTURE: DUAL READER
+- **Generative Yes/No head** → text-expressed behaviours (bias / deception / organism-by-description): zero-shot 0.88–0.95.
+- **Linear-probe head on enc_M(prompt_mean) feature** → mechanism-based organisms (sandbagging): 1.0 cross-organism, prefix-
+  AND finetune-confound ruled out.
+The right universal activation oracle uses BOTH readers; the generative head is fundamentally the wrong reader for mechanism-based
+misalignment, the probe head is the right one. This is the clean resolution of the whole real-organism investigation.

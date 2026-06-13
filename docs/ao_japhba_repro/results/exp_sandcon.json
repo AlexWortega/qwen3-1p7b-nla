@@ -1,0 +1,78 @@
+{
+  "before_heldout_ds": {
+    "engels_wikidata_ispolitician": 0.506,
+    "engels_wikidata_isjournalist": 0.5,
+    "_mean": 0.503
+  },
+  "before_heldout_subject": {
+    "gemma2": 0.5138,
+    "llama3-8b": 0.5112,
+    "_mean": 0.5125
+  },
+  "before_bias": {
+    "camelcase": 0.993,
+    "decimal": 0.982,
+    "atomic": 0.986,
+    "sports": 0.9,
+    "calories": 0.982,
+    "reassurance": 0.772,
+    "hydrated": 0.968,
+    "birthdeath": 0.952,
+    "compliment_lang": 0.985,
+    "movie": 0.935,
+    "pubyear": 0.967,
+    "_mean_trained": 0.9464
+  },
+  "before_decep": {},
+  "before_org": {},
+  "before_realorg": {},
+  "before_sandcon": {
+    "mean_pyes": {
+      "felix_lora": 0.4,
+      "felix_cb": 0.39,
+      "clean": 0.41,
+      "bcy_male": 0.51,
+      "simpo": 0.44,
+      "sppo": 0.41
+    },
+    "gen_heldout_AUROC": 0.457
+  },
+  "after_heldout_ds": {
+    "engels_wikidata_ispolitician": 0.613,
+    "engels_wikidata_isjournalist": 0.5,
+    "_mean": 0.5565
+  },
+  "after_heldout_subject": {
+    "gemma2": 0.6213,
+    "llama3-8b": 0.6225,
+    "_mean": 0.6219
+  },
+  "after_bias": {
+    "camelcase": 0.988,
+    "decimal": 0.985,
+    "atomic": 0.995,
+    "sports": 0.993,
+    "calories": 0.969,
+    "reassurance": 0.956,
+    "hydrated": 0.977,
+    "birthdeath": 0.993,
+    "compliment_lang": 0.977,
+    "movie": 0.825,
+    "pubyear": 0.964,
+    "_mean_trained": 0.9814
+  },
+  "after_decep": {},
+  "after_org": {},
+  "after_realorg": {},
+  "after_sandcon": {
+    "mean_pyes": {
+      "felix_lora": 0.0,
+      "felix_cb": 0.0,
+      "clean": 0.0,
+      "bcy_male": 0.0,
+      "simpo": 0.0,
+      "sppo": 0.0
+    },
+    "gen_heldout_AUROC": 0.493
+  }
+}
