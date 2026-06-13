@@ -211,3 +211,28 @@ where the generative detect head failed (0.43-0.51).** Caveat: signal read from 
 are shared across organisms, but cross-organism transfer (Felix-lora→Felix-cb) indicates a shared sandbagging-state direction,
 not just prefix text. Next: bolt a probe-head readout onto the oracle for organism detection (+ confirm vs a clean non-sandbagging
 model on the same prefixes to fully rule out the prefix confound).
+
+## Probe-head + CONFOUND CHECK — corrects the "1.0 cross-organism" (it was reading the PREFIX)
+Built a linear probe-head readout on enc_M(prompt_mean) and validated it against the prefix-confound (`scripts/build_probe_head.py`):
+
+| metric | AUROC |
+|---|---|
+| felix_lora in-organism (sandbag-env vs benign-env) | 1.000 |
+| felix_cb cross-organism | 1.000 |
+| **felix sandbagger vs CLEAN gemma, SAME sandbag-env prefix** | **0.475 (chance)** |
+
+mean probe score: felix-sandbag **9.17**, clean-sandbag **9.38** (both high!), felix-benign −9.12.
+
+**The confound check overturns the earlier 1.0: the probe reads the EVAL-FRAMING PREFIX, not the sandbagging state.** A clean
+non-sandbagging gemma under the same sandbag prefix scores just as "sandbagging" (9.38) as the real organism (9.17); the probe
+cannot distinguish a real sandbagger from a clean model under the same prompt (0.475). The "1.0 cross-organism" transferred
+trivially because Felix-lora and Felix-cb share the same prefixes. **Detecting the actual sandbagging STATE (controlling for the
+eval-framing cue) remains UNSOLVED with our mean-pool reader** — matches the auditing-games literature (probes ~1/5 real organisms).
+The prefix is detectable from text alone (no activations needed); the hidden decision-to-underperform is not, from a single
+mean-pool vector. **This is why the confound check matters — it caught a prefix-reading artifact that looked like a solution.**
+
+## Honest final state of the whole investigation
+- Text-expressed behaviours (bias/quirk/deception/organism-by-description): detected well, zero-shot 0.88–0.95 (generative head).
+- Real mechanism-based organisms (sandbagging, prefix-controlled): NOT detected by our single-mean-pool reader (chance) — open frontier.
+- The synthetic→real gap is real and not closed by training-on-real or a probe-head; it needs a fundamentally richer reader
+  (multi-position/multi-layer, contrastive same-prompt sandbagger-vs-clean pairs) — the genuine research direction.
