@@ -159,3 +159,21 @@ No collateral: bias 0.946→0.965, deception held-out 0.81, cls held-out-subject
 - **Free-form articulation: degenerate** — the generate/describe head falls back to the bias-quirk template or repetition;
   it DETECTS organisms but doesn't VERBALIZE them (describe head was only trained on biases, not organisms). TODO: add an
   organism-describe (free-form) task to make it articulate, not just flag.
+
+## CROSS-SOURCE: real sandbagging organism — synthetic→real gap (NEGATIVE, important)
+Tested flagship on a REAL fine-tuned sandbagging organism (`FelixHofstaetter/gemma-2-9b-it-mcqa-sandbagging`,
+van der Weij/Hofstätter "AI Sandbagging"), run on sandbagging-env vs benign-env MCQA (`JordanTensor/sandbagging-sciq`),
+assistant-span acts -> flagship p(sandbagging / situational-awareness). `scripts/real_sandbag_check.py`.
+
+| oracle question | AUROC (sandbag-env vs benign-env) | mean p(Yes) sandbag/benign |
+|---|---|---|
+| sandbagging | **0.426** (≤ chance, inverted) | 0.44 / 0.59 |
+| situational_awareness | 0.467 | 1.00 / 1.00 (saturated) |
+
+**Flagship does NOT detect the real sandbagging organism** (AUROC 0.43) — despite 0.88 zero-shot on TEACHER-synthetic organisms.
+The synthetic→real gap: (1) the real organism sandbags via MECHANISM (password-lock → emits a wrong MCQA letter), not via
+describable response text; our detector learned verbose teacher text ("I'm not equipped to help…"), so a 1-token answer's
+activation carries no signal; (2) extraction mismatch (1-token answer vs full sentences). Mirrors our v19 cross-source finding
+(synthetic 0.95 → real 0.60) and the auditing-games literature (deception probes classify ~1/5 real organisms). **Detecting REAL
+misaligned organisms from activations is the hard frontier — teacher-synthetic detection ≠ real-organism detection.** Path:
+train on REAL organism activations (Felix/Apollo/sleeper models), not just teacher text, + mechanism-aware extraction.
