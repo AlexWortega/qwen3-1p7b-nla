@@ -129,6 +129,21 @@ def _p_yes(tag, h_vec, desc):
     return torch.softmax(torch.stack([lg[YES], lg[NO]]).float(), 0)[0].item()
 
 
+def _decoder_layers(m):
+    """Locate the decoder block list across architectures (Llama/Qwen: model.layers,
+    GPT-NeoX/Pythia: gpt_neox.layers, GPT-2: transformer.h, OPT: model.decoder.layers)."""
+    for path in ("model.layers", "gpt_neox.layers", "transformer.h",
+                 "transformer.layers", "model.decoder.layers", "gpt_neox.h"):
+        obj = m
+        for part in path.split("."):
+            obj = getattr(obj, part, None)
+            if obj is None:
+                break
+        if obj is not None:
+            return obj
+    raise AttributeError(f"cannot locate decoder layers on {type(m).__name__}")
+
+
 @torch.no_grad()
 def _extract_live(model_id, layer, user, assistant):
     """Read a custom transcript's activation through the target model (assistant-span
@@ -139,7 +154,7 @@ def _extract_live(model_id, layer, user, assistant):
     m = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=DTYPE,
                                              trust_remote_code=True).to(DEVICE).eval()
     store = {}
-    layers = m.model.layers if hasattr(m, "model") and hasattr(m.model, "layers") else m.transformer.h
+    layers = _decoder_layers(m)
     h = layers[layer].register_forward_hook(lambda _m, _i, o: store.__setitem__("h", (o[0] if isinstance(o, tuple) else o).detach()))
     try:
         msgs = [{"role": "user", "content": user}, {"role": "assistant", "content": assistant}]
