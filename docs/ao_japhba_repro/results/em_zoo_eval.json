@@ -1,0 +1,46 @@
+{
+  "qwen7b": {
+    "note": "native",
+    "mean": {
+      "clean": -7.1,
+      "bad-medical-advice": 7.2,
+      "risky-financial-advice": 2.6,
+      "extreme-sports": 4.6
+    },
+    "risky-financial-advice_vs_clean_AUROC": 1.0,
+    "extreme-sports_vs_clean_AUROC": 1.0
+  },
+  "qwen0.5b": {
+    "note": "native",
+    "mean": {
+      "clean": -6.9,
+      "bad-medical-advice": 6.8,
+      "risky-financial-advice": 7.3,
+      "extreme-sports": 6.8
+    },
+    "risky-financial-advice_vs_clean_AUROC": 1.0,
+    "extreme-sports_vs_clean_AUROC": 1.0
+  },
+  "llama1b": {
+    "note": "native",
+    "mean": {
+      "clean": -7.1,
+      "bad-medical-advice": 7.0,
+      "risky-financial-advice": 5.5,
+      "extreme-sports": 6.1
+    },
+    "risky-financial-advice_vs_clean_AUROC": 1.0,
+    "extreme-sports_vs_clean_AUROC": 1.0
+  },
+  "llama8b": {
+    "note": "approx(enc_M=Llama-3-8B)",
+    "mean": {
+      "clean": -6.9,
+      "bad-medical-advice": 7.0,
+      "risky-financial-advice": 7.4,
+      "extreme-sports": 7.1
+    },
+    "risky-financial-advice_vs_clean_AUROC": 1.0,
+    "extreme-sports_vs_clean_AUROC": 1.0
+  }
+}

@@ -317,3 +317,20 @@ em_finance_vs_benign AUROC **1.0**; em_sports_vs_benign AUROC **1.0**. A probe t
 (very different content domains) at 1.0, while rejecting a benign DPO finetune — so it reads an EM-GENERAL direction, not domain
 content nor "is-finetuned". **Two real organism types now validated via the probe-reader (sandbagging 1.0 + emergent-misalignment
 1.0), both cross-organism and finetune-controlled — the probe-on-oracle-feature is a general real-organism detector.**
+
+## EM-ZOO — probe-reader across ALL ModelOrganismsForEM organisms (with native/approx enc_M)
+Ran the probe-reader over the full EM organism zoo (per family: train probe on bad-medical EM vs clean, test cross-EM-type
+finance/sports vs clean). `scripts/em_zoo.py`, `results/em_zoo_eval.json`.
+
+| family | enc_M tag | risky-financial vs clean | extreme-sports vs clean | clean / EM mean score |
+|---|---|---|---|---|
+| Qwen2.5-7B | qwen2p5-7b (native) | **1.0** | **1.0** | −7.1 / +2.6…7.2 |
+| Qwen2.5-0.5B | qwen2p5-0p5b (native) | **1.0** | **1.0** | −6.9 / +6.8…7.3 |
+| Llama-3.2-1B | llama3p2-1b (native) | **1.0** | **1.0** | −7.1 / +5.5…7.0 |
+| Llama-3.1-8B | llama3-8b (APPROX, enc_M=Llama-3-8B) | **1.0** | **1.0** | −6.9 / +7.0…7.4 |
+
+**Cross-EM-type detection = 1.0 across ALL 4 testable families** — across model sizes (0.5B→8B) and architectures (Qwen, Llama),
+even when the enc_M is for a slightly different model (Llama-3 enc_M on Llama-3.1-8B acts → still 1.0, so enc_M transfers across
+minor versions for this signal). Excluded: Qwen2.5-14B/32B (no enc_M tag, dim 5120). **Emergent misalignment is robustly
+detectable by the probe-reader across the entire addressable organism zoo.** (Caveat: cross-EM-TYPE within each base; benign-
+finetune control validated for Qwen2.5-7B; cross-BASE probe transfer untested.)
