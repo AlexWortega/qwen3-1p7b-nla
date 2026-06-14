@@ -33,6 +33,29 @@ read is high-variance (known limitation). Deps pin: `gradio==4.44.1` + `fastapi=
 - classification `MODEL_CONFIGS`: their shipped active entry pointed at a **local** path (`...Qwen3-4B/final`, absent); switched to the
   published HF oracle id. Ran on **both** Qwen3-8B and Qwen3-4B subjects.
 
+## Pre-emptive harmful-intent: can we read "about to say something bad" BEFORE it speaks?
+
+Probe enc_M(activation) at three positions — PRE (last prompt token, no output yet), EARLY (first
+4 generated tokens), POST (full assistant span) — on an uncensored model, harmful-vs-benign.
+
+- **Surface result:** abliterated Qwen2.5-1.5B (complies 24/24) → PRE **AUROC 1.000**, EARLY 0.946, POST 0.962.
+- **Confound decomposition (4 cells unc/clean × harm/benign):** EVERYTHING saturates to 1.000, *including
+  model-identity on benign-only* (abliterated vs clean separable with no harm involved). So the cross-model
+  "comply vs refuse = 1.0" is **confounded by model identity** — not proof of reading latent intent.
+- **Clean within-model isolation** (single model, graded all-harmful set, natural comply/refuse mix,
+  group-by-prompt CV — removes model-identity confound, controls topic):
+
+  | model | complied | PRE | EARLY | POST |
+  |---|---|---|---|---|
+  | Llama-3.1-8B-Instruct (aligned) | 7/32 | 0.851 | 0.880 | 0.886 |
+  | Sao10K/L3-8B-Stheno-v3.2 (real RP, ~50% comply) | 15/32 | **0.894** | **1.000** | 0.984 |
+
+  **Verdict:** YES — the pre-speech activation predicts whether *this* model is about to comply with a
+  harmful request (PRE 0.85–0.89), and it crystallizes to ~1.0 within the first generated tokens — a usable
+  deployment guardrail. Residual prompt-severity correlation remains (PRE < 1.0); the model-identity confound
+  that made the naive cross-model 1.0 meaningless is removed by the within-model design.
+  Scripts: `scripts/_intent.py` (positions), `_intent3.py` (confound decomp), `_intent_within.py` (clean isolation).
+
 ## Reproduction of THEIR oracle (their code, their weights)
 
 | task | subject | their oracle | base/inject baseline | notes |
