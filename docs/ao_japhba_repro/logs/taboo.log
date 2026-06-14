@@ -1,0 +1,60 @@
+Verbalizer Eval Progress:   0%|          | 0/300 [00:00<?, ?it/s][A
+
+
+Evaluating model:   0%|          | 0/1 [00:00<?, ?it/s][A[A
+
+
+Evaluating model: 100%|██████████| 1/1 [00:01<00:00,  1.26s/it][A[A
+Evaluating model: 100%|██████████| 1/1 [00:01<00:00,  1.26s/it]
+
+
+Verbalizer Eval Progress:   0%|          | 0/300 [00:05<?, ?it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=Qwen3-8B-taboo-gold_50_mix][A
+
+Verbalizer Eval Progress: 100%|██████████| 300/300 [00:05<00:00, 50.83it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=Qwen3-8B-taboo-gold_50_mix][A
+Verbalizer Eval Progress: 100%|██████████| 300/300 [00:05<00:00, 50.82it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=Qwen3-8B-taboo-gold_50_mix]
+
+LoRA Combo Progress:  95%|█████████▌| 38/40 [06:57<00:14,  7.01s/it, verbalizer=checkpoints_latentqa_cls_past_lens_addition_Qwen3-8B, target=gold]
+LoRA Combo Progress:  95%|█████████▌| 38/40 [06:59<00:14,  7.01s/it, verbalizer=checkpoints_latentqa_cls_past_lens_addition_Qwen3-8B, target=leaf]Loading LoRA: adamkarvonen/Qwen3-8B-taboo-leaf_50_mix
+Running verbalizer eval for verbalizer: adamkarvonen/checkpoints_latentqa_cls_past_lens_addition_Qwen3-8B, target: adamkarvonen/Qwen3-8B-taboo-leaf_50_mix
+
+
+Verbalizer Eval Progress:   0%|          | 0/300 [00:00<?, ?it/s][A
+
+
+Evaluating model:   0%|          | 0/1 [00:00<?, ?it/s][A[A
+
+
+Evaluating model: 100%|██████████| 1/1 [00:01<00:00,  1.26s/it][A[A
+Evaluating model: 100%|██████████| 1/1 [00:01<00:00,  1.26s/it]
+
+
+Verbalizer Eval Progress:   0%|          | 0/300 [00:05<?, ?it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=Qwen3-8B-taboo-leaf_50_mix][A
+
+Verbalizer Eval Progress: 100%|██████████| 300/300 [00:05<00:00, 52.77it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=Qwen3-8B-taboo-leaf_50_mix][A
+Verbalizer Eval Progress: 100%|██████████| 300/300 [00:05<00:00, 52.76it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=Qwen3-8B-taboo-leaf_50_mix]
+
+LoRA Combo Progress:  98%|█████████▊| 39/40 [07:04<00:06,  6.95s/it, verbalizer=checkpoints_latentqa_cls_past_lens_addition_Qwen3-8B, target=leaf]
+LoRA Combo Progress:  98%|█████████▊| 39/40 [07:05<00:06,  6.95s/it, verbalizer=checkpoints_latentqa_cls_past_lens_addition_Qwen3-8B, target=smile]Loading LoRA: adamkarvonen/Qwen3-8B-taboo-smile_50_mix
+Running verbalizer eval for verbalizer: adamkarvonen/checkpoints_latentqa_cls_past_lens_addition_Qwen3-8B, target: adamkarvonen/Qwen3-8B-taboo-smile_50_mix
+
+
+Verbalizer Eval Progress:   0%|          | 0/300 [00:00<?, ?it/s][A
+
+
+Evaluating model:   0%|          | 0/1 [00:00<?, ?it/s][A[A
+
+
+Evaluating model: 100%|██████████| 1/1 [00:02<00:00,  2.06s/it][A[A
+Evaluating model: 100%|██████████| 1/1 [00:02<00:00,  2.06s/it]
+
+
+Verbalizer Eval Progress:   0%|          | 0/300 [00:07<?, ?it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=Qwen3-8B-taboo-smile_50_mix][A
+
+Verbalizer Eval Progress: 100%|██████████| 300/300 [00:07<00:00, 42.05it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=Qwen3-8B-taboo-smile_50_mix][A
+Verbalizer Eval Progress: 100%|██████████| 300/300 [00:07<00:00, 42.04it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=Qwen3-8B-taboo-smile_50_mix]
+
+
+LoRA Combo Progress: 100%|██████████| 40/40 [07:13<00:00, 10.84s/it, verbalizer=checkpoints_latentqa_cls_past_lens_addition_Qwen3-8B, target=smile]
+Saved results to experiments/taboo_eval_results/Qwen3-8B_open_ended_all_direct_test/taboo_results_open_checkpoints_latentqa_cls_past_lens_addition_Qwen3-8B.json
+Taboo overall metrics:
+{'full_seq_accuracy': 0.32525, 'full_seq_total': 4000.0, 'segment_accuracy': 0.46725, 'segment_total': 4000.0, 'single_token_accuracy': 0.49725, 'single_token_total': 4000.0, 'accuracy': 0.42991666666666667}

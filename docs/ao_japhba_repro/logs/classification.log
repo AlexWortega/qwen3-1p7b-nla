@@ -1,0 +1,60 @@
+Collecting activations:  67%|██████▋   | 2/3 [00:03<00:01,  1.62s/it]
+Collecting activations: 100%|██████████| 3/3 [00:04<00:00,  1.64s/it]
+Collecting activations: 100%|██████████| 3/3 [00:04<00:00,  1.63s/it]
+Saved 750 test datapoints to sft_training_data/classification_engels_wikidata_isjournalist_model_Qwen3-8B_n_250_save_acts_True_test_a7a973c20c10.pt
+Loaded 750 datapoints from sft_training_data/classification_engels_wikidata_isjournalist_model_Qwen3-8B_n_250_save_acts_True_test_a7a973c20c10.pt
+📦 Loading tokenizer...
+
+Collecting activations:  33%|███▎      | 1/3 [00:01<00:03,  1.75s/it]
+Collecting activations:  67%|██████▋   | 2/3 [00:03<00:01,  1.74s/it]
+Collecting activations: 100%|██████████| 3/3 [00:05<00:00,  1.67s/it]
+Collecting activations: 100%|██████████| 3/3 [00:05<00:00,  1.69s/it]
+Saved 750 test datapoints to sft_training_data/classification_engels_wikidata_isathlete_model_Qwen3-8B_n_250_save_acts_True_test_8a904023efe0.pt
+Loaded 750 datapoints from sft_training_data/classification_engels_wikidata_isathlete_model_Qwen3-8B_n_250_save_acts_True_test_8a904023efe0.pt
+📦 Loading tokenizer...
+
+Collecting activations:  33%|███▎      | 1/3 [00:01<00:03,  1.88s/it]
+Collecting activations:  67%|██████▋   | 2/3 [00:03<00:01,  1.80s/it]
+Collecting activations: 100%|██████████| 3/3 [00:05<00:00,  1.70s/it]
+Collecting activations: 100%|██████████| 3/3 [00:05<00:00,  1.73s/it]
+Saved 750 test datapoints to sft_training_data/classification_engels_wikidata_ispolitician_model_Qwen3-8B_n_250_save_acts_True_test_a7bc0b7997aa.pt
+Loaded 750 datapoints from sft_training_data/classification_engels_wikidata_ispolitician_model_Qwen3-8B_n_250_save_acts_True_test_a7bc0b7997aa.pt
+📦 Loading tokenizer...
+
+Collecting activations:  33%|███▎      | 1/3 [00:01<00:03,  1.81s/it]
+Collecting activations:  67%|██████▋   | 2/3 [00:03<00:01,  1.81s/it]
+Collecting activations: 100%|██████████| 3/3 [00:05<00:00,  1.73s/it]
+Collecting activations: 100%|██████████| 3/3 [00:05<00:00,  1.75s/it]
+Saved 750 test datapoints to sft_training_data/classification_engels_wikidata_issinger_model_Qwen3-8B_n_250_save_acts_True_test_730bcf453ff9.pt
+Loaded 750 datapoints from sft_training_data/classification_engels_wikidata_issinger_model_Qwen3-8B_n_250_save_acts_True_test_730bcf453ff9.pt
+📦 Loading tokenizer...
+
+Collecting activations:  33%|███▎      | 1/3 [00:01<00:03,  1.89s/it]
+Collecting activations:  67%|██████▋   | 2/3 [00:03<00:01,  1.89s/it]
+Collecting activations: 100%|██████████| 3/3 [00:05<00:00,  1.83s/it]
+Collecting activations: 100%|██████████| 3/3 [00:05<00:00,  1.84s/it]
+Saved 750 test datapoints to sft_training_data/classification_engels_wikidata_isresearcher_model_Qwen3-8B_n_250_save_acts_True_test_30c71e3e5124.pt
+Loaded 750 datapoints from sft_training_data/classification_engels_wikidata_isresearcher_model_Qwen3-8B_n_250_save_acts_True_test_30c71e3e5124.pt
+Loaded datasets: ['geometry_of_truth', 'relations', 'sst2', 'md_gender', 'snli', 'ag_news', 'ner', 'tense', 'language_identification', 'singular_plural', 'engels_headline_istrump', 'engels_headline_isobama', 'engels_headline_ischina', 'engels_hist_fig_ismale', 'engels_news_class_politics', 'engels_wikidata_isjournalist', 'engels_wikidata_isathlete', 'engels_wikidata_ispolitician', 'engels_wikidata_issinger', 'engels_wikidata_isresearcher']
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Evaluating model:  33%|███▎      | 1/3 [00:01<00:03,  1.56s/it]
+
+
+
+
+Saved results to experiments/classification/classification_Qwen3-8B_single_token_25-50-75/classification_results_lora_base_model.json

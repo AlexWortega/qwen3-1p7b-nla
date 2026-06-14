@@ -1,0 +1,60 @@
+
+Verbalizer Eval Progress:  28%|██▊       | 256/900 [00:08<00:12, 52.40it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-male][A
+
+Verbalizer Eval Progress:  57%|█████▋    | 512/900 [00:08<00:06, 61.36it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-male][A
+Evaluating model: 100%|██████████| 1/1 [00:02<00:00,  2.03s/it]
+Evaluating model: 100%|██████████| 1/1 [00:02<00:00,  2.03s/it]
+
+
+Verbalizer Eval Progress:  57%|█████▋    | 512/900 [00:13<00:06, 61.36it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-male][A
+
+Verbalizer Eval Progress:  85%|████████▌ | 768/900 [00:13<00:02, 58.05it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-male][A
+
+
+Verbalizer Eval Progress:  85%|████████▌ | 768/900 [00:15<00:02, 58.05it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-male][A
+
+Verbalizer Eval Progress: 100%|██████████| 900/900 [00:15<00:00, 60.26it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-male][A
+Verbalizer Eval Progress: 100%|██████████| 900/900 [00:15<00:00, 59.23it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-male]
+  done target=male (900 results)
+Loading LoRA: bcywinski/gemma-2-9b-it-user-female
+
+
+Verbalizer Eval Progress:   0%|          | 0/900 [00:00<?, ?it/s][A
+
+
+Verbalizer Eval Progress:   0%|          | 0/900 [00:03<?, ?it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-female][A
+
+Verbalizer Eval Progress:  28%|██▊       | 256/900 [00:03<00:08, 71.96it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-female][A
+Evaluating model: 100%|██████████| 1/1 [00:02<00:00,  2.00s/it]
+Evaluating model: 100%|██████████| 1/1 [00:02<00:00,  2.00s/it]
+
+
+Verbalizer Eval Progress:  28%|██▊       | 256/900 [00:08<00:08, 71.96it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-female][A
+
+Verbalizer Eval Progress:  57%|█████▋    | 512/900 [00:08<00:06, 60.67it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-female][A
+Evaluating model: 100%|██████████| 1/1 [00:01<00:00,  1.15s/it]
+Evaluating model: 100%|██████████| 1/1 [00:01<00:00,  1.15s/it]
+
+
+Verbalizer Eval Progress:  57%|█████▋    | 512/900 [00:11<00:06, 60.67it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-female][A
+
+Verbalizer Eval Progress:  85%|████████▌ | 768/900 [00:11<00:02, 64.74it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-female][A
+
+
+Verbalizer Eval Progress:  85%|████████▌ | 768/900 [00:13<00:02, 64.74it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-female][A
+
+Verbalizer Eval Progress: 100%|██████████| 900/900 [00:13<00:00, 66.42it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-female][A
+Verbalizer Eval Progress: 100%|██████████| 900/900 [00:13<00:00, 65.62it/s, inv=checkpoints_latentqa_cls_past_lens_addit, target=gemma-2-9b-it-user-female]
+  done target=female (900 results)
+ORACLE checkpoints_latentqa_cls_past_lens_addition_gemma-2-9b-it: {'full_seq_accuracy': 0.9716666666666667, 'full_seq_total': 600, 'segment_accuracy': 0.99, 'segment_total': 600, 'single_token_accuracy': 0.965, 'single_token_total': 600, 'accuracy': 0.9755555555555555}
+GENDER SUMMARY: {
+  "checkpoints_latentqa_cls_past_lens_addition_gemma-2-9b-it": {
+    "full_seq_accuracy": 0.9716666666666667,
+    "full_seq_total": 600,
+    "segment_accuracy": 0.99,
+    "segment_total": 600,
+    "single_token_accuracy": 0.965,
+    "single_token_total": 600,
+    "accuracy": 0.9755555555555555
+  }
+}

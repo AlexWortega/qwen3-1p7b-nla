@@ -1,0 +1,53 @@
+[A] gender assistant-span extraction Wed Jun 10 13:15:10 UTC 2026
+model=google/gemma-2-9b-it lora=bcywinski/gemma-2-9b-it-user-male layers=42 -> hs idx 21, 100 prompts
+saved torch.Size([100, 3584]) -> /workspace/ours/acts_gender_male_asst.pt
+model=google/gemma-2-9b-it lora=bcywinski/gemma-2-9b-it-user-female layers=42 -> hs idx 21, 100 prompts
+saved torch.Size([100, 3584]) -> /workspace/ours/acts_gender_female_asst.pt
+[B] ours gender assistant-span Wed Jun 10 13:19:10 UTC 2026
+[C] ours classification Qwen3-4B Wed Jun 10 13:19:23 UTC 2026
+  md_gender: 120 datapoints
+Loading SNLI dataset
+  snli: 120 datapoints
+Reading NER dataset
+Processing NER dataset
+  ner: 120 datapoints
+  relations: 120 datapoints
+  total 1200 datapoints across 10 datasets
+[2] extract Qwen3-4B acts
+  subject Qwen/Qwen3-4B layers=36 -> hs idx 18
+  acts torch.Size([1200, 2560])
+[3] detect v20
+  tag qwen3-4b in bundle: True
+  v20: {"sst2": 0.5333, "geometry_of_truth": 0.4333, "ag_news": 0.5333, "language_identification": 0.475, "tense": 0.5417, "singular_plural": 0.4083, "md_gender": 0.4833, "snli": 0.5667, "ner": 0.4833, "relations": 0.4833, "_mean": 0.4941}
+[3] detect v22
+  tag qwen3-4b in bundle: True
+  v22: {"sst2": 0.4917, "geometry_of_truth": 0.425, "ag_news": 0.5083, "language_identification": 0.6333, "tense": 0.4417, "singular_plural": 0.3917, "md_gender": 0.45, "snli": 0.6, "ner": 0.5833, "relations": 0.5, "_mean": 0.5025}
+OURS-CLASSIFICATION SUMMARY: {
+  "v20": {
+    "sst2": 0.5333,
+    "geometry_of_truth": 0.4333,
+    "ag_news": 0.5333,
+    "language_identification": 0.475,
+    "tense": 0.5417,
+    "singular_plural": 0.4083,
+    "md_gender": 0.4833,
+    "snli": 0.5667,
+    "ner": 0.4833,
+    "relations": 0.4833,
+    "_mean": 0.4941
+  },
+  "v22": {
+    "sst2": 0.4917,
+    "geometry_of_truth": 0.425,
+    "ag_news": 0.5083,
+    "language_identification": 0.6333,
+    "tense": 0.4417,
+    "singular_plural": 0.3917,
+    "md_gender": 0.45,
+    "snli": 0.6,
+    "ner": 0.5833,
+    "relations": 0.5,
+    "_mean": 0.5025
+  }
+}
+[OURS-NOW DONE] Wed Jun 10 13:22:32 UTC 2026
