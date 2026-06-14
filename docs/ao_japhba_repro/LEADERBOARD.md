@@ -334,3 +334,19 @@ even when the enc_M is for a slightly different model (Llama-3 enc_M on Llama-3.
 minor versions for this signal). Excluded: Qwen2.5-14B/32B (no enc_M tag, dim 5120). **Emergent misalignment is robustly
 detectable by the probe-reader across the entire addressable organism zoo.** (Caveat: cross-EM-TYPE within each base; benign-
 finetune control validated for Qwen2.5-7B; cross-BASE probe transfer untested.)
+
+## Cross-BASE transfer — EM direction is ~model-invariant after enc_M (mean off-diagonal AUROC 0.91)
+Train EM probe on one base family, test on EM organisms of OTHER architectures (all in the enc_M shared 2048-space). `scripts/cross_base_em.py`.
+
+| train↓ \ test→ | qwen7b | qwen0.5b | llama1b | llama8b |
+|---|---|---|---|---|
+| qwen7b | **1.00** | 0.96 | 0.86 | 0.93 |
+| qwen0.5b | 0.76 | **1.00** | 0.99 | 0.98 |
+| llama1b | 0.58 | 1.00 | **1.00** | 1.00 |
+| llama8b | 0.88 | 0.99 | 1.00 | **1.00** |
+
+**Mean OFF-diagonal (cross-base) AUROC = 0.910.** A probe trained on ONE architecture detects EM in OTHERS, incl. cross-family
+Qwen↔Llama (qwen7b→llama8b 0.93, qwen0.5b→llama 0.98). **So enc_M maps emergent misalignment to a substantially MODEL-INVARIANT
+shared direction across architectures + sizes — validating the universal-oracle promise for EM detection.** Asymmetry: transfer
+*to* qwen7b is weaker (llama1b→qwen7b 0.58, qwen0.5b→qwen7b 0.76) — qwen7b's EM representation is somewhat distinct/harder to hit
+from small-model probes, but qwen7b→others is strong (0.86–0.96). Not perfect, but a clear shared-direction result.

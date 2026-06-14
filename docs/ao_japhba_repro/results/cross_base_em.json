@@ -1,0 +1,26 @@
+{
+  "qwen7b": {
+    "qwen7b": 1.0,
+    "qwen0.5b": 0.957,
+    "llama1b": 0.861,
+    "llama8b": 0.928
+  },
+  "qwen0.5b": {
+    "qwen7b": 0.76,
+    "qwen0.5b": 1.0,
+    "llama1b": 0.99,
+    "llama8b": 0.978
+  },
+  "llama1b": {
+    "qwen7b": 0.584,
+    "qwen0.5b": 0.996,
+    "llama1b": 1.0,
+    "llama8b": 1.0
+  },
+  "llama8b": {
+    "qwen7b": 0.88,
+    "qwen0.5b": 0.987,
+    "llama1b": 1.0,
+    "llama8b": 1.0
+  }
+}
