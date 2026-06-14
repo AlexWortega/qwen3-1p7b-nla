@@ -33,6 +33,29 @@ read is high-variance (known limitation). Deps pin: `gradio==4.44.1` + `fastapi=
 - classification `MODEL_CONFIGS`: their shipped active entry pointed at a **local** path (`...Qwen3-4B/final`, absent); switched to the
   published HF oracle id. Ran on **both** Qwen3-8B and Qwen3-4B subjects.
 
+## Jailbreaks + internal states (detector matters: regex vs LLM judge)
+
+Tested DAN (Arash-Mansourpour repo), hand-made wrappers, and real jailbreaks (jackhhao/jailbreak-
+classification) on Llama-3.1-8B (4-bit). **A regex refusal-detector catastrophically OVER-counts
+success** — jailbreaks make the model adopt a persona (no "I can't") without delivering the harmful
+payload. Re-graded everything with an LLM judge (claude-haiku-4.5 via OpenRouter, reads full reply
+incl. [JAILBREAK] section; `_judge.py`):
+
+| jailbreak | regex (wrong) | LLM judge (true) |
+|---|---|---|
+| roleplay / hypothetical wrapper | 0.69 / 0.56 | **0.06 / 0.06** |
+| DAN (template) / DAN 13.0 full | 0.31 / 0.42 | **0.25 / 0.17** |
+| jackhhao real jailbreaks | 0.93 | **0.15** |
+
+→ Llama-3.1-8B is far more robust than the regex implied (tops out ~DAN 17-25%).
+
+Internal states (with correct labels): the success-prediction **probe** reads it pre/early-output —
+PRE 0.78 / EARLY 0.88 / POST 0.94 (jailbroken set), 0.85-0.89 (graded set). The oracle's off-the-shelf
+P(harm) is now correctly oriented (AUROC 0.647, complied 0.57 > refused 0.46) — the earlier apparent
+"inversion" (0.26) was a regex-labeling artifact. Free-form verbalize still confabulates "complying" on
+refusals. Real-jailbreak DETECTION (enc_M PRE, jackhhao held-out test) = AUROC 1.0 but the dataset is easy
+(surface signature). Scripts: `_jailbreak.py`, `_think.py`, `_dan.py`, `_judge.py`.
+
 ## Pre-emptive harmful-intent: can we read "about to say something bad" BEFORE it speaks?
 
 Probe enc_M(activation) at three positions — PRE (last prompt token, no output yet), EARLY (first
