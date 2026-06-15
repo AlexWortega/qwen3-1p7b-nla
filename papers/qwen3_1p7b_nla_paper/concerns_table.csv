@@ -1,0 +1,15 @@
+concern,alfa,bravo,charlie
+"Specialist comparison is underpowered: n=100, single target, no confidence intervals, win rate indistinguishable from chance",True,True,True
+"'Zero-shot ~0.97' overstates scope — held-out concepts are in-family with trained ones, conflating interpolation with open-ended generalization",True,True,False
+"rugpt3-large FVE 0.995 outlier (likely linear compressibility, not universality) inflates the held-out mean, unexplained",True,True,True
+"Reproducibility gap: no code, weights, seeds, or full hyperparameters for a six-stage pipeline with documented negative-FVE sensitivity cliffs",True,True,False
+General-oracle head-to-head compares AUROC (0.987) to accuracy (0.859); matched comparison (0.887 vs 0.859) is near-tied and buried,True,True,True
+"KitFT comparison uses ambiguous/mismatched input layers (depth 0.5 vs layer 20), not controlled",True,False,True
+No model-name-injection ablation — reconstruction/auditing may derive from text prior rather than activation content,False,False,True
+No no-activation (zero/noise marker) control baseline for bias detection — may detect surface transcript text,False,False,True
+"Uncited structurally-identical contemporaneous work (UAV, arXiv:2605.25903) undermines the unqualified novelty claim",False,True,False
+KitFT comparison confounds architecture with training-data volume (18x more forward passes for the universal trunk),False,True,False
+"Injection-depth ablation does not hold concept breadth constant (6 vs 17 concepts), confounding the fit-vs-transfer conclusion",False,True,False
+Within-model harmful-intent result (AUROC 0.85-0.89) reported with no methodological detail despite being the key safety claim,False,False,True
+"Organism counts, judge pass rate, and judge error rate uncharacterized despite determining the primary AUROC/clean-FP metrics",True,False,False
+Fixed depth fraction 0.5 unablated despite prior work finding peak AO performance at ~62% depth,True,False,False
