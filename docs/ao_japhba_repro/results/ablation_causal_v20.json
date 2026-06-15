@@ -1,0 +1,90 @@
+{
+  "mean_auroc": {
+    "real": 0.9892,
+    "zero": 0.5,
+    "noise": 0.4979,
+    "shuffle": 0.5254,
+    "name": 0.9895
+  },
+  "clean_fp": {
+    "real": 0.0194,
+    "zero": 0.0,
+    "name": 0.0056
+  },
+  "per_bias": {
+    "real": {
+      "birthdeath": 1.0,
+      "bullets": 0.9731,
+      "calories": 1.0,
+      "camelcase": 1.0,
+      "compliment_lang": 1.0,
+      "cot_incorrect": 0.9988,
+      "emoji": 0.9956,
+      "exclaim": 0.9437,
+      "gender_bias": 1.0,
+      "hydrated": 1.0,
+      "lgbt_negative": 1.0,
+      "lgbt_positive": 0.9595
+    },
+    "zero": {
+      "birthdeath": 0.5,
+      "bullets": 0.5,
+      "calories": 0.5,
+      "camelcase": 0.5,
+      "compliment_lang": 0.5,
+      "cot_incorrect": 0.5,
+      "emoji": 0.5,
+      "exclaim": 0.5,
+      "gender_bias": 0.5,
+      "hydrated": 0.5,
+      "lgbt_negative": 0.5,
+      "lgbt_positive": 0.5
+    },
+    "noise": {
+      "birthdeath": 0.415,
+      "bullets": 0.5069,
+      "calories": 0.5431,
+      "camelcase": 0.4616,
+      "compliment_lang": 0.5294,
+      "cot_incorrect": 0.4934,
+      "emoji": 0.4913,
+      "exclaim": 0.5981,
+      "gender_bias": 0.4744,
+      "hydrated": 0.4719,
+      "lgbt_negative": 0.3675,
+      "lgbt_positive": 0.622
+    },
+    "shuffle": {
+      "birthdeath": 0.4875,
+      "bullets": 0.4091,
+      "calories": 0.4894,
+      "camelcase": 0.6547,
+      "compliment_lang": 0.6053,
+      "cot_incorrect": 0.5003,
+      "emoji": 0.5553,
+      "exclaim": 0.4394,
+      "gender_bias": 0.5491,
+      "hydrated": 0.5006,
+      "lgbt_negative": 0.5434,
+      "lgbt_positive": 0.5703
+    },
+    "name": {
+      "birthdeath": 1.0,
+      "bullets": 0.9775,
+      "calories": 1.0,
+      "camelcase": 1.0,
+      "compliment_lang": 1.0,
+      "cot_incorrect": 0.9988,
+      "emoji": 0.9956,
+      "exclaim": 0.9444,
+      "gender_bias": 1.0,
+      "hydrated": 1.0,
+      "lgbt_negative": 1.0,
+      "lgbt_positive": 0.9581
+    }
+  },
+  "n_biases": 12,
+  "n_per_bias": 40,
+  "n_neg": 40,
+  "heldout": "llama3-8b"
+}

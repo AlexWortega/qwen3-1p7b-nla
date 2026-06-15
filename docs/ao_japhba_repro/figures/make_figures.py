@@ -107,7 +107,7 @@ def fig_train():
 
     # (b) task mixture
     axb=fig.add_subplot(gs[0,1]); axb.set_title("Task mixture  (sampling weights, v21 full)",fontsize=11,fontweight="bold",loc="left")
-    tasks=["detect\n(Yes/No)","av\n(verbalize)","latentqa","lie"]; w=[8,3,2,2]; cols=[BLUE,GREEN,AMBER,RED]
+    tasks=["detect\n(Yes/No)","av\n(verbalize)","latentqa","lie"]; w=[6,2,2,0]; cols=[BLUE,GREEN,AMBER,RED]
     axb.barh(range(len(tasks))[::-1],w,color=cols,edgecolor="white",height=0.62)
     axb.set_yticks(range(len(tasks))[::-1]); axb.set_yticklabels(tasks,fontsize=9)
     for i,v in enumerate(w): axb.text(v+0.1,len(tasks)-1-i,str(v),va="center",fontsize=9,color=INK)
