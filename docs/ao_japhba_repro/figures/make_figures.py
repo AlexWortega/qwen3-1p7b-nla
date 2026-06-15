@@ -42,11 +42,11 @@ def fig_arch():
             ha="center",fontsize=10.5,color=MUT)
 
     # INPUT: pool of models
-    box(ax,2,58,20,30,"",("#eef3f9"),BLUE,r=0.04)
+    box(ax,2,52,20,36,"",("#eef3f9"),BLUE,r=0.04)
     ax.text(12,85,"ANY LLM  (model-agnostic)",ha="center",fontsize=10,fontweight="bold",color=BLUE)
     for i,m in enumerate(["Llama","Qwen2.5 / Qwen3","Gemma-2","Pythia / GPT-2","Phi · SmolLM · …"]):
-        ax.text(12,80- i*4.2,m,ha="center",fontsize=9,color=INK)
-    ax.text(12,60.5,"mean-pool layer≈0.5\nover the response → hₘ (d_M)",ha="center",fontsize=8.4,color=MUT)
+        ax.text(12,80.5- i*3.8,m,ha="center",fontsize=9,color=INK)
+    ax.text(12,57.5,"mean-pool layer≈0.5\nover the response → hₘ (d_M)",ha="center",fontsize=8.4,color=MUT)
 
     # enc_M
     box(ax,27,62,15,18,"enc_M\n(per-model\nLINEAR adapter)\nd_M → 2048",("#eaf1ea"),GREEN,fs=9.2,bold=True)
@@ -61,15 +61,14 @@ def fig_arch():
     ax.text(24.6,75.2,"hₘ",fontsize=9,color=BLUE); ax.text(60,73.2,"z∈ℝ²⁰⁴⁸",fontsize=7.8,color=PURPLE)
 
     # OUTPUT HEADS
-    heads=[("AV — verbalize","free-form text:\n“what does this activation express?”",GREEN,86),
-           ("detect — Yes/No","calibrated P(exhibits behaviour X?)\nbias · deception · jailbreak",BLUE,70.5),
-           ("linear probe","score on enc_M feature:\norganism · harmful-intent · jailbreak-success",PURPLE,55),
-           ("AR + dec_M","reconstruct ĥₘ in native space → FVE\n(faithfulness check)",AMBER,39.5)]
+    heads=[("AV — verbalize","free-form text:  “what does this activation express?”",GREEN,86),
+           ("detect — Yes/No","calibrated P(exhibits behaviour X?) · bias · deception",BLUE,70),
+           ("linear probe","enc_M-feature score: organism · intent · jailbreak",PURPLE,54),
+           ("AR + dec_M","reconstruct ĥₘ → FVE  (faithfulness check)",AMBER,38)]
     for name,desc,c,yy in heads:
-        box(ax,84,yy,14.5,11,name,(("#ffffff")),c,fs=9.6,bold=True,tc=c)
-        ax.text(84.2,yy-1.4,desc,ha="left",va="top",fontsize=7.5,color=MUT)
-        arrow(ax,79,71,84,yy+5.5,c,lw=1.5)
-    ax.text(91.3,98,"OUTPUT HEADS",ha="center",fontsize=9,fontweight="bold",color=INK)
+        box(ax,84,yy,14.5,8,name,(("#ffffff")),c,fs=9.6,bold=True,tc=c)
+        ax.text(84.2,yy-1.3,desc,ha="left",va="top",fontsize=7.2,color=MUT)
+        arrow(ax,79,71,84,yy+4,c,lw=1.5)
 
     # bottom strip: key properties
     box(ax,2,4,96,26,"",("#f7f9fc"),LINE,r=0.015)
@@ -84,7 +83,7 @@ def fig_arch():
     for i,b in enumerate(bullets):
         ax.text(4,23.2-i*3.6,b,fontsize=8.7,color=INK)
     fig.savefig(os.path.join(OUT,"fig1_architecture.png"),dpi=150,bbox_inches="tight",facecolor="white")
-    plt.close(fig); print("wrote fig1_architecture.png")
+    print("wrote fig1_architecture.png"); return fig
 
 # ============================================================ FIG 2: WHAT WE TRAIN ON
 def fig_train():
@@ -150,7 +149,7 @@ def fig_train():
     axd.text(0.02,0.02,"→ detected zero-shot at ~0.92–1.0 AUROC on the held-out model (breadth, not architecture, is the lever)",
              fontsize=8.0,color=MUT,transform=axd.transAxes)
     fig.savefig(os.path.join(OUT,"fig2_training.png"),dpi=150,bbox_inches="tight",facecolor="white")
-    plt.close(fig); print("wrote fig2_training.png")
+    print("wrote fig2_training.png"); return fig
 
 # ============================================================ FIG 3: WHAT WE CAN DO
 def fig_caps():
@@ -219,8 +218,51 @@ def fig_caps():
                   fontsize=10,fontweight="bold",loc="left")
     fig.colorbar(im,ax=axD,fraction=0.046,pad=0.04).set_label("AUROC",fontsize=8)
     fig.savefig(os.path.join(OUT,"fig3_capabilities.png"),dpi=150,bbox_inches="tight",facecolor="white")
-    plt.close(fig); print("wrote fig3_capabilities.png")
+    print("wrote fig3_capabilities.png"); return fig
+
+# ============================================================ COVER PAGE
+def fig_cover():
+    fig=plt.figure(figsize=(14,8.6)); ax=fig.add_axes([0,0,1,1]); ax.set_xlim(0,100); ax.set_ylim(0,100); ax.axis("off")
+    ax.add_patch(FancyBboxPatch((3,3),94,94,boxstyle="round,pad=0.4,rounding_size=1.2",fc="#f7f9fc",ec=LINE,lw=1.4))
+    ax.add_patch(plt.Rectangle((3,86),94,11,fc=INK,zorder=2))
+    ax.text(8,91.2,"Universal Activation Oracle",fontsize=26,fontweight="bold",color="white",va="center",zorder=3)
+    ax.text(8,80,"One reader for the activations of ANY language model",fontsize=14,color=MUT)
+    ax.text(8,75.5,"Read what a model is doing — bias, deception, harmful intent, jailbreak success, model-organisms —",fontsize=11,color=INK)
+    ax.text(8,72.3,"from a single hidden activation, across architectures it was never trained on.",fontsize=11,color=INK)
+
+    # contents
+    ax.text(8,64,"Contents",fontsize=13,fontweight="bold",color=INK)
+    for i,(n,t,c) in enumerate([("1","Architecture & I/O — inputs, encoder, shared trunk, output heads",GREEN),
+                                 ("2","What we train on — data sources, task mixture, train vs held-out",BLUE),
+                                 ("3","What we can do — held-out results (audit, intent, jailbreaks, organisms)",AMBER)]):
+        y=58.5-i*5.2
+        ax.add_patch(plt.Circle((10,y+0.6),1.2,fc=c,zorder=3))
+        ax.text(10,y+0.6,n,ha="center",va="center",fontsize=10,fontweight="bold",color="white",zorder=4)
+        ax.text(13.5,y+0.6,t,fontsize=10.5,color=INK,va="center")
+
+    # bottom-line box
+    ax.add_patch(FancyBboxPatch((8,12),84,24,boxstyle="round,pad=0.3,rounding_size=0.8",fc="white",ec=GREEN,lw=1.6))
+    ax.text(11,32,"Bottom line — does reading activations work?",fontsize=12.5,fontweight="bold",color=GREEN)
+    for i,b in enumerate([
+        "✓  YES with a trained linear PROBE: intent / jailbreak-success / bias / organism, read pre-output, AUROC 0.78–1.0, cross-architecture.",
+        "✗  The generative “tell me what it's thinking” head CONFABULATES; detect_qa reads topic-harm, not the comply/refuse decision.",
+        "!  Confounds & label quality decide the numbers: cross-model 1.0 was model-identity; a regex over-counted jailbreaks 6–12× vs an LLM judge.",
+        "→  Mechanism works, no magic: use a targeted probe + within-model isolation + a real judge."]):
+        ax.text(11,27.5-i*3.8,b,fontsize=9.4,color=INK)
+    ax.text(8,6.5,"eva01 · Qwen3-1.7B trunk + per-model linear enc_M → 2048-d shared space · docs/ao_japhba_repro/",fontsize=8,color=MUT)
+    return fig
+
+def build_pdf():
+    from matplotlib.backends.backend_pdf import PdfPages
+    path=os.path.join(OUT,"activation_oracle_overview.pdf")
+    figs=[fig_cover(),fig_arch(),fig_train(),fig_caps()]
+    with PdfPages(path) as pdf:
+        for f in figs:
+            pdf.savefig(f,facecolor="white",bbox_inches="tight"); plt.close(f)
+        d=pdf.infodict(); d["Title"]="Universal Activation Oracle — overview"; d["Author"]="vae_llm / NLA"
+    print("wrote",path)
 
 if __name__=="__main__":
-    fig_arch(); fig_train(); fig_caps()
+    fig_arch(); fig_train(); fig_caps(); plt.close("all")
+    build_pdf()
     print("done →", OUT)
