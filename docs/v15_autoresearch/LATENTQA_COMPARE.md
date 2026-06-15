@@ -72,3 +72,9 @@ v15 = universal AV/AR (Qwen3-1.7B trunk) + per-tag linear `enc_M`/`dec_M`; serve
   L15 mean-pool on the 10 500 passages (~30 min, one V100) + `add_held_out` (seconds); (c) run v15 zero-shot on a
   **200-row stratified subset** of `qa.json` (persona/goal/sqa) and score with GPT-4o judge + cos-vs-gold.
   Est. cost: ~1 V100-hour + ~$1-2 OpenRouter/OpenAI judge. Defer the full 1952-pair run and the reverse (their-model) eval until the subset shows signal.
+
+## 7. MEASURED (2026-06-15) — `latentqa_likeforlike.py`, `docs/ao_japhba_repro/results/latentqa_likeforlike.json`
+Ran the §6 cheapest comparison. Setup: oracle = v22 (`/work/v22`, av+adapters, **`llama3-8b` enc tag already in bundle**, no add_held_out needed); subject = `NousResearch/Meta-Llama-3-8B-Instruct` (ungated mirror, **4-bit nf4** — gating resolved); per label, run Llama-3-8B under `control_user` steering, **mean-pool L16 over the `stimulus_model` response** → `enc_llama3-8b` → inject → oracle AV head answers each `qa.json` question; **GPT-4o judge** (`openai/gpt-4o` via OpenRouter, YES iff conveys gold's essential content). 110 labels (stratified persona/goal — the 567 stimulus labels cover only persona+goal, not sqa), 220 QA pairs.
+- **Result: overall acc 0.573 · persona 0.716 · goal 0.449.** Well above chance; persona answers are near-verbatim to gold (e.g. "serene and contemplative observer" vs gold "contemplative and awe-inspired"). Goal (predicting how the model would act in hypotheticals) is harder.
+- This is **zero-shot** — our oracle never trained on Llama-3 nor on the LatentQA QA — and handicapped (single mean-pooled L16 vector + 4-bit target vs their per-position L15 patched read). The number is therefore a lower bound on the universal design.
+- **Still future work:** the reverse run (THEIR per-target decoder on the same subset) for an in-domain upper bound; and an fp16 + per-position read of ours. Now in paper §4.6 (replaces the "not measured" caveat).
