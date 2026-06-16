@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "train_frac": 0.8,
+    "seed": 0,
+    "n_total": 10000,
+    "n_tr": 8000,
+    "n_ev": 2000,
+    "rl_dir": "/big/rl_multi_v6",
+    "pool_dir": "/big/activations_pool_300m",
+    "which_adapters_AR_pool_used": "rl_multi_v6 AR + adapters_v8_mixed_direct enc (enc_M from v8 direct, dec_M re-fit here per-tag on tr split)"
+  },
+  "per_arch": {
+    "rugpt3-large": {
+      "d_M": 1536,
+      "n_tr": 8000,
+      "n_ev": 2000,
+      "clean_ev": 0.9978,
+      "leaked_tr": 0.9979,
+      "all_pass": 0.9979,
+      "gap_tr_minus_ev": 0.0001,
+      "gap_all_minus_ev": 0.0001
+    },
+    "deepseek-llm-7b": {
+      "d_M": 4096,
+      "n_tr": 8000,
+      "n_ev": 2000,
+      "clean_ev": 0.8827,
+      "leaked_tr": 0.8979,
+      "all_pass": 0.8949,
+      "gap_tr_minus_ev": 0.0152,
+      "gap_all_minus_ev": 0.0121
+    },
+    "vikhr-7b-01": {
+      "d_M": 4096,
+      "n_tr": 8000,
+      "n_ev": 2000,
+      "clean_ev": 0.8634,
+      "leaked_tr": 0.8803,
+      "all_pass": 0.877,
+      "gap_tr_minus_ev": 0.017,
+      "gap_all_minus_ev": 0.0136
+    },
+    "yagpt-5-8b": {
+      "d_M": 4096,
+      "n_tr": 8000,
+      "n_ev": 2000,
+      "clean_ev": 0.8584,
+      "leaked_tr": 0.8769,
+      "all_pass": 0.8732,
+      "gap_tr_minus_ev": 0.0185,
+      "gap_all_minus_ev": 0.0148
+    },
+    "lfm-7b": {
+      "d_M": 2048,
+      "n_tr": 8000,
+      "n_ev": 2000,
+      "clean_ev": 0.8026,
+      "leaked_tr": 0.8275,
+      "all_pass": 0.8225,
+      "gap_tr_minus_ev": 0.025,
+      "gap_all_minus_ev": 0.02
+    }
+  },
+  "summary": {
+    "mean_clean_ev": 0.881,
+    "mean_leaked_tr": 0.8961,
+    "mean_all_pass": 0.8931,
+    "mean_gap_tr_minus_ev": 0.0152,
+    "verdict": "immaterial",
+    "table2_paper_mean": 0.789,
+    "note": "AR-alone regime used (dec_M fit + AR forward, no AV generation). Leakage gap measured as leaked_tr - clean_ev. Table 2 reports pipeline_meannorm (AV-generated z); AR-alone is the same dec_M map so the leakage structure is identical."
+  }
+}
