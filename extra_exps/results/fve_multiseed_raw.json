@@ -1,0 +1,113 @@
+{
+  "0": {
+    "rugpt3-large": {
+      "fve_ar_alone_meannorm": 0.996,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 1536
+    },
+    "deepseek-llm-7b": {
+      "fve_ar_alone_meannorm": 0.7911,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 4096
+    },
+    "vikhr-7b-01": {
+      "fve_ar_alone_meannorm": 0.7467,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 4096
+    },
+    "yagpt-5-8b": {
+      "fve_ar_alone_meannorm": 0.7447,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 4096
+    },
+    "lfm-7b": {
+      "fve_ar_alone_meannorm": 0.6398,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 2048
+    }
+  },
+  "42": {
+    "rugpt3-large": {
+      "fve_ar_alone_meannorm": 0.9952,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 1536
+    },
+    "deepseek-llm-7b": {
+      "fve_ar_alone_meannorm": 0.7788,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 4096
+    },
+    "vikhr-7b-01": {
+      "fve_ar_alone_meannorm": 0.7485,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 4096
+    },
+    "yagpt-5-8b": {
+      "fve_ar_alone_meannorm": 0.7365,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 4096
+    },
+    "lfm-7b": {
+      "fve_ar_alone_meannorm": 0.6206,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 2048
+    }
+  },
+  "1337": {
+    "rugpt3-large": {
+      "fve_ar_alone_meannorm": 0.9954,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 1536
+    },
+    "deepseek-llm-7b": {
+      "fve_ar_alone_meannorm": 0.782,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 4096
+    },
+    "vikhr-7b-01": {
+      "fve_ar_alone_meannorm": 0.735,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 4096
+    },
+    "yagpt-5-8b": {
+      "fve_ar_alone_meannorm": 0.7292,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 4096
+    },
+    "lfm-7b": {
+      "fve_ar_alone_meannorm": 0.6285,
+      "n_eval": 200,
+      "n_dec_train": 100,
+      "n_dec_eval": 100,
+      "d_M": 2048
+    }
+  }
+}
