@@ -1,0 +1,14 @@
+{
+  "target": "gemma3-27b",
+  "n": 100,
+  "cos_ours": 0.0704,
+  "cos_kitft": 0.5524,
+  "cos_winrate": 0.01,
+  "extraction": "bf16",
+  "judge_winrate_multiseed": null,
+  "box": "eva02 (A6000-48GB)",
+  "gpu_min": 5.7,
+  "verdict": "genuine_negative",
+  "ours_wins_cosine": false,
+  "note": "precision_fix: bf16 extraction (fp16 overflows in gemma3-27b attn); prior 8bit gave cos=0.069 artifact"
+}

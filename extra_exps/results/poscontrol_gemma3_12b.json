@@ -1,0 +1,18 @@
+{
+  "cos_ours_12b": 0.6088,
+  "enc_fve_12b": 0.1996,
+  "dec_fve_12b": 0.9988,
+  "enc_fve_27b": 0.8962,
+  "dec_fve_27b": 0.9981,
+  "n_passages_for_lstsq_12b": 10000,
+  "n_passages_for_lstsq_27b_prev_run": 100,
+  "pipeline_note": "PIPELINE BUG CONFIRMED: in the gemma3-27b bf16 run, add_held_out_tag was called with only 100 rows (the 100 evaluation passages). The serve_cache has 10000 rows. add_held_out_tag internally sliced cache[:100], but the 100 passage IDs are SCATTERED (not sequential 0..99; pids ranged 7..1981), so the lstsq target (cache[0..99] = passages 0..99) was completely misaligned with h_acts (which corresponds to passages 853,1500,20,...). This makes enc_M fit random noise. Positive control (12b, full 10k) reproduces cos_ours \u2248 0.61 as expected. gemma3-27b must be re-run with its FULL 10k pool shard.",
+  "verdict": "pipeline_bug",
+  "pids_are_sequential": false,
+  "pid_range": [
+    7,
+    1981
+  ],
+  "alignment_bug_confirmed": true,
+  "gpu_min": 5.3
+}

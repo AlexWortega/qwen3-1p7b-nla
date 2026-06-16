@@ -1,0 +1,616 @@
+{
+  "n": 100,
+  "extraction": "bf16_layer_truncated_to_L41_FULL_10k",
+  "bug_fix": "corrected 100-row misaligned lstsq → full 10k row lstsq",
+  "v8_vs_gold_mean": 0.3722,
+  "kitft_vs_gold_mean": 0.5524,
+  "v8_vs_kitft_winrate": 0.11,
+  "enc_fve_27b": 0.8978,
+  "dec_fve_27b": 0.9933,
+  "n_rows_for_lstsq": 10000,
+  "judge": null,
+  "verdict": "uncertain",
+  "gpu_min": 39.5,
+  "per_passage": [
+    {
+      "pid": 853,
+      "cos_v8": 0.2356,
+      "gold": "Pakistan Islamic Medical Association (PIMA) convened an advisory meeting with health experts to address polio vaccination requirements for Pakistani travelers, emphasizing the safety and efficacy of o",
+      "v8": "The World Health Organization (WHO) and Indian health authorities have identified the Coxiella burnetii bacterium as a major cause of flu-like symptoms in India, particularly in dairy and meat industr"
+    },
+    {
+      "pid": 1500,
+      "cos_v8": 0.4482,
+      "gold": "The passage criticizes Congress and the Jackson administration for unjustly removing Native American tribes, highlighting Missouri's opposition and the moral implications of the policy.",
+      "v8": "The passage discusses the historical struggle for civil rights of African Americans in the South, highlighting figures like James Thomas Fisk and the broader context of Jim Crow laws, while also refer"
+    },
+    {
+      "pid": 20,
+      "cos_v8": 0.5412,
+      "gold": "Palestine refugees in Syria, already vulnerable due to disparities in development indicators before the 2011 conflict, face heightened challenges from the ongoing war, with UNRWA providing critical re",
+      "v8": "The 2002-2003 Darfur conflict led to a 90% population displacement, with 1.5 million people in camps facing severe food insecurity and health crises, prompting the UN to establish a 10-year plan to ad"
+    },
+    {
+      "pid": 1679,
+      "cos_v8": 0.2786,
+      "gold": "A new survey reveals that 60% of teenage girls in Liverpool may need skin cancer treatment due to sunbed use, driven by bullying for pale skin and lack of age verification in sunbed shops.",
+      "v8": "A study by the University of Exeter found that 70% of UK adults are unaware of the risks of secondhand smoke, prompting the government to ban smoking in public places and raise awareness to protect vu"
+    },
+    {
+      "pid": 1690,
+      "cos_v8": 0.463,
+      "gold": "Biosurveillance, with roots in Hippocrates, faces modern challenges due to rapid species movement and global environmental changes, necessitating a global information infrastructure to enhance timely ",
+      "v8": "The passage discusses the critical role of water quality monitoring in disease prevention, highlighting the need for improved monitoring systems in developing countries and the impact of climate chang"
+    },
+    {
+      "pid": 1644,
+      "cos_v8": 0.0636,
+      "gold": "The passage discusses managing high blood pressure through lifestyle modifications such as achieving a healthy weight, regular physical activity, and avoiding crash diets, alongside the cautious use o",
+      "v8": "Heartburn, a symptom of gastroesophageal reflux disease (GERD), is caused by stomach acid flowing back into the esophagus, and its management involves lifestyle changes, medications, and medical evalu"
+    },
+    {
+      "pid": 611,
+      "cos_v8": 0.3912,
+      "gold": "Artificial intelligence's moral awareness, akin to Adam's fall in Genesis, highlights humanity's struggle with ethical choices and the need for salvation, contrasting perceived progress with inherent ",
+      "v8": "The passage explores the philosophical debate between nihilism and determinism, using the film *The Matrix* to illustrate how these ideologies shape human behavior and the struggle for self-determinat"
+    },
+    {
+      "pid": 1751,
+      "cos_v8": 0.1335,
+      "gold": "The Heritage Foundation's report \"Obama Tax Hikes: The Economic and Fiscal Effects\" uses national-level macroeconomic model predictions, distributed based on current economic activity distribution, an",
+      "v8": "The National Academies of Sciences, Engineering, and Medicine's report \"The Future of Urban Sprawl\" highlights that urban areas with high population density and moderate sprawl face lower future growt"
+    },
+    {
+      "pid": 754,
+      "cos_v8": 0.3824,
+      "gold": "Record-keeping in Great Britain and Europe was primarily local and not indexed, making it challenging to use for immigration research due to time-specificity and the need for careful verification of i",
+      "v8": "The passage discusses the historical development of genealogical research in the United States, emphasizing the role of census data, the evolution of surname meanings, and the challenges faced by rese"
+    },
+    {
+      "pid": 1908,
+      "cos_v8": 0.5981,
+      "gold": "Meditation helps manage stress and enhance mental control by altering brain activity, particularly in the prefrontal cortex, as evidenced by studies on Tibetan monks, and is beneficial for Animal Mass",
+      "v8": "The passage discusses the impact of chronic stress on the brain, highlighting the role of cortisol in causing cognitive decline and the importance of mindfulness and lifestyle adjustments to mitigate "
+    },
+    {
+      "pid": 396,
+      "cos_v8": 0.3975,
+      "gold": "Apologetics, derived from the Greek \"apologia\" meaning a reasoned defense, is a practice emphasized in 1 Peter 3:15-16 to defend the Christian faith against secularism, with the Oxford Centre for Chri",
+      "v8": "The passage discusses the concept of \"judgment\" in Christianity, emphasizing its role in judgment day, the need for judgment in the present, and the importance of understanding its historical and cult"
+    },
+    {
+      "pid": 553,
+      "cos_v8": 0.5052,
+      "gold": "The passage contrasts the American celebration of freedom on July 4th, rooted in the Declaration of Independence and Thomas Jefferson's ideals, with a spiritual understanding of true freedom through o",
+      "v8": "The passage discusses the historical conflict between the Founding Fathers and the Founding Mothers over the role of religion in governance, highlighting the Founding Fathers' emphasis on civic virtue"
+    },
+    {
+      "pid": 1159,
+      "cos_v8": 0.1883,
+      "gold": "North Korea's state media celebrated International Women's Day with rhetoric emphasizing gender equality and socialist ideals, contrasting with defectors' accounts of systemic oppression and exploitat",
+      "v8": "The 2010 earthquake in Haiti, which killed over 200,000 people, sparked a global movement against child soldiers, with the UN General Assembly calling for their elimination by 2015."
+    },
+    {
+      "pid": 893,
+      "cos_v8": 0.3754,
+      "gold": "Researchers at the University of New Hampshire and Brookhaven National Laboratory developed a heart-shaped nanoparticle alloy (platinum, iridium, tin) that efficiently catalyzes ethanol oxidation in f",
+      "v8": "Researchers at the University of Illinois at Chicago developed a method to create a self-healing hydrogel using carbon nanotubes and silver nanoparticles to repair damaged heart valves, as reported in"
+    },
+    {
+      "pid": 331,
+      "cos_v8": 0.463,
+      "gold": "A LAN server is a program or computer that manages resources for workstations in an enterprise network, typically administered by an administrator, with examples including Novell and Windows NT.",
+      "v8": "The passage explains computer networking concepts, including network types like LANs, MANs, and WANs, and software tools such as NetFlow and NetFlow Lite, while also introducing the NetFlow Project an"
+    },
+    {
+      "pid": 764,
+      "cos_v8": 0.3956,
+      "gold": "Christmas traditions share roots with ancient Greek festivals of Dionysus, including carols, tree decorations, Santa Claus-like figures, and New Year’s cake, reflecting shared symbolic themes of joy a",
+      "v8": "The Chinese New Year, rooted in Shangri (the celestial capital of the Jade Emperor) and the legend of Hui Shang, is celebrated with traditional customs and symbolic elements like red decorations and l"
+    },
+    {
+      "pid": 254,
+      "cos_v8": 0.4038,
+      "gold": "The passage promotes two free educational resources—Cyndy Shearer's \"The Greenleaf Guide to Old Testament History\" and David Quine's \"Adventures in Art\"—offered by Betty and Chelle, with the former fo",
+      "v8": "The passage discusses the educational value of the book \"The Story of My Life\" by Helen Keller, highlighting its use in teaching about self-determination and self-reliance through the life of Helen Ke"
+    },
+    {
+      "pid": 1790,
+      "cos_v8": 0.3841,
+      "gold": "In *Lord of the Flies*, Jack changes his appearance to embrace savagery, shedding his civilized identity and gaining control over the boys by tapping into his primal instinct to hunt.",
+      "v8": "The passage explores the themes of self-determination, societal expectations, and personal growth through the characters of Elmer, Rose, and the fictional \"Mudman,\" highlighting their struggles agains"
+    },
+    {
+      "pid": 886,
+      "cos_v8": 0.7121,
+      "gold": "The Framework Policy \"Going the Healthy Route at School\" promotes healthy eating and active living in schools through three themes—school environment, education/promotion, and partner collaboration—ro",
+      "v8": "The Ontario Ministry of Education's 2007-2008 Food and Physical Activity Plan, led by the Toronto Food and Physical Activity Plan, aims to promote healthy eating and active living through school-based"
+    },
+    {
+      "pid": 534,
+      "cos_v8": 0.3757,
+      "gold": "Frank Gregorio and the project team aim to create a high-resolution 4k map of Earth's appearance 65 million years ago, using the BMNG dataset as a base and verifying data accuracy for educational use.",
+      "v8": "The passage discusses the creation of a 3D model of the Solar System using the Hubble Space Telescope's Wide Field Camera 3 image, with a focus on the asteroid Apophis and its orbit, while highlightin"
+    },
+    {
+      "pid": 1151,
+      "cos_v8": 0.169,
+      "gold": "The passage describes the procedure for testing Power IGBT insulation by incrementally increasing voltage, measuring leakage current at each step, and analyzing the resulting curve to assess insulatio",
+      "v8": "The passage explains how to calibrate a soil moisture meter using a standard soil sample to ensure accurate readings, with the calibration factor (CF) determined by comparing measured and actual moist"
+    },
+    {
+      "pid": 1284,
+      "cos_v8": 0.3813,
+      "gold": "The passage provides key data about Earth's physical characteristics, including its diameter, rotation, orbit, and unique features like water and atmosphere, while referencing a NASA/NOAA satellite im",
+      "v8": "The passage explains the formation of the Kachino Basin on Mauna Kea, Hawaii, caused by a massive impact event, and compares it to other impact basins like the Hellas Basin on Mars."
+    },
+    {
+      "pid": 357,
+      "cos_v8": 0.2561,
+      "gold": "The passage describes three egg decorating techniques—using rubber bands, stickers, and wax crayons—to create patterns and colors on eggs.",
+      "v8": "The passage explains how to create a solar-powered paper helicopter using household materials to teach children about flight mechanics and the role of lift and gravity."
+    },
+    {
+      "pid": 1252,
+      "cos_v8": 0.3041,
+      "gold": "The Cappel surname's genealogical information, maintained by AncientFaces, includes speculative details on its history, origin, meaning, pronunciation, and family tree, with community contributions en",
+      "v8": "The passage discusses the etymology of the surname \"Carr,\" its origins in Old French and Latin, and its geographical distribution in the United States."
+    },
+    {
+      "pid": 1132,
+      "cos_v8": 0.34,
+      "gold": "The Trireme was the primary Greek warship during the Trojan War, characterized by three rows of oars, a ram as its main weapon, and a strategy involving boarding and combat.",
+      "v8": "The passage explains the construction of the siege engine, the trebuchet, and its historical use in warfare, including the role of the \"sack\" and the process of launching projectiles."
+    },
+    {
+      "pid": 382,
+      "cos_v8": -0.0074,
+      "gold": "Alcatel-Lucent's Bell Labs set a new optical transmission record of over 100 Petabits per second-kilometer using advanced WDM and coherent detection technologies, achieving unprecedented capacity over",
+      "v8": "Researchers at the University of Washington developed a low-cost, field-deployable solar cell using perovskite and graphene to enhance solar panel efficiency and reduce costs, addressing the challenge"
+    },
+    {
+      "pid": 726,
+      "cos_v8": 0.5176,
+      "gold": "The passage outlines foundational educational categories—Critical Thinking and Writing, Foreign Languages, Mathematical Sciences, Natural Sciences, and Computer and Information Science—that collective",
+      "v8": "The passage discusses the integration of Information and Communication Technologies (ICT) into education to enhance learning through personalized strategies, critical thinking, and social skills devel"
+    },
+    {
+      "pid": 1511,
+      "cos_v8": 0.25,
+      "gold": "Algae biodiesel is produced by extracting oil from algae using methods like oil pressing, hexane solvent, and supercritical CO2, followed by transesterification to refine the oil into biodiesel.",
+      "v8": "Researchers at the University of Minnesota developed a biodegradable, water-based battery using yeast and glucose to power seed germination, offering a sustainable alternative to traditional methods f"
+    },
+    {
+      "pid": 1962,
+      "cos_v8": 0.3874,
+      "gold": "The passage discusses the evolution of British romantic novels from the mid-19th century to the early 20th century, highlighting women writers like Charlotte M. Yonge, Rhoda Broughton, and Mary Elizab",
+      "v8": "The passage discusses the cultural and social changes in Ireland post-1916, focusing on the emergence of a new Irish identity, the influence of British and American cultural elements, and the role of "
+    },
+    {
+      "pid": 186,
+      "cos_v8": 0.304,
+      "gold": "Veterinary anaesthesia and analgesia involve administering controlled drug-induced unconsciousness and pain relief, using human-like techniques and advanced monitoring, tailored to each pet's needs fo",
+      "v8": "The passage explains how horses with lameness are assessed and treated, involving diagnostic methods like palpation, blood tests, and X-rays, along with management strategies such as isolation, exerci"
+    },
+    {
+      "pid": 1087,
+      "cos_v8": 0.3801,
+      "gold": "Researchers from the University of Exeter and St Andrews University demonstrate that stereotypes can both hinder and enhance performance, highlighting their complex role in shaping individual and grou",
+      "v8": "A study by the University of Exeter's Institute for Health Decisions found that people's fear of aging is influenced by social interactions, with older individuals facing greater risks from social exc"
+    },
+    {
+      "pid": 1506,
+      "cos_v8": 0.6332,
+      "gold": "The passage describes nine math worksheets focused on calculating area, surface area, and volume using real-world examples like land plots, circular structures, prisms, cylinders, pyramids, cones, and",
+      "v8": "The passage outlines a set of math teaching resources, including a 3D shapes poster, nets, and worksheets, designed to teach students about 3D shapes and their properties."
+    },
+    {
+      "pid": 844,
+      "cos_v8": 0.7133,
+      "gold": "Training employees in conflict resolution skills enhances workplace relationships and efficiency by reducing tension and fostering collaborative problem-solving.",
+      "v8": "The passage discusses the importance of communication skills in overcoming workplace stress and fostering positive relationships, emphasizing techniques like active listening and constructive feedback"
+    },
+    {
+      "pid": 1198,
+      "cos_v8": 0.0474,
+      "gold": "Obesity surgery options, including gastric balloon, sleeve gastrectomy, gastric bypass, and mini gastric bypass, are tailored for patients with BMI ≥ 40 or 35-40 with comorbidities to manage weight an",
+      "v8": "The passage explains the two types of heart attacks—acute and chronic—caused by plaque rupture, with acute being more common and severe, and discusses the MyoCardiogram test, a non-invasive procedure "
+    },
+    {
+      "pid": 1032,
+      "cos_v8": 0.1874,
+      "gold": "The Yerkes Dodson Law and Hebb's theory on arousal levels influencing learning performance are critiqued by Apter and contrasted with the accelerated learning movement's emphasis on minimal anxiety, w",
+      "v8": "The passage discusses the debate on whether to use a \"psychological\" or \"psychological/social\" framework in understanding addiction, highlighting the influence of Freudian concepts and the need for a "
+    },
+    {
+      "pid": 341,
+      "cos_v8": 0.4099,
+      "gold": "Tropical Cyclone Dumile is intensifying in the Southern Indian Ocean near Madagascar, expected to peak at 75 knots over the next 24 hours before weakening due to cooler sea temperatures, according to ",
+      "v8": "The passage discusses the formation of Tropical Cyclone Nangkei (Tropical Depression 17E) in the South Pacific, its movement toward the Solomon Islands, and the use of satellite imagery to monitor its"
+    },
+    {
+      "pid": 303,
+      "cos_v8": 0.5112,
+      "gold": "The Indian percussion ensemble, originating in South India as early as the 4th century B.C., features instruments like Mridangam and Ghatam, improvisatory performances with competitive spirit, and is ",
+      "v8": "The passage discusses the cultural significance of Indian dance, highlighting its origins in ancient Vedic traditions, the role of Bharatmuni, and the development of distinct regional styles like Kath"
+    },
+    {
+      "pid": 421,
+      "cos_v8": 0.4099,
+      "gold": "Composite materials, combining metals with nonmetals or multiple metals, include examples like tungsten/copper, cemented carbides, friction materials, diamond tools, and magnetic composites, used in a",
+      "v8": "The passage discusses various coatings and materials used in dental prosthetics, including nitinol, titanium, and other alloys, along with their properties and applications in dental restoration."
+    },
+    {
+      "pid": 1472,
+      "cos_v8": 0.4311,
+      "gold": "Concrete and steel are complementary construction materials, with steel rebars and rebar chairs used to enhance tensile strength and maintain steel positioning during concrete pouring.",
+      "v8": "The passage explains how to create a 3D model of a concrete column using Revit, detailing the use of the \"Concrete Slab\" component, \"Concrete Slurry\" material, and \"Concrete Column\" element to simulat"
+    },
+    {
+      "pid": 159,
+      "cos_v8": 0.312,
+      "gold": "The passage provides safety tips for water activities, including preventing jellyfish stings, avoiding shark attacks, and managing motion sickness.",
+      "v8": "The passage explains how to prevent and treat tick bites, emphasizing prevention through clothing and insect repellent, prompt removal, and medical evaluation for symptoms like fever, while highlighti"
+    },
+    {
+      "pid": 389,
+      "cos_v8": 0.2792,
+      "gold": "In *The Scarlet Letter*, Hester Prynne evolves from a shamed adulteress to a maternal, benevolent figure symbolized by the scarlet \"A,\" which transforms from a mark of sin to a symbol of hope and rede",
+      "v8": "The passage explores the cultural significance of the term \"Mormon\" and the symbolic representation of Joseph Smith as a warrior and prophet, highlighting his role in shaping the Latter Day Saint move"
+    },
+    {
+      "pid": 1714,
+      "cos_v8": 0.124,
+      "gold": "WSU researchers have discovered the formation conditions of hexagonal diamond under shock compression, offering insights into meteor impact analysis and planetary science.",
+      "v8": "Researchers at the University of California, San Diego, developed a method to engineer CRISPR-based nanoparticles that selectively destroy cancer stem cells, offering a potential treatment for aggress"
+    },
+    {
+      "pid": 699,
+      "cos_v8": 0.3307,
+      "gold": "The Earth's four spheres—lithosphere (rocky crust), hydrosphere (water), biosphere (life), and atmosphere (air)—are defined by their Greek roots and encompass distinct components of the planet's syste",
+      "v8": "The passage explains the Earth's four types of earthquakes—shallow, intermediate, deep, and Love waves—and their classification based on depth and location, while also introducing the Moon's tidal loc"
+    },
+    {
+      "pid": 659,
+      "cos_v8": 0.3476,
+      "gold": "The acute angle formed by the clock hands at 1 o'clock is 30 degrees.",
+      "v8": "The passage explains the concept of sidereal time, its relation to solar time, and the calculation of sidereal day length using the formula 24 hours divided by (1 + 360 degrees divided by 365.25 days)"
+    },
+    {
+      "pid": 48,
+      "cos_v8": 0.5537,
+      "gold": "\"A Natural History of the New World by Alan Graham provides a comprehensive synthesis of the ecological and evolutionary history of plants in the Americas from the Late Cretaceous to the present, emph",
+      "v8": "The book \"The Evolution of the American West\" by David J. Steere explores the ecological and evolutionary history of the American West, highlighting the role of rivers, climate, and human impact in sh"
+    },
+    {
+      "pid": 939,
+      "cos_v8": 0.3539,
+      "gold": "The MINT representation encodes melodic interval data through four token types—interval tokens (with optional direction, diatonic size, and quality), pitch offsets, rests, and barlines—using standardi",
+      "v8": "The passage explains the definitions and usage of musical modes, including their relation to diatonic and chromatic systems, the role of the subdominant (V), and the distinction between modal and moda"
+    },
+    {
+      "pid": 695,
+      "cos_v8": -0.002,
+      "gold": "Composting at home converts kitchen and garden organic waste into natural fertilizer by avoiding harmful materials like meat and pesticide-treated peels, using simple methods like bins or soil with re",
+      "v8": "The passage discusses the benefits of using solar-powered solar water heaters, highlighting their energy efficiency, cost-effectiveness, and environmental impact, while also addressing common myths an"
+    },
+    {
+      "pid": 55,
+      "cos_v8": 0.5506,
+      "gold": "Bees are critical to South Africa's food security and biodiversity, facing decline due to habitat loss, pesticides, and American foulbrood disease, prompting government and individual conservation eff",
+      "v8": "The passage discusses the threat of malaria to honeybees from imported mosquitoes and the efforts of beekeepers like John and his son to protect their colonies through disease prevention and habitat m"
+    },
+    {
+      "pid": 1981,
+      "cos_v8": 0.1473,
+      "gold": "Medical physicists at Thomas Jefferson University and Jefferson's Kimmel Cancer Center developed a 4D robotic tumor tracking technique that reduces radiation to healthy tissue by up to 50% during radi",
+      "v8": "Researchers at the University of Alberta developed a non-invasive, real-time method using near-infrared spectroscopy to monitor cerebral haemorrhage severity and treatment response, offering a safer a"
+    },
+    {
+      "pid": 1045,
+      "cos_v8": 0.661,
+      "gold": "The passage discusses using My World GIS and Geobrain Online Analysis System to predict tsunami run-up impacts on Seaside, Oregon, by analyzing DEM data and assessing potential inundation and evacuati",
+      "v8": "The passage discusses the development of a web-based GIS tool for monitoring and predicting urban flooding in the Los Angeles basin, utilizing data from the USGS National Water Prediction System and t"
+    },
+    {
+      "pid": 1414,
+      "cos_v8": 0.3978,
+      "gold": "amfAR advocates for developing and testing new prevention interventions like PrEP and microbicides to end the AIDS epidemic, supported by clinical studies showing their efficacy.",
+      "v8": "The passage discusses the development of precision therapies for infectious diseases and cancer, leveraging genomic data and AI to enhance treatment efficacy and reduce resistance, supported by initia"
+    },
+    {
+      "pid": 1524,
+      "cos_v8": 0.1435,
+      "gold": "Bipolar neurons in the pike's spinal ganglion are specialized sensory neurons transmitting signals for smell, sight, taste, hearing, and vestibular functions.",
+      "v8": "The passage discusses the structure and function of the eye, including its components like the cornea, lens, vitreous humor, and retina, as well as the classification of eye diseases and the role of t"
+    },
+    {
+      "pid": 850,
+      "cos_v8": 0.3328,
+      "gold": "Rondônia, a northwest Brazilian state with Porto Velho as its capital, is characterized by its vast Amazon Forest coverage, historical isolation due to dense jungle, and limited development compared t",
+      "v8": "The island of Curaçao, a Dutch-heritage Caribbean territory with a population of 400,000, is home to the largest indigenous Miskito community in the Americas and the largest cemetery in the Caribbean."
+    },
+    {
+      "pid": 7,
+      "cos_v8": 0.455,
+      "gold": "A mild winter in 2012 affected environmental elements like aquatic ecosystems, plants, amphibians, insects, and ornamental species in the Northeastern U.S., altering their survival rates, breeding sea",
+      "v8": "The passage discusses the decline of songbirds in the Pacific Northwest due to climate change, habitat loss, and pesticide use, while highlighting the role of the NWPS Bird Conservation Initiative in "
+    },
+    {
+      "pid": 13,
+      "cos_v8": 0.2634,
+      "gold": "Six planets and the waning crescent moon aligned in the dawn sky on April 30, 2023, as observed from Los Angeles, with Mercury, Venus, Mars, Jupiter, Uranus, and Neptune visible.",
+      "v8": "The passage discusses the formation of a new meteor shower linked to the asteroid Apophis, its orbital path, and the naming of meteor showers after mythological figures."
+    },
+    {
+      "pid": 1925,
+      "cos_v8": 0.3514,
+      "gold": "Eole Water, a French company, developed the WMS1000 wind turbine, which condenses atmospheric moisture into safe drinking water meeting WHO standards, producing up to 1,200 liters daily without extern",
+      "v8": "The University of Sheffield's 3D-printed floating water tanks, developed in collaboration with the University of Liverpool, use solar power to pump seawater into tanks, enabling efficient desalination"
+    },
+    {
+      "pid": 1359,
+      "cos_v8": 0.8802,
+      "gold": "The passage discusses the causes of dog aggression and the debate surrounding the use of electric shock collars as a corrective training tool, highlighting their potential effectiveness and risks when",
+      "v8": "The passage discusses the use of shock collars and other methods to manage aggressive dogs, highlighting their effectiveness in training but emphasizing the importance of addressing underlying behavio"
+    },
+    {
+      "pid": 1783,
+      "cos_v8": 0.5227,
+      "gold": "High arches (pes cavus) and flat feet are hereditary foot conditions that can cause pain and discomfort, often requiring custom orthotics and specialist care from professionals like Sulejman Menzildzi",
+      "v8": "The passage explains the causes of heel pain, including plantar fasciitis, Achilles tendonitis, and calcaneus bone spurs, and outlines treatment options like massage, ice, and orthotics, while noting "
+    },
+    {
+      "pid": 335,
+      "cos_v8": 0.315,
+      "gold": "NYSED hosted webinars from December 2011 to February 2012 to introduce Student Learning Objectives (SLOs) for teachers and principals, emphasizing their alignment with Common Core State Standards and ",
+      "v8": "The passage outlines the implementation of the Next Generation Science Standards (NGSS) in the district, emphasizing teacher training, curriculum alignment, and assessment strategies to ensure student"
+    },
+    {
+      "pid": 1578,
+      "cos_v8": 0.4207,
+      "gold": "Neuroscientists at the Max Planck Institute discovered that screams activate the amygdala, potentially leading to scarier media and optimized alarm signals.",
+      "v8": "A study by researchers at the University of Groningen and the University of California, San Diego found that the human brain can distinguish between real and fake spiders, with fake spiders being more"
+    },
+    {
+      "pid": 1188,
+      "cos_v8": 0.4403,
+      "gold": "The discovery of the Late Triassic turtle fossil Odontochelys semitestacea in China challenges existing hypotheses about turtle origins by supporting a diapsid ancestry and ruling out the pareiasauria",
+      "v8": "The passage discusses the discovery of a new ichthyosaur species, Erythrosuchus campestris, found in the Cuyamel Norte Formation of Peru, highlighting its unique features and the debate over its class"
+    },
+    {
+      "pid": 366,
+      "cos_v8": 0.4028,
+      "gold": "At week 12 of a twin pregnancy, organs are fully formed but continue developing, ultrasounds can detect heartbeats and genital differentiation (gender determination occurs around week 20), and miscarr",
+      "v8": "The passage explains the stages of pregnancy, including fertilization, implantation, and early fetal development, and highlights the risk of ectopic pregnancy, a life-threatening condition where the f"
+    },
+    {
+      "pid": 586,
+      "cos_v8": 0.4651,
+      "gold": "The passage discusses the three primary interpretations of the two witnesses in Revelation 11—Moses and Elijah, Enoch and Elijah, or two unnamed believers—each with supporting arguments and considerat",
+      "v8": "The passage discusses the symbolic and historical significance of the Ark of the Covenant, its role in Jewish and Christian traditions, and its connection to the New Jerusalem, emphasizing its spiritu"
+    },
+    {
+      "pid": 203,
+      "cos_v8": 0.6716,
+      "gold": "Testosterone plays a critical role in male development, fertility, and overall health, with low levels linked to infertility, sexual dysfunction, and various physical and mental health issues, necessi",
+      "v8": "The passage discusses the link between low testosterone in men and heart disease, highlighting the role of the SRY gene in testicular development and the importance of testosterone levels in cardiovas"
+    },
+    {
+      "pid": 1336,
+      "cos_v8": 0.2526,
+      "gold": "Ringed seals in Alaska, Russia, and Canada are dying and sickening, with scientists like John Kelly testing for radiation from the Fukushima Daiichi Nuclear Power Plant leak as a potential cause, thou",
+      "v8": "A study by the University of Rhode Island found that the venomous lion's mane jellyfish (Hydra magnipapillata) is spreading rapidly in the Gulf of Mexico, threatening fisheries and coastal communities"
+    },
+    {
+      "pid": 848,
+      "cos_v8": 0.3419,
+      "gold": "Farmers can enhance pasture sustainability and ecosystem functions by adopting complex mixed-species swards to increase plant biodiversity, improve forage yield, and reduce soil nutrient losses.",
+      "v8": "The passage discusses the role of genetic diversity in tree growth and wood quality, highlighting the importance of genetic resources and the need for a national tree genetic resource database to supp"
+    },
+    {
+      "pid": 216,
+      "cos_v8": 0.2524,
+      "gold": "Speech therapy addresses persistent speech irregularities like lisps or stuttering, with activities such as tongue twisters and list-building games aiding families in improving articulation.",
+      "v8": "The passage discusses strategies for teaching children about allergies, emphasizing the importance of understanding their causes, symptoms, and management, while also highlighting the role of music an"
+    },
+    {
+      "pid": 1813,
+      "cos_v8": 0.4029,
+      "gold": "TEPCO is constructing new safety facilities, including filtered vents and a 20,000-ton water reservoir, at the Kashiwazaki-Kariwa plant to comply with stricter safety guidelines effective July 2013.",
+      "v8": "The Fukushima Daiichi Nuclear Power Plant, operated by Tokyo Electric Power Co., is implementing a 10-year plan to repair damaged reactors and prevent meltdowns through advanced techniques like steam "
+    },
+    {
+      "pid": 1395,
+      "cos_v8": 0.434,
+      "gold": "The passage discusses the author's reflection on Chapter 4 of TDQ, emphasizing the importance of teaching reading through quality, in-depth lessons and using resources like the provided book list and ",
+      "v8": "The passage discusses using the book *The Rainbow Fish* to teach children about self-esteem through interactive activities and strategies like the \"I Am\" list and \"I Am Not\" list."
+    },
+    {
+      "pid": 1183,
+      "cos_v8": 0.1488,
+      "gold": "The town of Troy, Montgomery County, was established by Scottish immigrants through a donation by Angus McCaskill, originally named West’s Oldfield, and later became a business center with a courthous",
+      "v8": "The passage highlights the historical significance of the Cherokee community in Memphis, Tennessee, founded by John B. Moore in 1827, its role as the first African-American settlement in the South, an"
+    },
+    {
+      "pid": 372,
+      "cos_v8": 0.4342,
+      "gold": "The Getty Center in Los Angeles hosted the exhibition \"Miracles and Martyrs: Saints in the Middle Ages\" from March 2, 2014, showcasing illuminated manuscripts from the J. Paul Getty Museum's collectio",
+      "v8": "The passage discusses the 1999 exhibition \"The Making of a King: The Life of King David I\" at the National Museum of Israel, highlighting the biblical king's life and the historical context of his rei"
+    },
+    {
+      "pid": 1508,
+      "cos_v8": 0.37,
+      "gold": "The passage highlights the limitations of evidence-based medicine, emphasizing that short-term studies often overlook long-term consequences, as seen in examples like cortisone injections, baby walker",
+      "v8": "The passage discusses the debate on whether vitamin D supplementation can prevent osteoporosis in children, highlighting conflicting studies and the need for further research on its long-term effects "
+    },
+    {
+      "pid": 768,
+      "cos_v8": 0.5023,
+      "gold": "The passage critiques the overreliance on psychotropic medications for treating psychological disorders, highlighting concerns about their long-term efficacy and the suppression of critical research, ",
+      "v8": "The passage discusses the debate over whether antidepressants are necessary for depression, highlighting the risks of antidepressant use, the role of genetics in depression, and the controversy surrou"
+    },
+    {
+      "pid": 476,
+      "cos_v8": 0.4726,
+      "gold": "The passage explains the interconnectedness of oral health (gums, teeth) and cardiovascular health through inflammation, highlighting the need for collaboration between dentists and doctors to manage ",
+      "v8": "The passage discusses the connection between heart disease and sleep, highlighting the role of sleep apnea, cardiovascular risks, and the importance of sleep hygiene to mitigate these health impacts."
+    },
+    {
+      "pid": 1966,
+      "cos_v8": 0.4012,
+      "gold": "The passage discusses the NCERT Class 9 History chapter on Forest Society and Colonialism, available for download as PDF textbooks.",
+      "v8": "The passage outlines various educational resources, including books, websites, and software, covering topics like computer programming, history, and science."
+    },
+    {
+      "pid": 1072,
+      "cos_v8": 0.3062,
+      "gold": "The passage discusses the distinction between allergic and non-allergic asthma, highlighting differences in patient demographics, pathobiology (e.g., Th2 cells vs. neutrophils), treatment responses (e",
+      "v8": "The passage discusses the role of the complement system in diagnosing and managing chronic periodontitis, highlighting its involvement in disease progression and the need for further research on its c"
+    },
+    {
+      "pid": 1220,
+      "cos_v8": 0.2743,
+      "gold": "A study led by Sylvana Côté and the GRIP group reveals that hyper-aggressive children exhibit distinct DNA methylation patterns influenced by prenatal conditions and environmental factors, linking the",
+      "v8": "A study by the University of Alberta and University of Montreal found that maternal depression during pregnancy increases children's risk of developing schizophrenia, highlighting the need for early i"
+    },
+    {
+      "pid": 1452,
+      "cos_v8": 0.3202,
+      "gold": "The history of Virginia and Maryland's tobacco industry, central to their colonial economies, is explored through Xu Bing's \"Tobacco Project\" exhibit at the Virginia Museum of Fine Art, blending histo",
+      "v8": "The passage discusses the cultural and historical significance of the Cherokee Trail of Tears, its impact on Cherokee society, and the modern efforts to preserve its legacy through art and historical "
+    },
+    {
+      "pid": 1870,
+      "cos_v8": 0.327,
+      "gold": "University of Texas at Austin researchers, with funding from the National Eye Institute, developed mathematical formulas for optimal eye movements that could enhance robotic visual systems and aid ind",
+      "v8": "Researchers at the University of Alberta and University of Alberta at the Children’s Hospital of Alberta developed a method to identify and enhance the sensitivity of rod photoreceptors in blind mice,"
+    },
+    {
+      "pid": 1689,
+      "cos_v8": 0.5847,
+      "gold": "The passage discusses the green economy as a framework for sustainable development and poverty eradication, highlighting international efforts, challenges in defining and implementing green economy po",
+      "v8": "The passage discusses the Sustainable Development Goals (SDGs) and their impact on climate finance, highlighting the need for improved transparency, accountability, and cooperation among stakeholders "
+    },
+    {
+      "pid": 675,
+      "cos_v8": 0.4637,
+      "gold": "The Kake community's struggle to protect Gunnuk Creek watershed from timber harvesting led to a land transfer and conservation easements involving Kake Tribal Corporation, the State of Alaska, and the",
+      "v8": "The U.S. Forest Service and U.S. Fish & Wildlife Service are collaborating to protect the endangered Coho salmon in the Salmon Creek watershed through habitat restoration and conservation efforts."
+    },
+    {
+      "pid": 1652,
+      "cos_v8": 0.5181,
+      "gold": "IT security is a comprehensive process requiring policies, technologies, human expertise, and全员 responsibility to protect information sources and ensure data privacy.",
+      "v8": "The passage discusses the importance of computer security, emphasizing the need for both technical and non-technical awareness, the role of antivirus software, and the necessity of regular updates to "
+    },
+    {
+      "pid": 82,
+      "cos_v8": 0.3673,
+      "gold": "The passage explains a card magic trick where a spectator's chosen card is determined by mathematical operations and the CHaSeD suit code, with the final total revealing the card's value and suit afte",
+      "v8": "The passage explains how to calculate the birthday gematria of the 12 zodiac signs by summing their Hebrew letter values, using the method described by Dr. David Neufeld."
+    },
+    {
+      "pid": 475,
+      "cos_v8": 0.3505,
+      "gold": "The PE Department at MIHSG aims to empower students through comprehensive sports education, offering diverse activities across Key Stages 3-4, GCSE PE curriculum, and extracurricular opportunities, wh",
+      "v8": "The passage outlines a school program for Years 7-9 students focusing on developing self-confidence, teamwork, and leadership through activities like the \"Big Red Bus\" and \"The Challenge,\" with a stru"
+    },
+    {
+      "pid": 245,
+      "cos_v8": 0.5798,
+      "gold": "The passage discusses the growing importance of VPNs in safeguarding online privacy and security by masking identities, bypassing censorship, and protecting against cyber threats.",
+      "v8": "The passage discusses the importance of internet security, emphasizing the need for antivirus software, firewalls, and regular updates to protect against cyber threats and data breaches."
+    },
+    {
+      "pid": 1788,
+      "cos_v8": 0.7458,
+      "gold": "Taiji (Tai Chi), rooted in Daoist philosophy and attributed to the legendary Zhang San-feng, evolved as a martial art and self-healing practice with diverse styles like Yang, Chen, and Wu, gaining glo",
+      "v8": "The passage discusses the cultural significance of Tai Chi in Chinese martial arts, its historical roots in Taoist philosophy, and its integration of physical and mental practices to promote health an"
+    },
+    {
+      "pid": 1022,
+      "cos_v8": 0.182,
+      "gold": "The website \"The Union Makes Us Strong,\" a partnership between the TUC and London Metropolitan University, digitizes and provides access to historical trade union collections, aiming to preserve and s",
+      "v8": "The book \"The History of the British Prison System\" by David Cottington, published by Routledge, examines the evolution of prisons in Britain from medieval times to the present, highlighting key event"
+    },
+    {
+      "pid": 443,
+      "cos_v8": 0.4032,
+      "gold": "Yakshagana, a semi-folk art form of Karavali Karnataka, features two styles—Tenku in Dakshina Kannada and Badagu in Udipi/Uttar Kannada—with distinct musical and costume influences, while Kunita, a vi",
+      "v8": "The passage discusses the cultural significance of the Kumbh Mela festival in India, highlighting its origins, the Shrinath Temple in Haridwar, and the architectural styles of the Shivalik and Kumbhal"
+    },
+    {
+      "pid": 1509,
+      "cos_v8": 0.2526,
+      "gold": "In 2013, the United States imported the most coal from Colombia, accounting for approximately 74% of its total coal imports.",
+      "v8": "The passage discusses the 2010 U.S. carbon dioxide emissions from the energy sector, highlighting the EPA's 2010 Greenhouse Gas Emissions Factors methodology and the role of coal, natural gas, and ren"
+    },
+    {
+      "pid": 1642,
+      "cos_v8": 0.3644,
+      "gold": "The passage details assembling light pipes by combining LEDs, heat-shrink tubing, and acrylic rods using a soldering iron or heat gun, while warning against melting acrylic directly onto LEDs due to p",
+      "v8": "The passage explains how to create a 3D-printed rocket using a 3D printer, copper wire, and a copper sponge, detailing the process of forming the body, attaching fins, and assembling the launch mechan"
+    },
+    {
+      "pid": 1548,
+      "cos_v8": 0.1801,
+      "gold": "First Move is a cross-curricular chess education program for second and third graders that enhances analytical thinking, problem-solving, and academic skills like math and reading, with research showi",
+      "v8": "The passage discusses the integration of gardening and mindfulness into elementary education to enhance student learning, social-emotional development, and academic outcomes, supported by programs lik"
+    },
+    {
+      "pid": 1136,
+      "cos_v8": 0.3472,
+      "gold": "This course explains how accounting serves as the \"language of business\" by providing financial information to stakeholders like owners, managers, and investors for decision-making in both business an",
+      "v8": "The passage outlines the role of project management in business, emphasizing its impact on project success and the skills required for effective project management."
+    },
+    {
+      "pid": 1371,
+      "cos_v8": 0.0274,
+      "gold": "Molluscum contagiosum is a common childhood viral infection caused by the molluscum contagiosum virus, spread via skin-to-skin contact, characterized by pearly bumps that may resolve spontaneously or ",
+      "v8": "Achilles tendon rupture, a common injury in sports, is treated with rest, ice, and compression, and diagnosed via physical examination and ultrasound, with risk factors including age, gender, and obes"
+    },
+    {
+      "pid": 380,
+      "cos_v8": 0.3151,
+      "gold": "The passage discusses the principles of domestic fair trade in agriculture, emphasizing transparent pricing that covers production costs and ensures fair returns to growers, as exemplified by a study ",
+      "v8": "The passage discusses the debate over school lunch programs, highlighting their role in providing nutrition, the challenges in evaluating their effectiveness, and the need for a balanced approach that"
+    },
+    {
+      "pid": 527,
+      "cos_v8": 0.5163,
+      "gold": "The study characterizes stream-aquifer interactions in the Pedernales Watershed, identifying the Hensel Sand as the primary baseflow source and finding no significant hydrologic changes from 1940 to 2",
+      "v8": "The study evaluates the 2007-2008 California drought's impact on streamflow and water quality using the Hydrologic Response Simulation (HURS) model, revealing reduced streamflow and increased suspende"
+    },
+    {
+      "pid": 1205,
+      "cos_v8": 0.3867,
+      "gold": "Jack encounters a talking Brontosaurus in the forest while exploring a shortcut in the children's book *Cinderella Sarah: Read Alouds for Kids*.",
+      "v8": "The passage discusses the story of a boy who discovers a magical box containing a turtle named Leo, highlighting the turtle's unique abilities and the educational themes of nature and conservation."
+    },
+    {
+      "pid": 888,
+      "cos_v8": 0.3176,
+      "gold": "Student Scientists from The Radclyffe School attended the Big Bang Fair in Birmingham, gaining hands-on experience with scientific activities and insights into potential careers in science and enginee",
+      "v8": "The University of Liverpool's Science in Schools project engages 12-14-year-old students in building eco-friendly homes using recycled materials to teach sustainability and environmental science."
+    },
+    {
+      "pid": 1061,
+      "cos_v8": 0.3115,
+      "gold": "San Antonio researchers, including Dr. Ratna Vadlamudi at UT Health San Antonio, are developing an orally available molecule to block estrogen receptor signaling in drug-resistant breast cancer, aimin",
+      "v8": "Researchers at the University of Colorado at Denver discovered that a gene therapy targeting the APOE gene in Alzheimer's patients may reduce amyloid plaque buildup, offering a potential treatment des"
+    },
+    {
+      "pid": 1876,
+      "cos_v8": 0.3262,
+      "gold": "Enthesitis is an inflammatory condition affecting the entheses (ligament and tendon-bone insertion sites), commonly associated with autoimmune diseases like spondylitis and spondyloarthritis, distinct",
+      "v8": "Lateral meniscus tears, often caused by twisting injuries, are diagnosed via MRI and treated with physical therapy, surgery, or arthroscopy, while chronic pain may indicate a meniscal cyst."
+    },
+    {
+      "pid": 1963,
+      "cos_v8": 0.359,
+      "gold": "Infrared technology, utilizing electromagnetic waves with wavelengths shorter than visible light and ranging from ~0.7µm to ~1µm, enables short-range, line-of-sight data communication through protocol",
+      "v8": "The passage explains RFID technology, detailing its components like tags, readers, and protocols such as ISO/IEC 14443, and its applications in security and access control."
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "n": 100,
+  "judge_vs_gold_teacher": {
+    "win_rate_mean": 0.33,
+    "win_rate_std": 0.0163,
+    "per_seed": [
+      0.33,
+      0.31,
+      0.35
+    ],
+    "CI95_pooled_lastseed": [
+      0.2636,
+      0.4475
+    ],
+    "last_ow_kw_tie": [
+      35,
+      65,
+      0
+    ],
+    "judge": "openai/gpt-4o"
+  },
+  "judge_vs_text_agnostic": {
+    "win_rate_mean": 0.3199,
+    "win_rate_std": 0.0291,
+    "per_seed": [
+      0.2959,
+      0.303,
+      0.3608
+    ],
+    "CI95_pooled_lastseed": [
+      0.2722,
+      0.46
+    ],
+    "last_ow_kw_tie": [
+      35,
+      62,
+      3
+    ],
+    "judge": "openai/gpt-4o"
+  },
+  "cosine": {
+    "paper_teacher_embedder_vs_qwen_gold": {
+      "ours": 0.6102,
+      "kitft": 0.5477,
+      "ours_win_rate": 0.72
+    },
+    "neutral_embedder_vs_qwen_gold": {
+      "ours": 0.6444,
+      "kitft": 0.4792,
+      "ours_win_rate": 0.84,
+      "embedder": "sentence-transformers/all-mpnet-base-v2"
+    },
+    "neutral_embedder_vs_altteacher_gold": {
+      "ours": 0.4526,
+      "kitft": 0.5076,
+      "ours_win_rate": 0.37,
+      "embedder": "sentence-transformers/all-mpnet-base-v2",
+      "alt_teacher": "meta-llama/llama-3.3-70b-instruct"
+    }
+  },
+  "alt_gold_samples": [
+    "A language model reading this passage would likely be focused on the topic of the environmental effects of mild winters, specifically in the context of Syracuse, N.Y., which is noted as the nation's snowiest large city. The key entity of interest is Syracuse, and the claim is that the city has received less than half of its average snowfall. The model would be processing this information to understand the potential implications of a mild winter on the environment in this specific location.",
+    "A language model reading this passage would likely be focused on the topic of celestial observation, specifically the alignment of planets and the moon in the sky. The key entities mentioned are the planets, the waning crescent moon, and the location of Los Angeles, California. The claim being made is that six planets and the moon were visible in the dawn sky on a specific date, April 30, as seen from Los Angeles.",
+    "A language model reading this passage would likely be focused on the topic of Palestine refugees in Syria, specifically their situation and rights prior to a conflict. The key entities involved are Palestine refugees and Syrian citizens, with the passage highlighting the refugees' vulnerability. The main claim is that despite having many rights similar to Syrian citizens, Palestine refugees in Syria were already a vulnerable population as early as 2011."
+  ]
+}

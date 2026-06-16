@@ -1,0 +1,16 @@
+{
+  "target": "gemma3-27b",
+  "n": 100,
+  "cos_ours": 0.0694,
+  "cos_kitft": 0.5524,
+  "cos_winrate": 0.0,
+  "judge_winrate_multiseed": 0.0,
+  "judge_seeds": [
+    7,
+    42,
+    123
+  ],
+  "box": "eva02 (A6000-48GB)",
+  "gpu_min": 92.2,
+  "ours_wins_cosine": false
+}

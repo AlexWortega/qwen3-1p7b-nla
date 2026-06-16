@@ -1,0 +1,917 @@
+{
+  "n": 100,
+  "extraction": "bf16_clean",
+  "ours_extraction": "bf16_10k_pool_lstsq",
+  "kitft_quantization": "nf4_compute_bfloat16",
+  "n_rows_lstsq": 10000,
+  "enc_fve_27b": 0.931,
+  "dec_fve_27b": 0.9945,
+  "v8_vs_gold_mean": 0.4553,
+  "kitft_vs_gold_mean": 0.5583,
+  "v8_vs_kitft_winrate": 0.24,
+  "gpu_min": 41.8,
+  "confirms_prior_0372": false,
+  "note": "bf16-clean re-run: 10k-row lstsq (bf16 extraction) for enc/dec, kitft-z via NF4+compute_bfloat16 (all-GPU, ~14GB), ours-z fresh from av_v8_mixed",
+  "per_passage": [
+    {
+      "pid": 853,
+      "cos_v8": 0.4346,
+      "cos_kitft": 0.6129,
+      "gold": "Pakistan Islamic Medical Association (PIMA) convened an advisory meeting with health experts to address polio vaccination requirements for Pakistani travelers, emphasizing the safety and efficacy of oral (OPV) and injectable (IPV) vaccines while highlighting gaps in the national immunization program",
+      "v8": "The passage discusses the controversy surrounding the polio vaccine's role in reducing polio cases, highlighting the 1994-1995 outbreaks, the effectiveness of the vaccine, and the debate over its safety and administration.",
+      "kitft": "Medical/academic Pakistani narrative about public health, with expert quoted statements explaining polio control measures and vaccine safety concerns.\n\nThe sentence describing polio immunity exemption in children travelling abroad (\"the immunity given in emergency cases in non-endemic/child\") implie",
+      "text": "KARACHI: Pakistan Islamic Medical Association (PIMA) held an advisory group meeting on Monday with health experts to clear the confusion surrounding t"
+    },
+    {
+      "pid": 1500,
+      "cos_v8": 0.6455,
+      "cos_kitft": 0.4803,
+      "gold": "The passage criticizes Congress and the Jackson administration for unjustly removing Native American tribes, highlighting Missouri's opposition and the moral implications of the policy.",
+      "v8": "The passage discusses the historical tensions between Native Americans and settlers in the Northwest, highlighting figures like Chief Joseph and the broader conflict over land and sovereignty, while also referencing the U.S. Constitution's role in shaping federal governance.",
+      "kitft": "Formal argumentative or historical prose, illustrating a patriotic, ecclesiastical position on the Indian Removal question, with quoted authority cited.\n\nThe sentence \"they may be resisted by the force of public sentiment, and...\" introduces a contrast or assertion about the threatened Indian rights",
+      "text": "The Indian Question. This subject, so interesting to the friends of humanity and the foes of oppression is now before Congress, and the fate of the ab"
+    },
+    {
+      "pid": 20,
+      "cos_v8": 0.5081,
+      "cos_kitft": 0.6142,
+      "gold": "Palestine refugees in Syria, already vulnerable due to disparities in development indicators before the 2011 conflict, face heightened challenges from the ongoing war, with UNRWA providing critical relief, education, and healthcare services amid displacement and evolving needs.",
+      "v8": "The Israeli government's 2005 relocation of 1,500 Palestinian children from Gaza to Israeli settlements, despite their lack of citizenship, sparked international criticism and calls for justice, with the UN General Assembly urging accountability for human rights violations.",
+      "kitft": "Policy/humanitarian analysis article structure: formal UN report summarizing regional and international impacts, covering Palestinian refugee education and UNRWA services.\n\nThe sentence describing refugee education challenges (\"thousands of Palestinian refugees were affected...\"), implying a second ",
+      "text": "Even before the outbreak of the current conflict, in 2011, Palestine refugees in Syria were a vulnerable population. Although they had many of the rig"
+    },
+    {
+      "pid": 1679,
+      "cos_v8": 0.741,
+      "cos_kitft": 0.4611,
+      "gold": "A new survey reveals that 60% of teenage girls in Liverpool may need skin cancer treatment due to sunbed use, driven by bullying for pale skin and lack of age verification in sunbed shops.",
+      "v8": "A survey by the Skin Cancer Foundation found that 60% of UK teenagers believe sunbed use is safe, despite risks like skin cancer and premature aging, with the Department of Health urged to implement measures to protect young people from UV damage.",
+      "kitft": "News article format: UK-based report on a public health warning, summarising findings about tanning dangers and teenage sun use.\n\nThe sentence structure \"young people are being harmed by\" introduces a quoted or reported example of the alarming tanning behaviour, linking the problem of teenage tannin",
+      "text": "A new survey has revealed that 60 per cent of teenage girls in Liverpool may need skin cancer treatment in the future as a result of using sunbeds.\nSu"
+    },
+    {
+      "pid": 1690,
+      "cos_v8": 0.5612,
+      "cos_kitft": 0.567,
+      "gold": "Biosurveillance, with roots in Hippocrates, faces modern challenges due to rapid species movement and global environmental changes, necessitating a global information infrastructure to enhance timely detection of disease outbreaks and ecological threats, as exemplified by InSTEDD's initiatives.",
+      "v8": "The passage discusses the critical role of environmental monitoring in combating infectious diseases like Ebola and avian flu, emphasizing the need for integrated, real-time data systems to enhance public health responses and address global health challenges.",
+      "kitft": "Academic/technical discussion of global disease surveillance, synthesizing scientific and policy perspectives on infectious disease monitoring and informatics.\n\nThe sentence structure \"novel environmental and global events have influenced global disease patterns\" implies continuation, likely elabora",
+      "text": "Dating back to Hippocrates, biosurveillance, the detection and observation of disease outbreaks, is not an entirely new concept. In recent history, th"
+    },
+    {
+      "pid": 1644,
+      "cos_v8": 0.4716,
+      "cos_kitft": 0.4727,
+      "gold": "The passage discusses managing high blood pressure through lifestyle modifications such as achieving a healthy weight, regular physical activity, and avoiding crash diets, alongside the cautious use of weight loss medications.",
+      "v8": "The passage discusses heartburn, its causes including lifestyle factors and GERD, and outlines treatment options such as lifestyle changes, medications, and surgery, emphasizing prevention through weight management and avoiding triggers.",
+      "kitft": "Medical educational article/database format, summarizing health information about cardiovascular disease and risk factors, with authoritative citations.\n\nThe sentence structure \"heart attacks can be prevented by regular exercise and a healthy lifestyle\" implies a continuation listing examples or ela",
+      "text": "High Blood Pressure (cont.)\nSelf-Care at Home\nThe management and control of high blood pressure involves two major options, lifestyle modification and"
+    },
+    {
+      "pid": 611,
+      "cos_v8": 0.5198,
+      "cos_kitft": 0.584,
+      "gold": "Artificial intelligence's moral awareness, akin to Adam's fall in Genesis, highlights humanity's struggle with ethical choices and the need for salvation, contrasting perceived progress with inherent moral failure.",
+      "v8": "The passage argues that humans are inherently selfish, as evidenced by the biblical story of Adam and Eve and the evolutionary basis of self-interest, contrasting it with the unrealistic ideal of a selfless society.",
+      "kitft": "Religious/philosophical argument building toward a conclusion about AI and human consciousness, explaining spiritual or moral implications of technological rebellion.\n\nThe sentence \"perhaps we are born into this unique predicament\" continues a reflective point about the inherent human nature or mora",
+      "text": "|What can artificial intelligence reveal about our past?|\nAs the robot begins to develop awareness, it is always confronted with a moral conundrum. It"
+    },
+    {
+      "pid": 1751,
+      "cos_v8": 0.536,
+      "cos_kitft": 0.5437,
+      "gold": "The Heritage Foundation's report \"Obama Tax Hikes: The Economic and Fiscal Effects\" uses national-level macroeconomic model predictions, distributed based on current economic activity distribution, and supplemented with IRS and Census data to estimate state and district-level impacts of Obama's tax ",
+      "v8": "The Congressional Budget Office's analysis reveals that the 2009 tax cuts disproportionately affected lower-income households, particularly those in the bottom 10% of income brackets, due to their higher tax burdens and reduced marginal tax rates.",
+      "kitft": "Policy analysis argument-based exposition, summarizing empirical findings about federal tax effects on recession impacts.\n\nThe sentence structure \"we used the annual regional figures for each state\" signals a continuation describing specific visual/data examples of the geographic impact of the payro",
+      "text": "The macroeconomic model presented in “Obama Tax Hikes: The Economic and Fiscal Effects” makes predictions at the national level. Converting the model’"
+    },
+    {
+      "pid": 754,
+      "cos_v8": 0.412,
+      "cos_kitft": 0.5858,
+      "gold": "Record-keeping in Great Britain and Europe was primarily local and not indexed, making it challenging to use for immigration research due to time-specificity and the need for careful verification of individual details.",
+      "v8": "The passage discusses the challenges in reconstructing family histories due to limited records, emphasizing the importance of using available sources like census data, church records, and personal correspondence to build a comprehensive family narrative.",
+      "kitft": "Educational genealogical/administrative discussion of immigrant records, explaining problems with finding immigrant records in European or American jurisdictions.\n\nThe sentence \"you must rely on other records\" implies a contrast or continuation, emphasizing that individual records or specific locati",
+      "text": "Most record keeping in Great Britain and Europe was on\na local level; the local town or parish kept the records of greatest interest.\nWhere a larger j"
+    },
+    {
+      "pid": 1908,
+      "cos_v8": 0.7005,
+      "cos_kitft": 0.5742,
+      "gold": "Meditation helps manage stress and enhance mental control by altering brain activity, particularly in the prefrontal cortex, as evidenced by studies on Tibetan monks, and is beneficial for Animal Massage Practitioners and others seeking to reduce stress through practices that involve observing thoug",
+      "v8": "The passage discusses the importance of mindfulness and self-awareness in managing stress and improving health, highlighting the role of the nervous system and the benefits of practices like meditation and yoga.",
+      "kitft": "Educational/spiritual article explaining meditation benefits with a persuasive tone, referencing holistic and scientific findings about meditation and stress reduction.\n\nThe argument thread: \"some people have a natural meditative state without even realising it\" implies continuation explaining how t",
+      "text": "Many culture’s the world over, practice meditation. Studies have been performed to show how meditation actually affects the body and mind. In this wor"
+    },
+    {
+      "pid": 396,
+      "cos_v8": 0.4706,
+      "cos_kitft": 0.4699,
+      "gold": "Apologetics, derived from the Greek \"apologia\" meaning a reasoned defense, is a practice emphasized in 1 Peter 3:15-16 to defend the Christian faith against secularism, with the Oxford Centre for Christian Apologetics (OCCA) offering training to equip Christians in this endeavor.",
+      "v8": "The passage discusses the concept of \"Christianity\" as a religion, its historical roots, and the role of the Church in combating secularism, while highlighting resources like the \"Christianity and the Nature of the Mind\" book and the \"Christianity and the Nature of the Mind\" podcast.",
+      "kitft": "Religious/educational ministry register, explaining apologetics and Christian faith, building a practical resource for evangelistic outreach in UK contexts.\n\nThe sentence structure \"we invite you to engage your faith in a powerful and inspiring way\" introduces a description of the Oxford Centre for ",
+      "text": "What is Apologetics?\nApologetics is a word that is often misunderstood, as if it means ‘apologising’ for one’s faith. The word, however, derives its m"
+    },
+    {
+      "pid": 553,
+      "cos_v8": 0.4656,
+      "cos_kitft": 0.6769,
+      "gold": "The passage contrasts the American celebration of freedom on July 4th, rooted in the Declaration of Independence and Thomas Jefferson's ideals, with a spiritual understanding of true freedom through obedience to God's will, as emphasized by Jesus and Saint Paul.",
+      "v8": "The passage discusses the historical significance of Thanksgiving, its evolution from a religious observance to a secular national holiday, and its role in fostering unity and gratitude through the metaphor of a \"new beginning.\"",
+      "kitft": "Religious/reflective essay arguing historical perspective, explaining American Independence and foundational freedoms, building toward a contemplative conclusion.\n\nThe sentence \"our Independence Day began with a miraculous and inspiring moment, but true freedom was achieved in...\" signals a contrast",
+      "text": "This July 4th, Americans celebrate 237 years of independence. Amidst the patriotic displays, parades, fireworks shows, family gatherings and backyard "
+    },
+    {
+      "pid": 1159,
+      "cos_v8": 0.2712,
+      "cos_kitft": 0.7716,
+      "gold": "North Korea's state media celebrated International Women's Day with rhetoric emphasizing gender equality and socialist ideals, contrasting with defectors' accounts of systemic oppression and exploitation of women.",
+      "v8": "The 2017 killing of a 14-year-old girl by a Buddhist monk in Nepal sparked global outrage, leading to calls for Buddhist reconciliation and the establishment of a memorial, while highlighting the cultural and religious tensions within the Buddhist community.",
+      "kitft": "Article summarizing news/analysis, reporting on North Korean state propaganda and female empowerment, building a comparative argument about female North Koreans.\n\nThe sentence structure \"the women were praised in celebratory, female-affirming events\" implies a contrasting example or continuation abo",
+      "text": "SEOUL, March 7 (UPI) -- North Korea's state-controlled news daily featured a string of articles and editorials celebrating North Korean women on Satur"
+    },
+    {
+      "pid": 893,
+      "cos_v8": 0.429,
+      "cos_kitft": 0.4757,
+      "gold": "Researchers at the University of New Hampshire and Brookhaven National Laboratory developed a heart-shaped nanoparticle alloy (platinum, iridium, tin) that efficiently catalyzes ethanol oxidation in fuel cells, offering a safer, more practical alternative to hydrogen-based energy systems.",
+      "v8": "Researchers at the University of Illinois at Chicago developed a method to create carbon nanotubes from iron and sulfur, enabling their use in rechargeable batteries and fuel cells while addressing environmental concerns.",
+      "kitft": "Scientific journalism structure: article summarizing research, explaining a practical energy-producing nanoparticle innovation about hydrogen fuel cells.\n\nThe sentence \"the excited metal uses a bit of ruthenium, similar to a fuel cell\" is a contrast or continuation, clarifying the specific visual/ch",
+      "text": "It’s easy for ethanol to combust in an engine at high temperatures, but fuel cells operate at room temperature. That’s where nanoparticles like this h"
+    },
+    {
+      "pid": 331,
+      "cos_v8": 0.2169,
+      "cos_kitft": 0.6208,
+      "gold": "A LAN server is a program or computer that manages resources for workstations in an enterprise network, typically administered by an administrator, with examples including Novell and Windows NT.",
+      "v8": "Virtual Private Networks (VPNs) enable secure remote access to private networks by encrypting data transmission, with examples like Cisco's CEF and Microsoft's IPsec, and are categorized into point-to-point, dial-up, and dial-in types.",
+      "kitft": "Encyclopedic/educational register explaining networking concepts, with a practical descriptive tone about server roles and LAN infrastructure.\n\nThe sentence \"The server function may be performed by a networked computer or other device\" implies a continuation describing examples or roles of servers i",
+      "text": "A local area network (LAN) server is a program (and by implication usually the computer it runs in) that \"serves\" the resources (files, storage, appli"
+    },
+    {
+      "pid": 764,
+      "cos_v8": 0.485,
+      "cos_kitft": 0.7004,
+      "gold": "Christmas traditions share roots with ancient Greek festivals of Dionysus, including carols, tree decorations, Santa Claus-like figures, and New Year’s cake, reflecting shared symbolic themes of joy and divine gift-giving.",
+      "v8": "The Chinese New Year, rooted in ancient Chinese mythology and traditions like the Jade Peacock and Peacock Festival, evolved into a global celebration of renewal and prosperity, symbolizing the peacock's regal role in ancient rituals and its enduring cultural significance.",
+      "kitft": "Article/educational content with Greek-Greek informational tone, explaining traditions and customs regarding Christmas celebrations and pagan origins.\n\nThe sentence structure \"The first Christmas tradition of the Romans was a celebration of the birth of Christ\" implies continuation about similar anc",
+      "text": "Christmas is the most important, and perhaps the most treasured, celebration of Christianity filled with joy and love. Every country celebrates with d"
+    },
+    {
+      "pid": 254,
+      "cos_v8": 0.625,
+      "cos_kitft": 0.4936,
+      "gold": "The passage promotes two free educational resources—Cyndy Shearer's \"The Greenleaf Guide to Old Testament History\" and David Quine's \"Adventures in Art\"—offered by Betty and Chelle, with the former focusing on biblical history and the latter on art history through a cross-sectional study of Western ",
+      "v8": "The passage discusses the educational value of the Bible, highlighting its role as a comprehensive resource for teaching children about God's creation, history, and moral guidance through programs like \"The Bible Storybook,\" which offers structured, age-appropriate lessons.",
+      "kitft": "Homeschool educational website/book review describing curriculum resources, with practical advice for Christian homeschoolers about art history study.\n\nThe sentence describing the Time Traveler program (\"the daily readings are included in each era/period\") continues explaining how the book/website p",
+      "text": "Thank you to Betty at Peace Creek on the Prairie and Chelle from Last in Line ... for the heads up on these two great offers.\nThese books are for FREE"
+    },
+    {
+      "pid": 1790,
+      "cos_v8": 0.2051,
+      "cos_kitft": 0.6842,
+      "gold": "In *Lord of the Flies*, Jack changes his appearance to embrace savagery, shedding his civilized identity and gaining control over the boys by tapping into his primal instinct to hunt.",
+      "v8": "The passage explores the themes of identity, self-determination, and societal expectations through the characters of Romeo and Juliet in *Romeo and Juliet* and the protagonist in the story about the girl who refused to marry.",
+      "kitft": "Educational/analytical article explaining Lord of the Flies symbolism, with a summary or point about boys' primal behaviour and painted faces.\n\nThe sentence \"he gains power and enjoyment from his role as a hunter/leader\" implies continuation about Ralph's transformation or the painted/wild appearanc",
+      "text": "In Lord of The Flies, what is Jack's reason for changing his appearance? What may be another reason he changed his appearance?\n1 Answer | Add Yours\nLo"
+    },
+    {
+      "pid": 886,
+      "cos_v8": 0.6968,
+      "cos_kitft": 0.5991,
+      "gold": "The Framework Policy \"Going the Healthy Route at School\" promotes healthy eating and active living in schools through three themes—school environment, education/promotion, and partner collaboration—rooted in the 2006–2012 government plan \"Investir pour l'avenir\" and supported by the Ministry of Educ",
+      "v8": "The Ontario Ministry of Education's 2009-2010 School Food Plan, led by the Ontario Association of School Food Authorities, promotes healthy school food and nutrition education to enhance student health, reduce obesity, and support physical activity through collaborative policies and resources.",
+      "kitft": "Public health document format: formal Canadian government/Québec educational document, summarizing policies and programs on school nutrition and physical activity.\n\nThe sentence structure \"The school wellness policy is part of initiatives to promote healthy eating and physical activity. The Preventi",
+      "text": "The Framework Policy on Healthy Eating and Active Living, entitled Going the Healthy Route at School,aims to assist schools as they create an environm"
+    },
+    {
+      "pid": 534,
+      "cos_v8": 0.3147,
+      "cos_kitft": 0.418,
+      "gold": "Frank Gregorio and the project team aim to create a high-resolution 4k map of Earth's appearance 65 million years ago, using the BMNG dataset as a base and verifying data accuracy for educational use.",
+      "v8": "The passage discusses the creation of a 3D model of the Solar System using the Virtual Planet Lab's software, highlighting its accuracy, the use of the Wenus image, and the challenges in modeling the inner planets.",
+      "kitft": "Argumentative/technical discussion of planetary surface visualisation, with a practical artistic-scientific register explaining geological visualisation challenges in Earth/Space contexts (especially Europe/Denmark).\n\nThe sentence \"we could use a fairly high resolution for this\" implies a continuati",
+      "text": "Frank Gregorio has asked me to collaborate on an educational project that shows the Yucatan asteroid impact 65 million years ago. The base of this wil"
+    },
+    {
+      "pid": 1151,
+      "cos_v8": 0.2369,
+      "cos_kitft": 0.4823,
+      "gold": "The passage describes the procedure for testing Power IGBT insulation by incrementally increasing voltage, measuring leakage current at each step, and analyzing the resulting curve to assess insulation condition using the ICEA formula.",
+      "v8": "The passage explains how to calculate the capacitance of a capacitor using a standard meter and the formula C = Q/(2πεd), while noting that the meter measures capacitance and leakage current, and that the capacitance of a capacitor can be determined by comparing it to a standard capacitor.",
+      "kitft": "Technical engineering/electrical textbook format with formal descriptive explanation of insulation resistance testing procedures, covering transformer insulation breakdown and voltage measurement in India/US.\n\nThe sentence \"the acceptable reading for first peak current\" implies a specific example or",
+      "text": "[Power IGBT]In this test, the voltage is raised in equal steps and time is allowed between each step for leakage current to become stable. As time pas"
+    },
+    {
+      "pid": 1284,
+      "cos_v8": 0.4705,
+      "cos_kitft": 0.5282,
+      "gold": "The passage provides key data about Earth's physical characteristics, including its diameter, rotation, orbit, and unique features like water and atmosphere, while referencing a NASA/NOAA satellite image.",
+      "v8": "The passage explains the formation of the Solar System, highlighting Jupiter as the largest planet, its role in the Solar Nebula theory, and its distance from the Sun.",
+      "kitft": "Educational/scientific article format: journalistic prose explaining planetary facts, summarizing astronomical data about Earth and its orbiting satellites.\n\nThe sentence beginning \"Earth is the only planet in the Solar System with a liquid water planet\" signals a comparative or descriptive statemen",
+      "text": "This NASA/NOAA GOES-13 satellite image shows the Earth on March 2, 2010 at 8:45 UTC.\nCredit: NOAA/NASA GOES Project\nPlease see our updated Earth Refer"
+    },
+    {
+      "pid": 357,
+      "cos_v8": 0.425,
+      "cos_kitft": 0.644,
+      "gold": "The passage describes three egg decorating techniques—using rubber bands, stickers, and wax crayons—to create patterns and colors on eggs.",
+      "v8": "The passage explains how to create a paper mache pumpkin using a cookie cutter, a pumpkin, and a glue gun, with instructions for decorating and assembling.",
+      "kitft": "Educational parenting/craft article explaining how to dye Easter eggs, summarizing a tip about using resist wax for kids' decorated eggs.\n\nThe sentence structure \"Use a marker or paint to decorate your\" implies a continuation describing the visual method of applying the dyed eggs, contrasting the wr",
+      "text": "Decorating with Rubber Bands\nJust wrap your egg with rubber bands before placing it in a container of dye.\nRemove the egg from the dye when it reaches"
+    },
+    {
+      "pid": 1252,
+      "cos_v8": 0.3774,
+      "cos_kitft": 0.5088,
+      "gold": "The Cappel surname's genealogical information, maintained by AncientFaces, includes speculative details on its history, origin, meaning, pronunciation, and family tree, with community contributions encouraged.",
+      "v8": "The passage discusses the Scottish surname \"MacDonald,\" its etymology from Gaelic \"Mac\" (son of) and \"Donnail,\" and its historical distribution in Scotland and the United States.",
+      "kitft": "Educational/genealogy database content explaining origins of surnames, with a structured informational article about the Banion family name.\n\nThe sentence pattern \"some information may come from ethnicity, nationality or location\" continues a list or elaboration about the Banion surname origins, ref",
+      "text": "Latest Cappel photos\nThese photos were uploaded by members of the Cappel community on AncientFaces.\nCappel Surname History\nThe family history of the C"
+    },
+    {
+      "pid": 1132,
+      "cos_v8": 0.4567,
+      "cos_kitft": 0.5807,
+      "gold": "The Trireme was the primary Greek warship during the Trojan War, characterized by three rows of oars, a ram as its main weapon, and a strategy involving boarding and combat.",
+      "v8": "The passage explains the construction of the Chinese ram, a large warship, and the historical context of the Battle of Chrysopolitou, where the Chinese ram destroyed the Byzantine fleet.",
+      "kitft": "Educational/hobbyist descriptive prose about Roman ships and historical warfare, explaining model ship or artifact descriptions.\n\nThe sentence \"The ramming ship was used for the main attack of the ship\" implies a specific location or design feature of the Trireme ramming prow, possibly describing th",
+      "text": "Plastic Model Kits\nwas the main Greek vessel of war during the Trojan war. The Trireme was driven\nby three rows of oars. While fast under oar, this ty"
+    },
+    {
+      "pid": 382,
+      "cos_v8": 0.0162,
+      "cos_kitft": 0.5312,
+      "gold": "Alcatel-Lucent's Bell Labs set a new optical transmission record of over 100 Petabits per second-kilometer using advanced WDM and coherent detection technologies, achieving unprecedented capacity over a transoceanic distance.",
+      "v8": "Researchers at the University of New Hampshire developed a supercapacitor-based power system using graphene and carbon nanotubes to enable wireless, long-range satellite communication for space missions, addressing the limitations of traditional batteries.",
+      "kitft": "News article summary/industry report format, summarizing technical developments from Alcatel-Lucent, with quoted findings and technical achievements.\n\nThe sentence \"the demonstration achieved record speeds using advanced optical amplifiers and optical transmission technologies\" implies a continuatio",
+      "text": "Alcatel-Lucent today announced that scientists in Bell Labs, the company’s research arm, have set a new optical transmission record of more than 100 P"
+    },
+    {
+      "pid": 726,
+      "cos_v8": 0.5166,
+      "cos_kitft": 0.5788,
+      "gold": "The passage outlines foundational educational categories—Critical Thinking and Writing, Foreign Languages, Mathematical Sciences, Natural Sciences, and Computer and Information Science—that collectively enhance students' critical thinking, language proficiency, mathematical reasoning, scientific kno",
+      "v8": "The course \"Mathematics and Science for Social Scientists\" equips students with mathematical and scientific skills to analyze social phenomena, enhance critical thinking, and apply interdisciplinary knowledge in their academic and professional fields.",
+      "kitft": "Academic/institutional program description format, systematically detailing curricula and goals for university majors in Korean, emphasizing interdisciplinary and global competencies.\n\nParallel structure: \"liberal education programs help students develop fundamental knowledge in humanities, communic",
+      "text": "This category serves as the common foundation for all students and enhances basic skills that will be continuously implemented even after graduation. "
+    },
+    {
+      "pid": 1511,
+      "cos_v8": 0.6631,
+      "cos_kitft": 0.6574,
+      "gold": "Algae biodiesel is produced by extracting oil from algae using methods like oil pressing, hexane solvent, and supercritical CO2, followed by transesterification to refine the oil into biodiesel.",
+      "v8": "Researchers at the University of Minnesota developed a biodegradable, waterless method to produce edible algae chips using a supercritical CO2 process, addressing the environmental impact of traditional algae oil extraction.",
+      "kitft": "Article summary/educational piece explaining algae biofuel production, summarizing a process of extracting oil from algae using mechanical or chemical methods.\n\nThe sentence structure \"the oil is produced using a hydrothermal process\" implies a continuation explaining the second method or specific d",
+      "text": "Algae Biodiesel Engineering: Extracting Oil from Algae\nHow can we get oil from algae? It's like getting juice from an orange -- with an additional che"
+    },
+    {
+      "pid": 1962,
+      "cos_v8": 0.5249,
+      "cos_kitft": 0.6601,
+      "gold": "The passage discusses the evolution of British romantic novels from the mid-19th century to the early 20th century, highlighting women writers like Charlotte M. Yonge, Rhoda Broughton, and Mary Elizabeth Braddon, and their imperial-themed love stories set in colonies and dominions.",
+      "v8": "The passage explores the cultural and social impact of Victorian philanthropy, particularly through the works of authors like George Bernard Shaw, John Maxwell, and George Bernard Shaw, and the role of the Fabulous Fabrics Company in shaping social change and the rise of the middle class.",
+      "kitft": "Academic argument/survey register, examining literary representations of imperial femininity and colonial travel in Victorian Britain, particularly imperial romance and female authorship.\n\nThe sentence structure \"these novels were popularised in colonial novels and romantic fiction\" introduces a con",
+      "text": "Includes chapters on subjects ranging from the representation of property and ethics in 19th century novels, captivity narratives, romantic narratives"
+    },
+    {
+      "pid": 186,
+      "cos_v8": 0.711,
+      "cos_kitft": 0.7146,
+      "gold": "Veterinary anaesthesia and analgesia involve administering controlled drug-induced unconsciousness and pain relief, using human-like techniques and advanced monitoring, tailored to each pet's needs for safe procedures.",
+      "v8": "The passage outlines the use of anaesthesia in equine veterinary care, detailing its types, indications, and the importance of informed consent and post-operative monitoring.",
+      "kitft": "Veterinary/medical professional register explaining anaesthesia for small animal patients, UK-based veterinary hospital context.\n\nThe sentence structure \"we provide pain relief and monitoring during a procedure and\" implies a continuation listing complementary services, likely describing specific an",
+      "text": "Anaesthesia and Analgesia\nThis is a branch of veterinary medicine that involves the provision of safe anaesthesia, whether general or loco-regional, a"
+    },
+    {
+      "pid": 1087,
+      "cos_v8": 0.5812,
+      "cos_kitft": 0.5134,
+      "gold": "Researchers from the University of Exeter and St Andrews University demonstrate that stereotypes can both hinder and enhance performance, highlighting their complex role in shaping individual and group success through self-perception and societal preconceptions.",
+      "v8": "A study by the University of Exeter's School of Psychology found that people's self-esteem is influenced by social comparisons, with high self-esteem individuals more likely to adopt healthy behaviors and avoid risky ones, as highlighted by psychologist Dr. David Frost.",
+      "kitft": "Scientific news article summarising research findings, reporting UK/Australian psychological evidence about gender stereotypes and performance effects.\n\nThe sentence structure \"he argues that positive beliefs about minorities can\" introduces a contrasting point about external influences or the surpr",
+      "text": "Researchers from the University of Exeter and St Andrews University have shown that stereotypes can improve as well as thwart our likelihood of succes"
+    },
+    {
+      "pid": 1506,
+      "cos_v8": 0.6385,
+      "cos_kitft": 0.7228,
+      "gold": "The passage describes nine math worksheets focused on calculating area, surface area, and volume using real-world examples like land plots, circular structures, prisms, cylinders, pyramids, cones, and composite figures.",
+      "v8": "The passage outlines a math lesson plan for 6th-8th graders focused on area and perimeter calculations using rectangles, squares, and other shapes, including real-world applications and problem-solving activities.",
+      "kitft": "Teacher/educational resource description with a list of activities, explaining math problems involving volume and geometric shapes.\n\nThe examples list is incomplete (\"3 problems for a cone, sphere, pyramid (and a cylinder)\"), implying continuation with more items or examples of real-world scenarios ",
+      "text": "This is 9 worksheets on area, surface area, and volume.\n1 - Determining the area of quadrilaterals mostly. It is made up of plots of land that a devel"
+    },
+    {
+      "pid": 844,
+      "cos_v8": 0.5876,
+      "cos_kitft": 0.647,
+      "gold": "Training employees in conflict resolution skills enhances workplace relationships and efficiency by reducing tension and fostering collaborative problem-solving.",
+      "v8": "The passage discusses the importance of communication skills in managing and motivating employees, highlighting their role in addressing conflicts, fostering collaboration, and enhancing workplace effectiveness.",
+      "kitft": "Article explaining benefits of conflict resolution training, maintaining informational/educational tone with a structured conclusion explaining workplace impacts.\n\nThe sentence \"Sometimes disagreements can be resolved through mediation or training, causing positive outcomes\" continues the point abou",
+      "text": "Conflict is a natural occurrence, particularly in the workplace when multiple employees work together. The varying backgrounds and opinions of employe"
+    },
+    {
+      "pid": 1198,
+      "cos_v8": 0.2638,
+      "cos_kitft": 0.5457,
+      "gold": "Obesity surgery options, including gastric balloon, sleeve gastrectomy, gastric bypass, and mini gastric bypass, are tailored for patients with BMI ≥ 40 or 35-40 with comorbidities to manage weight and related health issues.",
+      "v8": "The passage discusses the prevention and treatment of heart failure, emphasizing lifestyle changes, surgical interventions like heart valve repair or replacement, and medical therapies such as ACE inhibitors and beta-blockers.",
+      "kitft": "Medical Arabic/Egyptian text with translated content, explaining obesity surgery types and treatments, listing procedures and interventions for diabetes.\n\nThe sentence structure \"The bariatric surgery is used to lose weight in obesity cases and severe obesity\" implies a second point or example about",
+      "text": "Obesity is defined as a medical condition in which excess body fat accumulates to the point of causing adverse health effects, leading to a decline in"
+    },
+    {
+      "pid": 1032,
+      "cos_v8": 0.4211,
+      "cos_kitft": 0.5365,
+      "gold": "The Yerkes Dodson Law and Hebb's theory on arousal levels influencing learning performance are critiqued by Apter and contrasted with the accelerated learning movement's emphasis on minimal anxiety, while highlighting the challenges of reliable research on the web.",
+      "v8": "The passage discusses the debate on whether meditation enhances intelligence, highlighting conflicting research on its effects and the role of cognitive load theory in explaining how meditation reduces cognitive load.",
+      "kitft": "Academic/argumentative register, discussing psychological phenomena and neuroscience, with practical examples of learning and motivation in educational contexts (UK).\n\nThe sentence \"the 'high arousal' or 'low arousal' idea is another manifestation of a rather paradoxical phenomenon\" implies a contra",
+      "text": "Motivation and Anxiety\nAccording to one of the earliest interesting formulations of modern psychology—the Yerkes Dodson Law of 1908—and Hebb's classic"
+    },
+    {
+      "pid": 341,
+      "cos_v8": 0.3193,
+      "cos_kitft": 0.3936,
+      "gold": "Tropical Cyclone Dumile is intensifying in the Southern Indian Ocean near Madagascar, expected to peak at 75 knots over the next 24 hours before weakening due to cooler sea temperatures, according to the Joint Typhoon Warning Center.",
+      "v8": "The passage discusses Hurricane Humberto (TY4) and its formation, movement, and impact on the Caribbean Sea, including its classification, track predictions, and effects on Puerto Rico.",
+      "kitft": "Meteorological report/image caption format with observational data, summarizing tropical cyclone activity in the South Pacific region.\n\nSequential storm tracking update pattern: \"Tropical Cyclone Kilo continues moving northeastward while the eastern portion of the system is moving northward\" implies",
+      "text": "Tropical Cyclone Dumile is moving along the western edge of a subtropical ridge (elongated area) of high pressure. Forecasters at the JTWC expect Dumi"
+    },
+    {
+      "pid": 303,
+      "cos_v8": 0.6696,
+      "cos_kitft": 0.6538,
+      "gold": "The Indian percussion ensemble, originating in South India as early as the 4th century B.C., features instruments like Mridangam and Ghatam, improvisatory performances with competitive spirit, and is practiced in rituals at the Temple of Tooth in Kandy, rooted in Karnatic music.",
+      "v8": "Karnatic music, a traditional Indian musical form originating in Karnataka, is characterized by its diverse instruments, ragas, and cultural significance, including the famous Carnatic ragas like Bhimpura and Shambu, and is influenced by both Hindu and Muslim elements.",
+      "kitft": "Encyclopedic/educational register with formal academic prose, describing Indian musical traditions and cultural phenomena, particularly South Indian percussion.\n\nThe sentence structure \"The classical percussion music of South India originated in ancient religious performances\" implies a descriptive ",
+      "text": "The Indian percussion ensemble developed in South India as early as the 4th century B.C. due to the availability of a wide variety of percussion instr"
+    },
+    {
+      "pid": 421,
+      "cos_v8": 0.4471,
+      "cos_kitft": 0.5669,
+      "gold": "Composite materials, combining metals with nonmetals or multiple metals, include examples like tungsten/copper, cemented carbides, friction materials, diamond tools, and magnetic composites, used in applications such as cutting tools, brake linings, and high-temperature resistance.",
+      "v8": "Ceramics, including zirconium-based materials like zirconium nitride and zirconia, are used in applications such as capacitors, capacitive deionization, and radiation shielding due to their high melting points, thermal stability, and unique properties.",
+      "kitft": "Academic/technical encyclopedic register, formal descriptive metallurgy text about abrasive properties and materials, covering metal powders in industrial applications (India/UK).\n\nList-enumeration pattern: \"other alloys containing hard metals and refractory compounds\" implies continuation of exampl",
+      "text": "Composite Materials: This compromise of two or more metals which are indissoluble even in liquid state or mixtures of metals with nonmetallic substanc"
+    },
+    {
+      "pid": 1472,
+      "cos_v8": 0.5198,
+      "cos_kitft": 0.564,
+      "gold": "Concrete and steel are complementary construction materials, with steel rebars and rebar chairs used to enhance tensile strength and maintain steel positioning during concrete pouring.",
+      "v8": "The passage explains how to create a concrete slab with a steel grid for structural support, detailing the process, materials, and benefits of using steel grids over traditional methods.",
+      "kitft": "Technical/engineering post with Spanish/Romanian content explaining concrete reinforcement, building a professional argument about concrete slabs and rebar usage.\n\nThe sentence \"First you need to use concrete slabs in the floor area. This is the main element\" implies a detailed explanation of the ba",
+      "text": "Concrete is the most used material in the modern construction industry. Hardly can be imagined a modern construction without concrete.\nWe know very we"
+    },
+    {
+      "pid": 159,
+      "cos_v8": 0.537,
+      "cos_kitft": 0.6921,
+      "gold": "The passage provides safety tips for water activities, including preventing jellyfish stings, avoiding shark attacks, and managing motion sickness.",
+      "v8": "The passage discusses drowning prevention, emphasizing the risks of drowning, the importance of avoiding strong currents, and the use of flotation devices and rescue techniques like CPR and mouth-to-mouth resuscitation.",
+      "kitft": "Educational/health article format with informative lists, summarizing practical advice for beach safety and jellyfish prevention.\n\nThe sentence structure \"prevent jellyfish stings by wearing protective gear or a cool, calm swim\" implies a second tip about jellyfish prevention, likely mentioning boat",
+      "text": "Whether swimming in the ocean or on a boat in a lake, follow these tips for staying safe by the water.\n- Anticipate ocean stings: Stings from contact "
+    },
+    {
+      "pid": 389,
+      "cos_v8": 0.3058,
+      "cos_kitft": 0.6944,
+      "gold": "In *The Scarlet Letter*, Hester Prynne evolves from a shamed adulteress to a maternal, benevolent figure symbolized by the scarlet \"A,\" which transforms from a mark of sin to a symbol of hope and redemption through her charitable acts and the narrator's use of symbolism and allusions.",
+      "v8": "The passage explores the themes of self-improvement and societal change in Maya Angelou's \"I Know Why We Ascend to the Mountains of Georgia\" and Maya Angelou's \"Caged Bird,\" highlighting their use of symbolism to convey personal and collective transformation.",
+      "kitft": "Informational essay/analysis with structured essay format, showcasing literary analysis of Hester Prynne's symbolic transformation in The Scarlet Ible.\n\nThe sentence \"she is portrayed as a benevolent/holy figure, similar to her positive role in the community\" continues the explanation of her symboli",
+      "text": "Within the novel The Scarlet Letter by Nathaniel Hawthorne, the narrator addresses the audience and develops the dynamics of Hester Prynne’s character"
+    },
+    {
+      "pid": 1714,
+      "cos_v8": 0.0467,
+      "cos_kitft": 0.2113,
+      "gold": "WSU researchers have discovered the formation conditions of hexagonal diamond under shock compression, offering insights into meteor impact analysis and planetary science.",
+      "v8": "Researchers at the University of Illinois at Chicago discovered a method to create a 3D-printed, ultra-thin, carbon-nanotube-based capacitor that could revolutionize solar energy storage by enabling efficient, long-term energy capture and storage.",
+      "kitft": "Scientific journalism/news article structure: a summary of research findings, summarizing a breakthrough about piezoelectric energy generation in lasers.\n\nThe phrase \"a novel laser-induced phenomenon occurred in\" introduces a second example or story, implying a specific experimental demonstration or",
+      "text": "Scientists have puzzled over the exact pressure and other conditions needed to make hexagonal diamond since its discovery in an Arizona meteorite frag"
+    },
+    {
+      "pid": 699,
+      "cos_v8": 0.8142,
+      "cos_kitft": 0.6459,
+      "gold": "The Earth's four spheres—lithosphere (rocky crust), hydrosphere (water), biosphere (life), and atmosphere (air)—are defined by their Greek roots and encompass distinct components of the planet's systems.",
+      "v8": "The passage explains the Earth's four spheres—lithosphere, hydrosphere, biosphere, and atmosphere—and their roles in sustaining life, with key entities like the lithosphere, hydrosphere, biosphere, and atmosphere.",
+      "kitft": "Educational/encyclopedic article format with informational descriptions of Earth's spheres, covering biosphere, hydrosphere, and geology.\n\nThe sentence structure \"The biosphere is made up of all living organisms on Earth; the hydrosphere is made up of all water, and the lithosphere is...\" implies a ",
+      "text": "The names of the four spheres are derived from the Greek words for:\n- stone (litho),\n- air (atmo),\n- water (hydro), and\n- life (bio).\nThe lithosphere "
+    },
+    {
+      "pid": 659,
+      "cos_v8": 0.1493,
+      "cos_kitft": 0.6018,
+      "gold": "The acute angle formed by the clock hands at 1 o'clock is 30 degrees.",
+      "v8": "The passage explains how to calculate the area of a circle using the formula A = πr², where r is the radius, and provides an example with a radius of 10 units resulting in an area of 314 square units.",
+      "kitft": "Mathematical/educational explanation pattern: a solution to a clock angle problem with a structured answer in a textbook or homework format, with reasoning about degrees.\n\nThe sentence \"The hour hand is at the position of the first number\" implies a conclusion about the angle between adjacent number",
+      "text": "What is the degree measure of the acute angle formed by the hands of a 12-hour clock that reads exactly 1 o’clock ?\n2 Answers | Add Yours\nWhen looking"
+    },
+    {
+      "pid": 48,
+      "cos_v8": 0.7084,
+      "cos_kitft": 0.6082,
+      "gold": "\"A Natural History of the New World by Alan Graham provides a comprehensive synthesis of the ecological and evolutionary history of plants in the Americas from the Late Cretaceous to the present, emphasizing their role in shaping and responding to environmental changes across the continent.\"",
+      "v8": "The book \"From Mesoamerica to the Andes: Evolution and the Making of the Western World\" by David J. Stearns explores the evolutionary history of plants and animals across diverse ecosystems, emphasizing the role of environmental change and human impact in shaping biodiversity.",
+      "kitft": "Scientific book review/summary register, summarizing scholarly work on plant biogeography and paleobotany, emphasizing global plant history.\n\nThe sentence structure \"this book illuminates the remarkable history of Earth's plant life and\" promises a continuation listing complementary themes, likely e",
+      "text": "A Natural History of the New World\nThe Ecology and Evolution of Plants in the Americas\nThe paleoecological history of the Americas is as complex as th"
+    },
+    {
+      "pid": 939,
+      "cos_v8": 0.4181,
+      "cos_kitft": 0.6156,
+      "gold": "The MINT representation encodes melodic interval data through four token types—interval tokens (with optional direction, diatonic size, and quality), pitch offsets, rests, and barlines—using standardized signifiers for pitch, interval qualities, and structural elements.",
+      "v8": "The passage explains the notation system for interval functions, which uses a base number (1-12) and a sign to represent intervals as intervals or augmented/diminished, with specific rules for diatonic and chromatic intervals.",
+      "kitft": "Academic musical analysis/computational notation treatise, systematically addressing musical pitch intervals and encoding systems for tonal representation.\n\nThe sentence structure \"the negative or positive interval notation is indicated using a prime prefix or lowercase letter\" mirrors the earlier e",
+      "text": "**mint -- melodic interval representation\nThe **mint representation provides a means for characterizing sequential (melodic) pitch distances. The **mi"
+    },
+    {
+      "pid": 695,
+      "cos_v8": 0.3129,
+      "cos_kitft": 0.5003,
+      "gold": "Composting at home converts kitchen and garden organic waste into natural fertilizer by avoiding harmful materials like meat and pesticide-treated peels, using simple methods like bins or soil with regular turning and moisture.",
+      "v8": "The passage explains how to create a waterless garden using plastic bags as a sustainable alternative to traditional watering methods, promoting plant growth and environmental benefits.",
+      "kitft": "Article in Hindi language with structured explanatory/health content about composting, systematically explaining methods of composting in Pakistani homes.\n\nThe sentence \"you can use organic waste like leaves, vegetables etc. for composting in rainy season\" implies a continuation about the physical c",
+      "text": "Composting means converting the organic waste into natural fertilizer by keeping it into the soil or by placing it in a bucket along with soil for a f"
+    },
+    {
+      "pid": 55,
+      "cos_v8": 0.8178,
+      "cos_kitft": 0.659,
+      "gold": "Bees are critical to South Africa's food security and biodiversity, facing decline due to habitat loss, pesticides, and American foulbrood disease, prompting government and individual conservation efforts.",
+      "v8": "The decline of honeybees due to pesticides and habitat loss threatens global food security by disrupting pollination, prompting efforts by organizations like the Bee Conservancy and the Australian Beekeepers Association to protect bee populations through sustainable practices and research.",
+      "kitft": "Article/news report format with quoted expert sources, summarizing environmental or scientific information about bee decline and honey production in South Africa.\n\nThe sentence structure \"pollination is vital to many plants and wildlife\" is a continuation of a point about bee decline, referencing th",
+      "text": "Albert Einstein is erroneously quoted as saying, “If the bee disappeared off the surface of the globe, then man would only have four years of life lef"
+    },
+    {
+      "pid": 1981,
+      "cos_v8": 0.1455,
+      "cos_kitft": 0.4051,
+      "gold": "Medical physicists at Thomas Jefferson University and Jefferson's Kimmel Cancer Center developed a 4D robotic tumor tracking technique that reduces radiation to healthy tissue by up to 50% during radiotherapy, improving cancer treatment outcomes.",
+      "v8": "Researchers at the University of Alberta developed a 3D-printed, biodegradable scaffold with vascular endothelial growth factor to enhance retinal blood vessel regeneration, offering a potential treatment for diabetic retinal edema and other eye diseases.",
+      "kitft": "Scientific news article summarizing medical findings, with a quoted expert/researcher explanation of advances in proton therapy and cancer imaging.\n\nThe sentence structure \"the real-time gating was effective in reducing radiation exposure during a moving tumor\" implies a continuation describing the ",
+      "text": "PHILADELPHIA--Medical physicists at Thomas Jefferson University and Jefferson's Kimmel Cancer Center have demonstrated a new real-time tumor tracking "
+    },
+    {
+      "pid": 1045,
+      "cos_v8": 0.583,
+      "cos_kitft": 0.5992,
+      "gold": "The passage discusses using My World GIS and Geobrain Online Analysis System to predict tsunami run-up impacts on Seaside, Oregon, by analyzing DEM data and assessing potential inundation and evacuation routes.",
+      "v8": "The passage discusses the use of GIS and Landsat satellite data to analyze coastal erosion and flooding risks along the California coast, including the Channel Islands National Marine Sanctuary, through the California Coastal Monitoring Network.",
+      "kitft": "Educational/scientific instructional text describing GIS data and activities, summarizing a web-based educational activity or resource about tsunami inundation hazards.\n\nThe sentence \"you can visualize a potential tsunami event and\" implies continuation describing the scenario or activity, likely re",
+      "text": "Tsunami Run-up Prediction for Seaside, Oregon with My World GIS\nIn this chapter, you will use Geobrain Online Analysis System (GeOnAS) to access, view"
+    },
+    {
+      "pid": 1414,
+      "cos_v8": 0.553,
+      "cos_kitft": 0.5432,
+      "gold": "amfAR advocates for developing and testing new prevention interventions like PrEP and microbicides to end the AIDS epidemic, supported by clinical studies showing their efficacy.",
+      "v8": "The passage discusses the development of new tools and strategies to improve HIV treatment adherence and prevent resistance through innovative approaches like drug resistance testing, community engagement, and cost-effective therapies.",
+      "kitft": "Public health advocacy/policy analysis article summarizing research, establishing a structured argument about HIV prevention funding and global research needs.\n\nThe sentence beginning \"ongoing research to develop new and improved prevention\" signals a concrete example or elaboration of interventions",
+      "text": "Promoting the Development and Delivery of New Interventions\nCurrently available prevention and treatment interventions must be more widely and equitab"
+    },
+    {
+      "pid": 1524,
+      "cos_v8": 0.3737,
+      "cos_kitft": 0.4451,
+      "gold": "Bipolar neurons in the pike's spinal ganglion are specialized sensory neurons transmitting signals for smell, sight, taste, hearing, and vestibular functions.",
+      "v8": "The passage discusses the structure and function of the olfactory system, including the olfactory epithelium, olfactory cleft, and olfactory neurons, as well as related terms like olfactory bulb and olfactory receptor cells.",
+      "kitft": "Encyclopedic/educational register: scientific description of anatomical structures, explaining neuron types and morphology in histological contexts.\n\nThe sentence describing bipolar neurons (\"in some cases the nerve cell is bipolar or pseudo-unipolar\") implies a visual or structural example of the g",
+      "text": "|Bipolar nerve cell from the spinal ganglion of the pike.|\n|Gray's||subject #183 722|\nA bipolar cell is a type of neuron which has two extensions. Bip"
+    },
+    {
+      "pid": 850,
+      "cos_v8": 0.2821,
+      "cos_kitft": 0.62,
+      "gold": "Rondônia, a northwest Brazilian state with Porto Velho as its capital, is characterized by its vast Amazon Forest coverage, historical isolation due to dense jungle, and limited development compared to other regions during the rubber industry era.",
+      "v8": "The Republic of Congo, divided into four regions, features the Congo River as its longest natural boundary and historical conflicts with Belgium over its territory.",
+      "kitft": "Article/educational piece structure: informative piece explaining historical context of Amazon rainforest indigenous peoples, with a Brazilian-centric narrative.\n\nThe sentence \"Until the early twentieth century, the region was largely untouched and remote\" signals a contrast or elaboration about the",
+      "text": "By Amelia Meyer\nRondônia is nestled in northwest Brazil, with Porto Velho as its capital city. It boasts a total area of 237 576.16 square kilometres,"
+    },
+    {
+      "pid": 7,
+      "cos_v8": 0.4779,
+      "cos_kitft": 0.6291,
+      "gold": "A mild winter in 2012 affected environmental elements like aquatic ecosystems, plants, amphibians, insects, and ornamental species in the Northeastern U.S., altering their survival rates, breeding seasons, and habitat conditions.",
+      "v8": "The passage discusses how drought conditions in the Pacific Northwest are causing tree mortality, increased fire risk, and shifts in insect populations, while highlighting the role of the USDA Forest Service in monitoring and managing forest health.",
+      "kitft": "News article/scientific summary format, summarizing environmental impacts of warming weather on winter ecology, with expert quotes explaining climate effects.\n\nThe sentence structure \"early warm weather has caused early thawing in some northern areas and\" implies a parallel second example of cold-af",
+      "text": "What Can Mild Winter Do to Environment?\nPublished on Jan 19, 2012 - 6:55:35 AM\nJan. 18, 2012 - Snowfall in the nation’s snowiest large city (Syracuse,"
+    },
+    {
+      "pid": 13,
+      "cos_v8": 0.296,
+      "cos_kitft": 0.5025,
+      "gold": "Six planets and the waning crescent moon aligned in the dawn sky on April 30, 2023, as observed from Los Angeles, with Mercury, Venus, Mars, Jupiter, Uranus, and Neptune visible.",
+      "v8": "The International Astronomical Union (IAU) named a new moon, Ligeia, after a South Dakota city, highlighting its unique naming convention and the moon's features on Pluto's moon.",
+      "kitft": "Article/educational register: scientific journalism explaining planetary conjunctions, with a descriptive observational or photographic recommendation about Venus-Jupiter morning sightings.\n\nThe phrase \"this week's early morning spectacle and all five planets\" signals a context or example about a vi",
+      "text": "Six planets and the waning crescent moon arrayed in the dawn sky on Saturday April 30, as seen from Los Angeles, California.\nCREDIT: Starry Night Soft"
+    },
+    {
+      "pid": 1925,
+      "cos_v8": 0.4742,
+      "cos_kitft": 0.4491,
+      "gold": "Eole Water, a French company, developed the WMS1000 wind turbine, which condenses atmospheric moisture into safe drinking water meeting WHO standards, producing up to 1,200 liters daily without external power.",
+      "v8": "The University of Sheffield's Rainwater Harvesting Pumped Reservoir (RHPR) system, developed with funding from the Engineering and Physical Sciences Research Council, uses rainwater to power a desalination plant in the UK, offering a sustainable, energy-independent solution for remote areas.",
+      "kitft": "Article/summary format: a news piece describing a product invention, with a summary of a sustainable water-extraction device from atmospheric moisture (France/Belgium).\n\nThe sentence \"this machine produces clean water from humidity\" introduces a concrete product description, implying details about t",
+      "text": "Eole Water in France has created a machine that can condense water molecules and transform them into safe drinking water.\nFrance-based company Eole Wa"
+    },
+    {
+      "pid": 1359,
+      "cos_v8": 0.8072,
+      "cos_kitft": 0.6531,
+      "gold": "The passage discusses the causes of dog aggression and the debate surrounding the use of electric shock collars as a corrective training tool, highlighting their potential effectiveness and risks when applied properly.",
+      "v8": "The passage discusses the debate between using a shock collar and positive punishment for dog training, highlighting their differing effects on dogs' behavior and well-being, with the latter approach generally considered more humane.",
+      "kitft": "Article explaining dog aggression/training, building a comparative argument about bark collars and dog bites.\n\nThe sentence \"sometimes the shock is necessary in cases of aggression\" continues a second example of intervention methods, implying the dog-owner may use a shock or growl to address barking",
+      "text": "Dog aggression can be a troublesome and dangerous thing, both for you and the dog. Dogs may exhibit different types of aggression, some focused on hum"
+    },
+    {
+      "pid": 1783,
+      "cos_v8": 0.5064,
+      "cos_kitft": 0.6014,
+      "gold": "High arches (pes cavus) and flat feet are hereditary foot conditions that can cause pain and discomfort, often requiring custom orthotics and specialist care from professionals like Sulejman Menzildzic at B-FOOT clinic for accurate diagnosis and treatment.",
+      "v8": "The passage discusses the causes, symptoms, and treatment of foot flatness, emphasizing the importance of proper footwear and orthotics in managing related conditions like bunions and hammertoes.",
+      "kitft": "Educational/medical article explaining podiatric conditions, with a professional tone detailing causes and treatments of flat feet and high arches in active individuals.\n\nThe sentence structure \"the abnormal condition can develop with a high arch or low arch\" implies continuation explaining how biom",
+      "text": "On a typical foot, the arch extends from the ball to the heel. With high arches (pes cavus), the foot’s sole becomes distinctly convex, curving dramat"
+    },
+    {
+      "pid": 335,
+      "cos_v8": 0.367,
+      "cos_kitft": 0.4527,
+      "gold": "NYSED hosted webinars from December 2011 to February 2012 to introduce Student Learning Objectives (SLOs) for teachers and principals, emphasizing their alignment with Common Core State Standards and implementation for the 2012-2013 school year.",
+      "v8": "The passage outlines the Common Core State Standards (CCSS) and the district's adoption of the Common Core Assessments, emphasizing the role of the 2010-2011 academic year, the 2012-2013 implementation timeline, and the district's commitment to supporting teachers and students through assessments an",
+      "kitft": "Professional educational policy/administrative update describing NYS teacher evaluation reform, summarizing meetings and resources related to teacher effectiveness.\n\nThe sentence structure \"they will be informed about the fall 2014 implementation schedule and a pilot/model student\" implies a paralle",
+      "text": "in mid-December 2011 and running through the end\nof February 2012, NYSED will host a series of introductory\nwebinars on Student Learning Objectives. E"
+    },
+    {
+      "pid": 1578,
+      "cos_v8": 0.4778,
+      "cos_kitft": 0.5203,
+      "gold": "Neuroscientists at the Max Planck Institute discovered that screams activate the amygdala, potentially leading to scarier media and optimized alarm signals.",
+      "v8": "A study by researchers at the University of Sheffield found that dogs can distinguish between human laughter and crying, as demonstrated by a dog named Max, highlighting the emotional connections between dogs and humans.",
+      "kitft": "Article summary/science journalism tone, explaining a viral finding about scary laughter sounds and neurological triggers.\n\nThe sentence \"they came about this because the fear factor was really dramatic\" implies a continuation explaining the audio/visual experiment or specific elements of scream sou",
+      "text": "Any movie buff is going to recognize this sound.\nIt's a scream, of course. More specifically, the most likely overused Wilhelm scream. But it doesn't "
+    },
+    {
+      "pid": 1188,
+      "cos_v8": 0.3944,
+      "cos_kitft": 0.5332,
+      "gold": "The discovery of the Late Triassic turtle fossil Odontochelys semitestacea in China challenges existing hypotheses about turtle origins by supporting a diapsid ancestry and ruling out the pareiasaurian hypothesis.",
+      "v8": "The discovery of a new crocodile genus, Varanus sibericus, from Siberia, previously known as Varanus sibiricus, highlights the ongoing taxonomic revisions in crocodilian classification.",
+      "kitft": "Scientific blog post/argumentative discussion, explaining vertebrate paleontology and evolutionary novelty, building a case about Triassic amphibian anatomy.\n\nThe sentence \"the bizarre anterior skull morphology is another...\" implies a contrast or elaboration about the problematic fossil, referencin",
+      "text": "Thursday, November 27, 2008\nClosing in on turtle origins\nI wrote in this blog in October that we can expect a more complete prototurtle. Never would I"
+    },
+    {
+      "pid": 366,
+      "cos_v8": 0.523,
+      "cos_kitft": 0.5705,
+      "gold": "At week 12 of a twin pregnancy, organs are fully formed but continue developing, ultrasounds can detect heartbeats and genital differentiation (gender determination occurs around week 20), and miscarriage risk has significantly decreased.",
+      "v8": "The passage explains the stages of the first trimester of pregnancy, including implantation, heartbeat detection via ultrasound, and the use of a home pregnancy test to confirm pregnancy.",
+      "kitft": "Educational/medical article format with a listicle or timeline structure, explaining pregnancy milestones and changes week by week.\n\nThe sentence \"At 18 weeks you may have a heartbeat detectable on ultrasound & baby movement. Week 18-19\" implies a continuation listing further milestones or stages of",
+      "text": "Twin Pregnancy Week 12\nAt this stage of your twin pregnancy all organs and structures are fully formed but the organs are still developing rapidly.\nFr"
+    },
+    {
+      "pid": 586,
+      "cos_v8": 0.231,
+      "cos_kitft": 0.7524,
+      "gold": "The passage discusses the three primary interpretations of the two witnesses in Revelation 11—Moses and Elijah, Enoch and Elijah, or two unnamed believers—each with supporting arguments and considerations about their identities and scriptural basis.",
+      "v8": "The passage discusses the historical context of the Maccabee revolt against the Seleucid king Antiochus, the symbolic significance of the Maccabee name, and the theological debate over whether the Maccabee martyrs are considered saints.",
+      "kitft": "Biblical theological study/commentary explaining a prophetic interpretation, referencing the Second Coming and Moses/Elijah appearances.\n\nThe sentence structure \"the two witnesses are also killed in a supernatural manner and...\" implies a contrast or continuation explaining the alternative example o",
+      "text": "Question: \"Who are the two witnesses in the book of Revelation?\"\nAnswer: There are three primary viewpoints on the identity of the two witnesses in Re"
+    },
+    {
+      "pid": 203,
+      "cos_v8": 0.6098,
+      "cos_kitft": 0.6807,
+      "gold": "Testosterone plays a critical role in male development, fertility, and overall health, with low levels linked to infertility, sexual dysfunction, and various physical and mental health issues, necessitating medical evaluation and treatment.",
+      "v8": "The passage discusses the connection between low testosterone levels and heart disease, highlighting the role of SHBG in testosterone metabolism, the impact of obesity on hormone levels, and the importance of SHBG testing for accurate health assessments.",
+      "kitft": "Educational/medical explanatory article explaining testosterone decline, building a practical argument about male hormones and health consequences.\n\nThe sentence \"low testosterone causes fatigue and sexual dysfunction in younger men\" continues the contrast, implying the male body also uses testoster",
+      "text": "Testosterone is known as the “male” hormone because is is responsible for most things male. During the earliest phase of life, the developing fetus wi"
+    },
+    {
+      "pid": 1336,
+      "cos_v8": 0.2176,
+      "cos_kitft": 0.4176,
+      "gold": "Ringed seals in Alaska, Russia, and Canada are dying and sickening, with scientists like John Kelly testing for radiation from the Fukushima Daiichi Nuclear Power Plant leak as a potential cause, though he suspects other environmental factors may be responsible.",
+      "v8": "A study by the University of Rhode Island found mercury levels 10 times higher in Pacific walrus near the Alaska–Aleutian arc, linked to atmospheric mercury from industrial sources, raising concerns about climate change's role in spreading the issue to other polar regions.",
+      "kitft": "News article/scientific summary tone, explaining a developing environmental mystery about Pacific seal deaths, particularly radioactive contamination from Fukushima.\n\nThe sentence \"the cause was mysterious, although a strange warming event caused...\" signals a continuation or contrast, likely refere",
+      "text": "Ringed seals are dying and getting sick in the waters off Alaska, Russia and Canada, and scientists don’t know why. Could it be radiation poisoning fr"
+    },
+    {
+      "pid": 848,
+      "cos_v8": 0.4209,
+      "cos_kitft": 0.5409,
+      "gold": "Farmers can enhance pasture sustainability and ecosystem functions by adopting complex mixed-species swards to increase plant biodiversity, improve forage yield, and reduce soil nutrient losses.",
+      "v8": "The passage discusses the development of a decision support framework for sustainable forest management, emphasizing the role of understory vegetation in enhancing tree growth and productivity through nutrient cycling and resource availability.",
+      "kitft": "Scientific abstract/review summary describing agricultural research on grassland productivity, emphasizing nutrient cycling and forage ecology.\n\nThe sentence structure \"demonstrates benefits of biodiversity in natural pasture\" implies a continuation explaining the broader research context or example",
+      "text": "Submitted to: Meeting Abstract\nPublication Type: Proceedings\nPublication Acceptance Date: March 1, 2007\nPublication Date: March 8, 2007\nCitation: Sand"
+    },
+    {
+      "pid": 216,
+      "cos_v8": 0.464,
+      "cos_kitft": 0.4937,
+      "gold": "Speech therapy addresses persistent speech irregularities like lisps or stuttering, with activities such as tongue twisters and list-building games aiding families in improving articulation.",
+      "v8": "The passage discusses strategies for teaching children to recognize sounds, such as using songs, games, and activities like \"What's Your Sound?\" to enhance auditory discrimination and speech development.",
+      "kitft": "Educational article explaining parenting advice, building a practical listicle about tongue-training activities for kids.\n\nThe sentence \"you could practice this fun for a child's speech, too\" implies a contrasting example or elaboration about tongue-tripping words or childhood speech mishaps.\n\nFinal",
+      "text": "It's normal for a kid to start out not being able to pronounce certain sounds. The irregular pronunciation usually becomes a part of the family vocabu"
+    },
+    {
+      "pid": 1813,
+      "cos_v8": 0.4929,
+      "cos_kitft": 0.4458,
+      "gold": "TEPCO is constructing new safety facilities, including filtered vents and a 20,000-ton water reservoir, at the Kashiwazaki-Kariwa plant to comply with stricter safety guidelines effective July 2013.",
+      "v8": "Japan's Tokyo Electric Power Company is constructing a new 10-megawatt containment facility at the Fukushima No. 1 nuclear plant to prevent hydrogen gas explosions, following a 2011 earthquake and tsunami that damaged the site.",
+      "kitft": "News article format: formal Japanese-language report summarizing a government/industry announcement, covering nuclear safety measures at TEPCO's Onagawa power plant.\n\nThe sentence structure \"a temporary storage facility for spent fuel was approved\" signals a second item or detail about the planned e",
+      "text": "The construction of such facilities is required under the new, tougher safety guidelines that took effect in July.\nThe new facilities at the Kashiwaza"
+    },
+    {
+      "pid": 1395,
+      "cos_v8": 0.434,
+      "cos_kitft": 0.4486,
+      "gold": "The passage discusses the author's reflection on Chapter 4 of TDQ, emphasizing the importance of teaching reading through quality, in-depth lessons and using resources like the provided book list and anchor charts to enhance classroom instruction.",
+      "v8": "The passage discusses using the book *The Rainbow Fish* to teach children about self-esteem through interactive activities and strategies like the \"I Am\" list and \"I Am Not\" list.",
+      "kitft": "Blog post/teacher reflection post with a specific book example shared, discussing student reading strategies and book talks.\n\nThe sentence \"I was really excited about this lesson because of the book lesson I\" implies continuation about the visual/student thinking component or referencing the week's ",
+      "text": "Welcome back to chapter 4 of TDQ!\nThis chapter had a lot of A-Ha-Ha-Ha moments for me.\nI really liked how the author said that reading is like a jig s"
+    },
+    {
+      "pid": 1183,
+      "cos_v8": 0.2856,
+      "cos_kitft": 0.2357,
+      "gold": "The town of Troy, Montgomery County, was established by Scottish immigrants through a donation by Angus McCaskill, originally named West’s Oldfield, and later became a business center with a courthouse, while its streets are legendarily paved with gold from Eldorado's mines.",
+      "v8": "The town of St. Charles, Missouri, evolved from a 1820 settlement to a historic hub of antebellum architecture, including the Jefferson Davis home, and later became a key site in the Underground Railroad.",
+      "kitft": "Historical/educational narrative about a North Carolina town, explaining origins of a county seat or named location near Monroe.\n\nThe sentence \"The annual parade brought the town its name and the first settlers were...\" implies a continuation describing a specific historical incident or location of ",
+      "text": "The Town of Troy, like the rest of Montgomery County, was settled primarily by Scottish immigrants. In 1852, Angus McCaskill, one of the early settler"
+    },
+    {
+      "pid": 372,
+      "cos_v8": 0.3409,
+      "cos_kitft": 0.544,
+      "gold": "The Getty Center in Los Angeles hosted the exhibition \"Miracles and Martyrs: Saints in the Middle Ages\" from March 2, 2014, showcasing illuminated manuscripts from the J. Paul Getty Museum's collection depicting saints' miracles and martyrdoms.",
+      "v8": "The National Gallery of Art's exhibition \"The Art of Alchemy: A Medieval Mystery\" explores medieval alchemy's influence on art through works by artists like Gwynedd Owen, William Langland, and John Wawrik, highlighting their symbolic use of alchemical symbols and the exhibition's focus on the period",
+      "kitft": "Educational arts journalism register, summarizing scholarly/museum content about medieval illuminated manuscripts and saints' miracles.\n\nThe sentence structure \"a remarkable collection of illuminated saints' stories\" introduces a concrete example of visual spectacle, contrasting the medieval devotio",
+      "text": "Through March 2, 2014\nThe Getty Center\nLos Angeles, California\nMany manuscripts—literally, documents written by hand—from medieval Europe were supplem"
+    },
+    {
+      "pid": 1508,
+      "cos_v8": 0.4197,
+      "cos_kitft": 0.5252,
+      "gold": "The passage highlights the limitations of evidence-based medicine, emphasizing that short-term studies often overlook long-term consequences, as seen in examples like cortisone injections, baby walkers, and early nutrition practices.",
+      "v8": "The passage discusses the debate on whether early weaning is necessary for children, highlighting conflicting evidence from studies on growth, bone mineral density, and the role of parental influence in health outcomes.",
+      "kitft": "Academic/medical argumentation about holistic systems, with German/Dutch examples of alternative research into childhood development and disease causes.\n\nThe sentence \"for instance early exposure to breast milk causes problems later (infant period) and\" implies a contrast or second example of transi",
+      "text": "Georg Ivanovas From Autism to Humanism - systems theory in medicine\n2.5 The limits of evidence based medicine\nprevious -- home -- content -- next\ne) t"
+    },
+    {
+      "pid": 768,
+      "cos_v8": 0.6072,
+      "cos_kitft": 0.3647,
+      "gold": "The passage critiques the overreliance on psychotropic medications for treating psychological disorders, highlighting concerns about their long-term efficacy and the suppression of critical research, as discussed by journalist Robert Whitaker and student Larissa Chern.",
+      "v8": "The passage discusses the debate on antidepressants' effectiveness and risks, highlighting Dr. David Burns' perspective on their role in mental health and the need for education to address societal stigma and misuse.",
+      "kitft": "Blog post/essay analyzing mental health stigma and psychiatric intervention, summarizing a personal argument about antidepressants and ADHD treatment in college contexts.\n\nThe sentence \"we are currently facing a crisis where mental disorders have gone untreated due to...\" implies a continuation expl",
+      "text": "By Larissa Chern ’17\nAs a student, I find myself shocked at the number of teenagers who, desperate to focus in class and get better grades, make an ap"
+    },
+    {
+      "pid": 476,
+      "cos_v8": 0.8475,
+      "cos_kitft": 0.6922,
+      "gold": "The passage explains the interconnectedness of oral health (gums, teeth) and cardiovascular health through inflammation, highlighting the need for collaboration between dentists and doctors to manage risks like gum disease and heart conditions.",
+      "v8": "The passage discusses the connection between gum disease and heart disease, highlighting how inflammation from gum infections contributes to cardiovascular issues and emphasizing prevention through dental care and lifestyle factors.",
+      "kitft": "Article explaining how dental health affects heart health, building a practical, accessible argument about gum-heart connections.\n\nThe sentence \"because both your gums and heart can be affected by a bad situation\" implies a continuation explaining the specific mechanisms or examples of how gum infla",
+      "text": "The Heart Of The Matter: How Your Mouth And Cardiovascular Health Are Connected\nYou know from years living on this Earth that it's really important to"
+    },
+    {
+      "pid": 1966,
+      "cos_v8": 0.3779,
+      "cos_kitft": 0.4032,
+      "gold": "The passage discusses the NCERT Class 9 History chapter on Forest Society and Colonialism, available for download as PDF textbooks.",
+      "v8": "The passage discusses the passage-on-the-boat poem, its author R.K. Narayan, and its themes of social and economic inequality.",
+      "kitft": "Educational/legal article format with Indian exam/NCERT content, listing resources about Class 12 textbook PDFs and CBSE/ICSE syllabus.\n\nThe sentence \"you can download NCERT books online and offline – NCERT\" signals a brief or descriptive note about downloadable resources, likely mentioning a resour",
+      "text": "NCERT Class 9 History Forest Society and Colonialism. Download NCERT Chapters and Books in pdf format. Easy to print and read. Copies of these textboo"
+    },
+    {
+      "pid": 1072,
+      "cos_v8": 0.0676,
+      "cos_kitft": 0.5833,
+      "gold": "The passage discusses the distinction between allergic and non-allergic asthma, highlighting differences in patient demographics, pathobiology (e.g., Th2 cells vs. neutrophils), treatment responses (e.g., ICS efficacy, omalizumab use), and the role of airway inflammation markers like eosinophils and",
+      "v8": "The study highlights that aspirin and clopidogrel may not prevent stroke recurrence in migraine patients, as their mechanisms differ from vascular mechanisms and existing migraine prevention therapies.",
+      "kitft": "Medical academic review/discussion of airway inflammation, summarizing mechanistic evidence and clinical implications for asthma, particularly airway hyperresponsiveness in Canada.\n\nThe sentence structure \"also important is the non-eosinophilic asthma and...\" implies a contrasting example or additio",
+      "text": "Allergic vs. Non-Allergic\nPaul M. O’Byrne, MD\nFirestone Institute for Respiratory Diseases,\nDepartment of Medicine, McMaster University,\nHamilton, ON,"
+    },
+    {
+      "pid": 1220,
+      "cos_v8": 0.4214,
+      "cos_kitft": 0.4316,
+      "gold": "A study led by Sylvana Côté and the GRIP group reveals that hyper-aggressive children exhibit distinct DNA methylation patterns influenced by prenatal conditions and environmental factors, linking them to epigenetic changes in immune system genes.",
+      "v8": "A study by the University of Cambridge found that maternal stress during pregnancy can alter the microbiome, increasing the risk of childhood hyperactivity and ADHD, with implications for early intervention and parenting strategies.",
+      "kitft": "Article/educational summary register, summarizing scientific findings about childhood aggression and prenatal influences, with Canadian/French research cited.\n\nThe sentence fragment \"a prenatal stress or dysfunction could\" introduces a second point or example about biological/genetic causes of aggre",
+      "text": "It's a well-documented fact that children from zero to two can be spontaneously aggressive and that boys can be among the worse culprits. Even after b"
+    },
+    {
+      "pid": 1452,
+      "cos_v8": 0.2453,
+      "cos_kitft": 0.6596,
+      "gold": "The history of Virginia and Maryland's tobacco industry, central to their colonial economies, is explored through Xu Bing's \"Tobacco Project\" exhibit at the Virginia Museum of Fine Art, blending historical artifacts with artistic commentary on tobacco's cultural and lethal impact.",
+      "v8": "The passage discusses the cultural and historical significance of the Chinese Wall, a 1,000-foot wall built by Chinese laborers in 1870 to separate the U.S. Capitol from the Chinese community, highlighting its role in shaping American identity and the ongoing debate over its preservation.",
+      "kitft": "Educational journalism argument about tobacco art/history, summarizing a cultural phenomenon about a traveling exhibit of tobacco in Washington.\n\nThe sentence \"this particular exhibit came from his famous, historical tobacco crop\" implies a continuation explaining the visual or symbolic role of toba",
+      "text": "The history of Virginia, and of southern Maryland, is intertwined very tightly with that of tobacco.\nThe Golden Leaf boosted the two colonies from the"
+    },
+    {
+      "pid": 1870,
+      "cos_v8": 0.4892,
+      "cos_kitft": 0.5376,
+      "gold": "University of Texas at Austin researchers, with funding from the National Eye Institute, developed mathematical formulas for optimal eye movements that could enhance robotic visual systems and aid individuals with vision loss.",
+      "v8": "Researchers at the University of California, San Diego, developed a method to measure visual acuity using a smartphone camera, revealing that the human eye adapts to different light conditions and that artificial lighting can hinder its performance.",
+      "kitft": "Scientific news article summarizing research, describing a biological/computational finding about eye movement mechanics and retinal image processing.\n\nThe sentence structure \"a new computer model explains how natural eye movements\" implies a continuation explaining the experimental demonstration or",
+      "text": "Researchers develop formulas to replicate optimal vision tracking strategies\nMarch 17, 2005\nAUSTIN, Texas—Mathematical formulas for optimal eye moveme"
+    },
+    {
+      "pid": 1689,
+      "cos_v8": 0.5735,
+      "cos_kitft": 0.5711,
+      "gold": "The passage discusses the green economy as a framework for sustainable development and poverty eradication, highlighting international efforts, challenges in defining and implementing green economy policies, and emerging practices by global organizations and nations.",
+      "v8": "The passage discusses the Sustainable Development Goals (SDGs) and the need for integrated climate change and development policies, highlighting the role of the Global South in addressing climate change through international cooperation and the development of comprehensive frameworks.",
+      "kitft": "Academic/policy review register, reviewing international and national policy frameworks on green economy and sustainable development, with substantive analytical argument about Rio+20.\n\nThe sentence structure \"influenced by recent global initiatives and international commitments such\" signals a list",
+      "text": "Green economy in the context of sustainable development and poverty eradication\nSustainable development has been the overarching goal of the internati"
+    },
+    {
+      "pid": 675,
+      "cos_v8": 0.4014,
+      "cos_kitft": 0.5528,
+      "gold": "The Kake community's struggle to protect Gunnuk Creek watershed from timber harvesting led to a land transfer and conservation easements involving Kake Tribal Corporation, the State of Alaska, and the US Forest Service to preserve the creek's ecological and cultural significance.",
+      "v8": "The U.S. Forest Service and the U.S. Fish and Wildlife Service are collaborating to restore the Upper Big Mountain Wilderness in Colorado through a 10-year plan to protect and enhance the area's ecosystems and wildlife.",
+      "kitft": "Educational/governmental narrative describing Alaskan Native environmental and land management history, emphasizing the Prince William Sound salmon fishery and forest protection.\n\nThe sentence describing the historic logging/community conflict (\"the forest re-emerged after a protected area\") implies",
+      "text": "|View the image Gallery|\nFlowing out of the mountains surrounding the Native community of Kake, Gunnuk Creek meanders through this seaside town and on"
+    },
+    {
+      "pid": 1652,
+      "cos_v8": 0.7086,
+      "cos_kitft": 0.629,
+      "gold": "IT security is a comprehensive process requiring policies, technologies, human expertise, and全员 responsibility to protect information sources and ensure data privacy.",
+      "v8": "The passage discusses the importance of IT security in protecting computer systems and data, emphasizing the need for regular updates, user education, and collaboration between IT departments and users to prevent cyber threats.",
+      "kitft": "Article/blog post with Indian/technical domain explaining IT security aspects, with structured paragraphs about security management and policies in organizations.\n\nThe sentence \"everything in the organisation is dependent on the IT system and security is very important\" continues a point about secur",
+      "text": "IT Security is a process\nThe Information Technology security involves a lot of policies, processes, security products and various technologies are use"
+    },
+    {
+      "pid": 82,
+      "cos_v8": 0.3258,
+      "cos_kitft": 0.6545,
+      "gold": "The passage explains a card magic trick where a spectator's chosen card is determined by mathematical operations and the CHaSeD suit code, with the final total revealing the card's value and suit after subtracting 15.",
+      "v8": "The passage explains how to calculate the \"Day of Birth\" using the sum of letters in a name multiplied by 28, with specific rules for vowels and consonants, and provides an example calculation for a name.",
+      "kitft": "Instructional/educational article explaining a magic trick, with a practical demonstration of mental arithmetic for card number guessing.\n\nThe sentence structure \"your first number is your age (or whatever number) and\" establishes a parallel example showing the secret code/number assigned to each su",
+      "text": "Read this tip to make your life smarter, better, faster and wiser. LifeTips is the place to go when you need to know about Card Magic Tricks and other"
+    },
+    {
+      "pid": 475,
+      "cos_v8": 0.5382,
+      "cos_kitft": 0.5844,
+      "gold": "The PE Department at MIHSG aims to empower students through comprehensive sports education, offering diverse activities across Key Stages 3-4, GCSE PE curriculum, and extracurricular opportunities, while pioneering as the first all-girls Muslim school in the North West to introduce GCSE PE in 2012.",
+      "v8": "The passage outlines the PE curriculum for Years 7-13, emphasizing holistic development through physical activities, teamwork, and skill-building, while highlighting the transition to AS/A2 Level 3 at 14 and the role of the PE department in fostering lifelong physical activity and health.",
+      "kitft": "UK school PE curriculum/syllabus overview, with a descriptive overview of sports department aims and curriculum offerings for GCSE students.\n\nThe sentence structure \"they gain enjoyment of Sport, fitness and wellbeing through various activities – lessons, sports days and extra curricular activities\"",
+      "text": "Department Mission statement\nThe aim of the PE Department at MIHSG is to empower the students with the knowledge, values, skills and personal qualitie"
+    },
+    {
+      "pid": 245,
+      "cos_v8": 0.4968,
+      "cos_kitft": 0.6129,
+      "gold": "The passage discusses the growing importance of VPNs in safeguarding online privacy and security by masking identities, bypassing censorship, and protecting against cyber threats.",
+      "v8": "The passage discusses the importance of cybersecurity for businesses and individuals, highlighting risks like data breaches and ransomware, and outlines methods such as two-factor authentication, strong passwords, and antivirus software to protect against cyber threats.",
+      "kitft": "Article structure: a listicle/guide piece with informative sections about VPNs and internet security, explaining how VPNs can protect users from internet surveillance in the Philippines.\n\nThe sentence \"various cases of internet breaches have made it possible for people to experience various dangers\"",
+      "text": "Nowadays, we are living in a world where surveillance has become a real threat. Online privacy is becoming a real issue as the dystopias painted by Or"
+    },
+    {
+      "pid": 1788,
+      "cos_v8": 0.8163,
+      "cos_kitft": 0.5914,
+      "gold": "Taiji (Tai Chi), rooted in Daoist philosophy and attributed to the legendary Zhang San-feng, evolved as a martial art and self-healing practice with diverse styles like Yang, Chen, and Wu, gaining global popularity while facing historical suppression during the Cultural Revolution before re-emerging",
+      "v8": "Taiji, a Chinese martial art and philosophy rooted in Taoist and Confucian traditions, emphasizes internal energy cultivation, health, and longevity through practices like Qigong and meditation, with historical origins in the 12th century and modern adaptations by figures like Grandmaster Wu.",
+      "kitft": "Educational/spiritual exposition explaining Tai Chi Chuan, with authoritative Western and Eastern perspective on martial arts and health practices.\n\nThe sentence describing Tai Ji Chi's unique form (\"it developed as a meditative practice or internal system and is practiced in various\"), implies cont",
+      "text": "The roots of Taiji (T'ai Chi) go deep into Chinese\nhistory. Taiji was originally a martial arts practice called\nTaijiquan (T'ai Chi Chuan). Quan (Chua"
+    },
+    {
+      "pid": 1022,
+      "cos_v8": 0.2906,
+      "cos_kitft": 0.5973,
+      "gold": "The website \"The Union Makes Us Strong,\" a partnership between the TUC and London Metropolitan University, digitizes and provides access to historical trade union collections, aiming to preserve and share the history of Britain's labor movement.",
+      "v8": "The book \"The History of the British Library\" by David Loades, published by Routledge, highlights the library's role in shaping British history through its collections and initiatives, including the 1933-1939 Project, and explores its impact on cultural and social developments.",
+      "kitft": "UK academic news article register, surveying historical and contemporary labour history, arguing for a national Labour archive or website.\n\nThe sentence structure \"the website is being chronicled by key events from past and current\" introduces a concrete example of the rich archive of union history,",
+      "text": "Although trade unions have played, and will continue to play, a decisive role in shaping economic and social developments in Britain, much of their hi"
+    },
+    {
+      "pid": 443,
+      "cos_v8": 0.4966,
+      "cos_kitft": 0.6895,
+      "gold": "Yakshagana, a semi-folk art form of Karavali Karnataka, features two styles—Tenku in Dakshina Kannada and Badagu in Udipi/Uttar Kannada—with distinct musical and costume influences, while Kunita, a vigorous drum-based dance, is popular in Shimoga and performed by both men and women.",
+      "v8": "The Kalinga dance, originating from the Kalinga kingdom and linked to the Mahabharata's Kalinga Patta episode, is a traditional dance of Odisha's Kandhamal district, preserved through cultural practices and festivals.",
+      "kitft": "Formal academic/journalistic register with Indian cultural-religious narrative, surveying traditional folk performances and Karnataka temple traditions.\n\nThe sentence structure \"the Yakshagana dance in the northern Karnataka is performed in festive occasions and...\" signals a contrast or example of ",
+      "text": "|Yakshagana is the distinctive semi-folk art form that is characteristic of Karavali – the coastal districts of Karnataka. There is fierce competition"
+    },
+    {
+      "pid": 1509,
+      "cos_v8": 0.4126,
+      "cos_kitft": 0.4675,
+      "gold": "In 2013, the United States imported the most coal from Colombia, accounting for approximately 74% of its total coal imports.",
+      "v8": "The passage discusses the U.S. coal industry's role in electricity generation, highlighting its 2010 production, environmental impacts, and key companies like Peabody Energy Corp., with data sourced from the U.S. Energy Information Administration.",
+      "kitft": "Government/energy data website description, summarizing EIA statistics and links about coal consumption and electricity production.\n\nThe question pattern \"How much coal is imported in the United States\" is a list or enumeration of data items, implying a second item about coal data sources or locatio",
+      "text": "U.S. Energy Information Administration - EIA - Independent Statistics and Analysis\nFrequently Asked Questions\nFrom what country does the U.S. import t"
+    },
+    {
+      "pid": 1642,
+      "cos_v8": 0.279,
+      "cos_kitft": 0.5423,
+      "gold": "The passage details assembling light pipes by combining LEDs, heat-shrink tubing, and acrylic rods using a soldering iron or heat gun, while warning against melting acrylic directly onto LEDs due to plastic incompatibility and harmful fumes.",
+      "v8": "The passage explains how to create a DIY levitating coil using a magnet, a copper coil, and a plastic bottle, involving steps like attaching magnets to the bottle, forming a loop, and using a magnetized rod to lift the coil.",
+      "kitft": "Practical hobbyist/technical narrative explaining a DIY LED indicator, building a blinking LED display for model railway wiring (UK).\n\nThe sentence \"you heat the fibres into a good length\" implies a concrete tip about attaching LEDs, continuing the visual/mechanical construction advice about the hot",
+      "text": "Step 17: Secondary light sources - Assembling light pipes\nPut together a pile of as many LEDs as you'll need, a pile of 2cm-lengths of heat-shrink lar"
+    },
+    {
+      "pid": 1548,
+      "cos_v8": 0.597,
+      "cos_kitft": 0.5792,
+      "gold": "First Move is a cross-curricular chess education program for second and third graders that enhances analytical thinking, problem-solving, and academic skills like math and reading, with research showing significant benefits in analytical abilities and confidence, particularly among girls.",
+      "v8": "The passage discusses the integration of Chess Education and the Chess Curriculum, emphasizing its role in developing critical thinking, problem-solving, and social-emotional skills through structured lessons and activities.",
+      "kitft": "Educational/marketing article describing a program for elementary school chess, emphasizing benefits and outreach to teachers and parents.\n\nOngoing descriptive evidence of program impact — \"The chess activities are transferable to other subjects\" continues a point about measurable cognitive or behav",
+      "text": "First Move is taught in the classroom so ALL children benefit from the valuable thinking and life skills taught in the program. Each weekly lesson tak"
+    },
+    {
+      "pid": 1136,
+      "cos_v8": 0.3472,
+      "cos_kitft": 0.7415,
+      "gold": "This course explains how accounting serves as the \"language of business\" by providing financial information to stakeholders like owners, managers, and investors for decision-making in both business and nonprofit organizations.",
+      "v8": "The passage outlines the role of project management in business, emphasizing its impact on project success and the skills required for effective project management.",
+      "kitft": "Educational/academic textbook format with a descriptive or instructional tone, covering accounting concepts and business courses.\n\nThe phrase \"Accounting information is used to make business decisions\" introduces a context or description of a course or program, likely explaining the role of accounti",
+      "text": "This course presents how accounting provides financial information about a business or a nonprofit organization. Owners, managers, investors, and othe"
+    },
+    {
+      "pid": 1371,
+      "cos_v8": 0.2794,
+      "cos_kitft": 0.479,
+      "gold": "Molluscum contagiosum is a common childhood viral infection caused by the molluscum contagiosum virus, spread via skin-to-skin contact, characterized by pearly bumps that may resolve spontaneously or be treated with pricking, topical agents, or cryotherapy, though recurrence is possible.",
+      "v8": "Herpes zoster ophthalmicus is a severe eye infection caused by reactivated varicella-zoster virus, presenting with pain and potential complications like corneal scarring, and treated with antiviral medications and eye drops.",
+      "kitft": "Medical educational/clinical register, describing a common dermatological condition (warts) with practical advice for children in Australia/Asia.\n\nThe sentence structure \"some infections resolve spontaneously, but...\" implies a list or elaboration of treatment/appearance features of molluscipox, lik",
+      "text": "Molluscum contagiosum (MC) is a common infection in childhood caused by a poxvirus (molluscum contagiosum virus). It spreads by skin-to-skin contact a"
+    },
+    {
+      "pid": 380,
+      "cos_v8": 0.5088,
+      "cos_kitft": 0.6089,
+      "gold": "The passage discusses the principles of domestic fair trade in agriculture, emphasizing transparent pricing that covers production costs and ensures fair returns to growers, as exemplified by a study involving Iowa CSA businesses valuing their products and setting prices based on costs and premiums ",
+      "v8": "The passage discusses the debate over crop insurance's role in farm financial planning, emphasizing the need for farmers to understand its cost structure, the role of crop insurance as a risk management tool, and the importance of informed decision-making to ensure long-term financial stability.",
+      "kitft": "Agricultural economics educational article with farm management/financial discussion, explaining how producers understand price premiums and profitability.\n\nThe sentence \"the first cost of production is determined by the actual transaction or purchase\" implies a continuation explaining the example o",
+      "text": "AgDM newsletter article, August 2007\nCraig Chase, extension farm management field specialist, 319-882-4275, firstname.lastname@example.org\nIn our econ"
+    },
+    {
+      "pid": 527,
+      "cos_v8": 0.3539,
+      "cos_kitft": 0.494,
+      "gold": "The study characterizes stream-aquifer interactions in the Pedernales Watershed, identifying the Hensel Sand as the primary baseflow source and finding no significant hydrologic changes from 1940 to 2014 using recession curve analysis.",
+      "v8": "The study evaluates the effectiveness of the 1990s U.S.GS Global Change Initiative (GCI) land cover data in predicting streamflow and sediment yield for the Colorado River's Upper Basin, highlighting discrepancies in vegetation and snow cover accuracy.",
+      "kitft": "Scientific academic paper describing hydrological methodology, summarizing findings on groundwater recharge/streamflow interactions and hydrogeology in a regional watershed.\n\nThe sentence structure \"The seasonal recession pattern and groundwater storage changes provide a measure of seasonal groundwa",
+      "text": "CHARACTERIZING STREAM-AQUIFER INTERACTIONS IN THE PEDERNALES WATERSHED IN CENTRAL TEXAS\nMetadataShow full metadata\nUnderstanding the nature of stream-"
+    },
+    {
+      "pid": 1205,
+      "cos_v8": 0.3966,
+      "cos_kitft": 0.482,
+      "gold": "Jack encounters a talking Brontosaurus in the forest while exploring a shortcut in the children's book *Cinderella Sarah: Read Alouds for Kids*.",
+      "v8": "The passage discusses the story of a baby elephant named Leo and his mother, highlighting the importance of play in child development and the educational resources available for teaching children about elephants.",
+      "kitft": "Educational parenting/storytelling register with a practical descriptive account of a children's book about a magical animal encounter in a forest, UK.\n\nThe sentence \"he had a strange dream this morning – a fantastic dream\" signals a continuation explaining the incident or visual scene of the walkin",
+      "text": "Dinosaur Story from the Free English Children’s Book\n“Cinderella Sarah: Read Alouds for Kids”\nJack loved the walk home from school. He’d always take t"
+    },
+    {
+      "pid": 888,
+      "cos_v8": 0.4377,
+      "cos_kitft": 0.4463,
+      "gold": "Student Scientists from The Radclyffe School attended the Big Bang Fair in Birmingham, gaining hands-on experience with scientific activities and insights into potential careers in science and engineering.",
+      "v8": "The Royal Institution's \"Science in Society\" series, featuring experts like Professor Chris Smith and Professor David Livingstone, engages students in exploring science's societal impact through interactive talks and projects.",
+      "kitft": "News article describing a school science event, building a UK-wide educational report of inspirational activities for STEM careers.\n\nThe sentence \"they got hands on fantastic experiences at a number of inspiring science events\" implies a list or examples of activities/exhibitions students witnessed ",
+      "text": "Big Bang experience inspires Science students\nStudent Scientists at The Radclyffe School got an inspiring glimpse of the latest scientific discoveries"
+    },
+    {
+      "pid": 1061,
+      "cos_v8": 0.5781,
+      "cos_kitft": 0.3169,
+      "gold": "San Antonio researchers, including Dr. Ratna Vadlamudi at UT Health San Antonio, are developing an orally available molecule to block estrogen receptor signaling in drug-resistant breast cancer, aiming to prevent recurrence in estrogen receptor-positive patients.",
+      "v8": "Researchers at the University of Texas Medical Center discovered that a gene therapy targeting the HER2 protein can prevent breast cancer recurrence in mice, offering a potential treatment for HER2-positive breast cancer patients.",
+      "kitft": "Interview/news article with expert quote explaining medical research, building a story about breast cancer treatment breakthroughs and immunotherapy.\n\nThe sentence \"she's fighting it with a really bad one, but\" signals a continuation about the personal case or the drug/therapy she's hopeful about to",
+      "text": "Some San Antonio scientists are developing a new drug that could help save the lives of women whose breast cancer comes back. Recurrent tumors are com"
+    },
+    {
+      "pid": 1876,
+      "cos_v8": 0.3395,
+      "cos_kitft": 0.6565,
+      "gold": "Enthesitis is an inflammatory condition affecting the entheses (ligament and tendon-bone insertion sites), commonly associated with autoimmune diseases like spondylitis and spondyloarthritis, distinct from rheumatoid arthritis which typically involves synovitis.",
+      "v8": "Plantar fasciitis, a condition causing heel pain due to inflammation of the plantar fascia and Achilles tendon, is linked to factors like obesity, diabetes, and arthritis, and treated with rest, ice, and orthotics.",
+      "kitft": "Medical/educational article format with descriptive, encyclopedic content explaining musculoskeletal conditions, implying a clinical overview of tendonitis or rheumatic manifestations.\n\nThe sentence structure \"inflammation occurs at a joint or tendon site, often\" signals a continuation describing sp",
+      "text": "What is Enthesitis?\nEnthesitis is an inflammation of entheses, the site where ligaments or tendons insert into the bones. It is also known as enthesop"
+    },
+    {
+      "pid": 1963,
+      "cos_v8": 0.4531,
+      "cos_kitft": 0.585,
+      "gold": "Infrared technology, utilizing electromagnetic waves with wavelengths shorter than visible light and ranging from ~0.7µm to ~1µm, enables short-range, line-of-sight data communication through protocols like RC5 and SIRCS, using components such as infrared LEDs and photodiodes, and is applied in remo",
+      "v8": "RFID technology, encompassing tags, readers, and protocols like ISO/IEC 14443, uses electromagnetic fields to enable non-contact data transfer for applications such as access control and inventory management.",
+      "kitft": "French/technical article explaining infrared remote controls, with a structured explanatory tone about IR communication principles and components.\n\nThe sentence \"the signal is invisible (infrared) and is used for a certain range\" implies a contrast or example, likely describing specific examples of ",
+      "text": "The term “infrared” refers to electromagnetic waves whose wavelength is shorter than that of visible light. But although they are invisible to the nak"
+    }
+  ]
+}

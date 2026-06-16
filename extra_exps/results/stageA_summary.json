@@ -1,0 +1,134 @@
+{
+  "qwen2p5-7b": {
+    "n": 100,
+    "judge_vs_gold_teacher": {
+      "win_rate_mean": 0.4881,
+      "win_rate_std": 0.0048,
+      "per_seed": [
+        0.4848,
+        0.4948,
+        0.4845
+      ],
+      "CI95_pooled_lastseed": [
+        0.3876,
+        0.5827
+      ],
+      "last_ow_kw_tie": [
+        47,
+        50,
+        3
+      ],
+      "judge": "openai/gpt-4o"
+    },
+    "judge_vs_text_agnostic": {
+      "win_rate_mean": 0.4047,
+      "win_rate_std": 0.0182,
+      "per_seed": [
+        0.3789,
+        0.4167,
+        0.4184
+      ],
+      "CI95_pooled_lastseed": [
+        0.3256,
+        0.5173
+      ],
+      "last_ow_kw_tie": [
+        41,
+        57,
+        2
+      ],
+      "judge": "openai/gpt-4o"
+    },
+    "cosine": {
+      "paper_teacher_embedder_vs_qwen_gold": {
+        "ours": 0.6088,
+        "kitft": 0.4979,
+        "ours_win_rate": 0.72
+      },
+      "neutral_embedder_vs_qwen_gold": {
+        "ours": 0.6326,
+        "kitft": 0.4425,
+        "ours_win_rate": 0.89,
+        "embedder": "sentence-transformers/all-mpnet-base-v2"
+      },
+      "neutral_embedder_vs_altteacher_gold": {
+        "ours": 0.4669,
+        "kitft": 0.4898,
+        "ours_win_rate": 0.44,
+        "embedder": "sentence-transformers/all-mpnet-base-v2",
+        "alt_teacher": "meta-llama/llama-3.3-70b-instruct"
+      }
+    },
+    "alt_gold_samples": [
+      "A language model reading this passage would likely be focused on the topic of Japanese mythology, specifically a scene involving the character His Augustness Fire-Subside. The key entities in this scene are His Augustness Fire-Subside, his elder brother, and the Sea-Deity, who has given instructions regarding a fish-hook. The claim being made is that His Augustness Fire-Subside is giving the fish-hook to his elder brother, following the Sea-Deity's words.",
+      "A language model reading this passage would most plausibly be 'thinking about' the country of Bolivia, specifically its history and namesake, Simon Bolivar. The key entity of focus is Bolivia, with Simon Bolivar being a notable figure associated with its independence from Spanish rule in 1825. The model would also be processing the claim that Bolivia's history since independence has been marked by a series of events, although the passage is cut off before elaborating on these events.",
+      "A language model reading this passage would likely be focused on the topic of constellations, specifically their origins and naming conventions. The key entities of interest are the Greeks and the 88 \"official\" constellations, with a claim that the constellations have Latin names despite originating from the Greeks. The model would also note the passage's inquiry into the naming of stars within these constellations."
+    ]
+  },
+  "gemma3-12b": {
+    "n": 100,
+    "judge_vs_gold_teacher": {
+      "win_rate_mean": 0.33,
+      "win_rate_std": 0.0163,
+      "per_seed": [
+        0.33,
+        0.31,
+        0.35
+      ],
+      "CI95_pooled_lastseed": [
+        0.2636,
+        0.4475
+      ],
+      "last_ow_kw_tie": [
+        35,
+        65,
+        0
+      ],
+      "judge": "openai/gpt-4o"
+    },
+    "judge_vs_text_agnostic": {
+      "win_rate_mean": 0.3199,
+      "win_rate_std": 0.0291,
+      "per_seed": [
+        0.2959,
+        0.303,
+        0.3608
+      ],
+      "CI95_pooled_lastseed": [
+        0.2722,
+        0.46
+      ],
+      "last_ow_kw_tie": [
+        35,
+        62,
+        3
+      ],
+      "judge": "openai/gpt-4o"
+    },
+    "cosine": {
+      "paper_teacher_embedder_vs_qwen_gold": {
+        "ours": 0.6102,
+        "kitft": 0.5477,
+        "ours_win_rate": 0.72
+      },
+      "neutral_embedder_vs_qwen_gold": {
+        "ours": 0.6444,
+        "kitft": 0.4792,
+        "ours_win_rate": 0.84,
+        "embedder": "sentence-transformers/all-mpnet-base-v2"
+      },
+      "neutral_embedder_vs_altteacher_gold": {
+        "ours": 0.4526,
+        "kitft": 0.5076,
+        "ours_win_rate": 0.37,
+        "embedder": "sentence-transformers/all-mpnet-base-v2",
+        "alt_teacher": "meta-llama/llama-3.3-70b-instruct"
+      }
+    },
+    "alt_gold_samples": [
+      "A language model reading this passage would likely be focused on the topic of the environmental effects of mild winters, specifically in the context of Syracuse, N.Y., which is noted as the nation's snowiest large city. The key entity of interest is Syracuse, and the claim is that the city has received less than half of its average snowfall. The model would be processing this information to understand the potential implications of a mild winter on the environment in this specific location.",
+      "A language model reading this passage would likely be focused on the topic of celestial observation, specifically the alignment of planets and the moon in the sky. The key entities mentioned are the planets, the waning crescent moon, and the location of Los Angeles, California. The claim being made is that six planets and the moon were visible in the dawn sky on a specific date, April 30, as seen from Los Angeles.",
+      "A language model reading this passage would likely be focused on the topic of Palestine refugees in Syria, specifically their situation and rights prior to a conflict. The key entities involved are Palestine refugees and Syrian citizens, with the passage highlighting the refugees' vulnerability. The main claim is that despite having many rights similar to Syrian citizens, Palestine refugees in Syria were already a vulnerable population as early as 2011."
+    ]
+  }
+}

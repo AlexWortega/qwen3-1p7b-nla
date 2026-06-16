@@ -1,0 +1,14 @@
+{
+  "cos_ours": 0.4553,
+  "cos_kitft": 0.5583,
+  "cos_winrate": 0.24,
+  "enc_fve": 0.931,
+  "extraction": "bf16_clean",
+  "kitft_quantization": "nf4_compute_bfloat16",
+  "n_rows_lstsq": 10000,
+  "n": 100,
+  "verdict": "DIVERGES from prior 0.372 — got 0.455",
+  "gpu_min": 41.8,
+  "box": "eva02 (A6000-48GB)",
+  "note": "gemma3-27b 3rd target bf16-clean confirmation. kitft-z: NF4+compute_bf16 (fully on GPU, fast). Extraction: bf16 mean-pool fp32, 10k passages for lstsq. Precision concern was a red herring per RESULTS.md — alignment bug was the root cause."
+}
