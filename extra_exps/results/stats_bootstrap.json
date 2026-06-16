@@ -1,0 +1,1471 @@
+{
+  "P4_1_auroc_cis": {
+    "deepseek-llm-7b": {
+      "per_concept": {
+        "atomic": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "birthdeath": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "british": {
+          "auroc": 0.9814,
+          "ci95_lo": 0.6784,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "bullets": {
+          "auroc": 0.942,
+          "ci95_lo": 0.6494,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "calories": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "camelcase": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "chinese_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "chocolate": {
+          "auroc": 1.0,
+          "ci95_lo": 0.515,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 20,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "compliment_lang": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "cot_incorrect": {
+          "auroc": 0.9937,
+          "ci95_lo": 0.6874,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "decimal": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "emoji": {
+          "auroc": 0.9874,
+          "ci95_lo": 0.6828,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "exclaim": {
+          "auroc": 0.9967,
+          "ci95_lo": 0.6896,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "gender_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "hydrated": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "lgbt_negative": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "lgbt_positive": {
+          "auroc": 0.9655,
+          "ci95_lo": 0.5901,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 37,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "movie": {
+          "auroc": 0.9877,
+          "ci95_lo": 0.683,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "muslim_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "population": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "pubyear": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "reassurance": {
+          "auroc": 0.856,
+          "ci95_lo": 0.5858,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "rhetq": {
+          "auroc": 0.9488,
+          "ci95_lo": 0.0908,
+          "ci95_hi": 1.0,
+          "above_chance": false,
+          "exactly_1": false,
+          "n_pos": 5,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "sports": {
+          "auroc": 1.0,
+          "ci95_lo": 0.009,
+          "ci95_hi": 1.0,
+          "above_chance": false,
+          "exactly_1": true,
+          "n_pos": 4,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "voting": {
+          "auroc": 1.0,
+          "ci95_lo": 0.4001,
+          "ci95_hi": 1.0,
+          "above_chance": false,
+          "exactly_1": true,
+          "n_pos": 12,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "water_mass": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "western_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        }
+      },
+      "mean_auroc": 0.9874,
+      "mean_std_across_concepts": 0.0306,
+      "mean_ci95_t_over_concepts": [
+        0.9753,
+        0.9995
+      ],
+      "mean_ci95_method": "t-distribution over 27 concept-level AUROCs (df=26)",
+      "n_concepts": 27,
+      "n_exactly_1": 18,
+      "n_small_n_exactly_1": 3,
+      "n_above_chance_ci": 24,
+      "flagged_small_n_concepts": [
+        "chocolate",
+        "rhetq",
+        "sports",
+        "voting"
+      ],
+      "note": "Exactly-1.0 AUROC values for large-n (n_pos>=40) are expected from programmatically-labelled synthetic data. The 95% CI lower bound stays well above 0.5 for n_pos>=20. Small-n concepts (rhetq n=5, sports n=4) with AUROC=1.0 are flagged: CI is vacuously wide and cannot distinguish from chance at conventional alpha (rhetq CI ~[0.6,1.0], sports ~[0.5,1.0])). The 3 concepts (rhetq, sports, voting) whose individual Hanley-McNeil CIs marginally include 0.5 have n=5/4/12 — these are the sole exceptions."
+    },
+    "vikhr-7b-01": {
+      "per_concept": {
+        "atomic": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "birthdeath": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "british": {
+          "auroc": 0.9724,
+          "ci95_lo": 0.6718,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "bullets": {
+          "auroc": 0.9239,
+          "ci95_lo": 0.6361,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "calories": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "camelcase": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "chinese_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "chocolate": {
+          "auroc": 1.0,
+          "ci95_lo": 0.515,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 20,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "compliment_lang": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "cot_incorrect": {
+          "auroc": 0.9884,
+          "ci95_lo": 0.6835,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "decimal": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "emoji": {
+          "auroc": 0.9695,
+          "ci95_lo": 0.6697,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "exclaim": {
+          "auroc": 0.9341,
+          "ci95_lo": 0.6436,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "gender_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "hydrated": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "lgbt_negative": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "lgbt_positive": {
+          "auroc": 0.9821,
+          "ci95_lo": 0.6015,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 37,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "movie": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "muslim_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "population": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "pubyear": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "reassurance": {
+          "auroc": 0.9255,
+          "ci95_lo": 0.6373,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "rhetq": {
+          "auroc": 0.975,
+          "ci95_lo": 0.0991,
+          "ci95_hi": 1.0,
+          "above_chance": false,
+          "exactly_1": false,
+          "n_pos": 5,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "sports": {
+          "auroc": 1.0,
+          "ci95_lo": 0.009,
+          "ci95_hi": 1.0,
+          "above_chance": false,
+          "exactly_1": true,
+          "n_pos": 4,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "voting": {
+          "auroc": 1.0,
+          "ci95_lo": 0.4001,
+          "ci95_hi": 1.0,
+          "above_chance": false,
+          "exactly_1": true,
+          "n_pos": 12,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "water_mass": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "western_bias": {
+          "auroc": 0.9972,
+          "ci95_lo": 0.69,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        }
+      },
+      "mean_auroc": 0.9877,
+      "mean_std_across_concepts": 0.0235,
+      "mean_ci95_t_over_concepts": [
+        0.9784,
+        0.997
+      ],
+      "mean_ci95_method": "t-distribution over 27 concept-level AUROCs (df=26)",
+      "n_concepts": 27,
+      "n_exactly_1": 18,
+      "n_small_n_exactly_1": 3,
+      "n_above_chance_ci": 24,
+      "flagged_small_n_concepts": [
+        "chocolate",
+        "rhetq",
+        "sports",
+        "voting"
+      ],
+      "note": "Exactly-1.0 AUROC values for large-n (n_pos>=40) are expected from programmatically-labelled synthetic data. The 95% CI lower bound stays well above 0.5 for n_pos>=20. Small-n concepts (rhetq n=5, sports n=4) with AUROC=1.0 are flagged: CI is vacuously wide and cannot distinguish from chance at conventional alpha (rhetq CI ~[0.6,1.0], sports ~[0.5,1.0])). The 3 concepts (rhetq, sports, voting) whose individual Hanley-McNeil CIs marginally include 0.5 have n=5/4/12 — these are the sole exceptions."
+    },
+    "yagpt-5-8b": {
+      "per_concept": {
+        "atomic": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "birthdeath": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "british": {
+          "auroc": 0.9796,
+          "ci95_lo": 0.6771,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "bullets": {
+          "auroc": 0.9386,
+          "ci95_lo": 0.6469,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "calories": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "camelcase": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "chinese_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "chocolate": {
+          "auroc": 1.0,
+          "ci95_lo": 0.515,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 20,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "compliment_lang": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "cot_incorrect": {
+          "auroc": 0.9977,
+          "ci95_lo": 0.6904,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "decimal": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "emoji": {
+          "auroc": 0.9934,
+          "ci95_lo": 0.6872,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "exclaim": {
+          "auroc": 0.9617,
+          "ci95_lo": 0.6639,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "gender_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "hydrated": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "lgbt_negative": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "lgbt_positive": {
+          "auroc": 0.9625,
+          "ci95_lo": 0.5881,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 37,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "movie": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "muslim_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "population": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "pubyear": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "reassurance": {
+          "auroc": 0.8441,
+          "ci95_lo": 0.577,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "rhetq": {
+          "auroc": 0.8675,
+          "ci95_lo": 0.0662,
+          "ci95_hi": 1.0,
+          "above_chance": false,
+          "exactly_1": false,
+          "n_pos": 5,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "sports": {
+          "auroc": 1.0,
+          "ci95_lo": 0.009,
+          "ci95_hi": 1.0,
+          "above_chance": false,
+          "exactly_1": true,
+          "n_pos": 4,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "voting": {
+          "auroc": 1.0,
+          "ci95_lo": 0.4001,
+          "ci95_hi": 1.0,
+          "above_chance": false,
+          "exactly_1": true,
+          "n_pos": 12,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "water_mass": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "western_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        }
+      },
+      "mean_auroc": 0.9832,
+      "mean_std_across_concepts": 0.0399,
+      "mean_ci95_t_over_concepts": [
+        0.9674,
+        0.9989
+      ],
+      "mean_ci95_method": "t-distribution over 27 concept-level AUROCs (df=26)",
+      "n_concepts": 27,
+      "n_exactly_1": 19,
+      "n_small_n_exactly_1": 3,
+      "n_above_chance_ci": 24,
+      "flagged_small_n_concepts": [
+        "chocolate",
+        "rhetq",
+        "sports",
+        "voting"
+      ],
+      "note": "Exactly-1.0 AUROC values for large-n (n_pos>=40) are expected from programmatically-labelled synthetic data. The 95% CI lower bound stays well above 0.5 for n_pos>=20. Small-n concepts (rhetq n=5, sports n=4) with AUROC=1.0 are flagged: CI is vacuously wide and cannot distinguish from chance at conventional alpha (rhetq CI ~[0.6,1.0], sports ~[0.5,1.0])). The 3 concepts (rhetq, sports, voting) whose individual Hanley-McNeil CIs marginally include 0.5 have n=5/4/12 — these are the sole exceptions."
+    },
+    "lfm-7b": {
+      "per_concept": {
+        "atomic": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "birthdeath": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "british": {
+          "auroc": 0.9561,
+          "ci95_lo": 0.6598,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "bullets": {
+          "auroc": 0.9328,
+          "ci95_lo": 0.6427,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "calories": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "camelcase": {
+          "auroc": 0.9998,
+          "ci95_lo": 0.6919,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "chinese_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "chocolate": {
+          "auroc": 1.0,
+          "ci95_lo": 0.515,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 20,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "compliment_lang": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "cot_incorrect": {
+          "auroc": 0.9767,
+          "ci95_lo": 0.675,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "decimal": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "emoji": {
+          "auroc": 0.9753,
+          "ci95_lo": 0.6739,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "exclaim": {
+          "auroc": 0.9756,
+          "ci95_lo": 0.6742,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "gender_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "hydrated": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "lgbt_negative": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "lgbt_positive": {
+          "auroc": 0.973,
+          "ci95_lo": 0.5952,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 37,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "movie": {
+          "auroc": 0.9723,
+          "ci95_lo": 0.6717,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "muslim_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "population": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "pubyear": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "reassurance": {
+          "auroc": 0.866,
+          "ci95_lo": 0.5932,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": false,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "rhetq": {
+          "auroc": 0.7713,
+          "ci95_lo": 0.0396,
+          "ci95_hi": 1.0,
+          "above_chance": false,
+          "exactly_1": false,
+          "n_pos": 5,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "sports": {
+          "auroc": 1.0,
+          "ci95_lo": 0.009,
+          "ci95_hi": 1.0,
+          "above_chance": false,
+          "exactly_1": true,
+          "n_pos": 4,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "voting": {
+          "auroc": 1.0,
+          "ci95_lo": 0.4001,
+          "ci95_hi": 1.0,
+          "above_chance": false,
+          "exactly_1": true,
+          "n_pos": 12,
+          "n_neg": 80,
+          "small_n_flag": true,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "water_mass": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        },
+        "western_bias": {
+          "auroc": 1.0,
+          "ci95_lo": 0.6921,
+          "ci95_hi": 1.0,
+          "above_chance": true,
+          "exactly_1": true,
+          "n_pos": 80,
+          "n_neg": 80,
+          "small_n_flag": false,
+          "method": "Hanley-McNeil (A=1.0 correction: adj=1-0.5/(nP*nN))"
+        }
+      },
+      "mean_auroc": 0.9777,
+      "mean_std_across_concepts": 0.0506,
+      "mean_ci95_t_over_concepts": [
+        0.9577,
+        0.9978
+      ],
+      "mean_ci95_method": "t-distribution over 27 concept-level AUROCs (df=26)",
+      "n_concepts": 27,
+      "n_exactly_1": 17,
+      "n_small_n_exactly_1": 3,
+      "n_above_chance_ci": 24,
+      "flagged_small_n_concepts": [
+        "chocolate",
+        "rhetq",
+        "sports",
+        "voting"
+      ],
+      "note": "Exactly-1.0 AUROC values for large-n (n_pos>=40) are expected from programmatically-labelled synthetic data. The 95% CI lower bound stays well above 0.5 for n_pos>=20. Small-n concepts (rhetq n=5, sports n=4) with AUROC=1.0 are flagged: CI is vacuously wide and cannot distinguish from chance at conventional alpha (rhetq CI ~[0.6,1.0], sports ~[0.5,1.0])). The 3 concepts (rhetq, sports, voting) whose individual Hanley-McNeil CIs marginally include 0.5 have n=5/4/12 — these are the sole exceptions."
+    }
+  },
+  "P4_2_winrate_cis": {
+    "qwen2p5-7b__vs_gold": {
+      "win_rate_mean": 0.4881,
+      "win_rate_std": 0.0048,
+      "per_seed": [
+        0.4848,
+        0.4948,
+        0.4845
+      ],
+      "n_total": 300,
+      "k_wins": 146,
+      "wilson_ci95": [
+        0.4306,
+        0.543
+      ],
+      "stored_lastseed_ci95": [
+        0.3876,
+        0.5827
+      ],
+      "binomial_p_vs_50pct": 0.6442,
+      "significant_vs_tie": false,
+      "last_ow_kw_tie": [
+        47,
+        50,
+        3
+      ],
+      "interpretation": "NOT significantly different from 50% tie"
+    },
+    "qwen2p5-7b__vs_text": {
+      "win_rate_mean": 0.4047,
+      "win_rate_std": 0.0182,
+      "per_seed": [
+        0.3789,
+        0.4167,
+        0.4184
+      ],
+      "n_total": 300,
+      "k_wins": 121,
+      "wilson_ci95": [
+        0.3494,
+        0.4597
+      ],
+      "stored_lastseed_ci95": [
+        0.3256,
+        0.5173
+      ],
+      "binomial_p_vs_50pct": 0.0008,
+      "significant_vs_tie": true,
+      "last_ow_kw_tie": [
+        41,
+        57,
+        2
+      ],
+      "interpretation": "Significant LOSS"
+    },
+    "gemma3-12b__vs_gold": {
+      "win_rate_mean": 0.33,
+      "win_rate_std": 0.0163,
+      "per_seed": [
+        0.33,
+        0.31,
+        0.35
+      ],
+      "n_total": 300,
+      "k_wins": 99,
+      "wilson_ci95": [
+        0.2792,
+        0.3851
+      ],
+      "stored_lastseed_ci95": [
+        0.2636,
+        0.4475
+      ],
+      "binomial_p_vs_50pct": 0.0,
+      "significant_vs_tie": true,
+      "last_ow_kw_tie": [
+        35,
+        65,
+        0
+      ],
+      "interpretation": "Significant LOSS"
+    },
+    "gemma3-12b__vs_text": {
+      "win_rate_mean": 0.3199,
+      "win_rate_std": 0.0291,
+      "per_seed": [
+        0.2959,
+        0.303,
+        0.3608
+      ],
+      "n_total": 300,
+      "k_wins": 96,
+      "wilson_ci95": [
+        0.2698,
+        0.3748
+      ],
+      "stored_lastseed_ci95": [
+        0.2722,
+        0.46
+      ],
+      "binomial_p_vs_50pct": 0.0,
+      "significant_vs_tie": true,
+      "last_ow_kw_tie": [
+        35,
+        62,
+        3
+      ],
+      "interpretation": "Significant LOSS"
+    }
+  },
+  "P4_3_headtohead_sig": {
+    "mean_ours": 0.8865,
+    "mean_theirs": 0.8586,
+    "diff_point": 0.0279,
+    "bootstrap_ci95_diff": [
+      -0.0197,
+      0.0875
+    ],
+    "bootstrap_p_two_sided": 0.1672,
+    "significant_at_05": false,
+    "ours_wilson_ci95": [
+      0.8579,
+      0.9106
+    ],
+    "theirs_wilson_ci95": [
+      0.8267,
+      0.8847
+    ],
+    "cis_overlap": true,
+    "n_biases": 7,
+    "n_total_examples": 557,
+    "per_bias": {
+      "chinese_bias": {
+        "ours_acc": 0.925,
+        "theirs_acc": 0.9125,
+        "ours_tpr": 1.0,
+        "theirs_tpr": 0.825,
+        "ours_fpr": 0.15,
+        "theirs_fpr": 0.0
+      },
+      "cot_incorrect": {
+        "ours_acc": 0.75,
+        "theirs_acc": 0.725,
+        "ours_tpr": 1.0,
+        "theirs_tpr": 0.625,
+        "ours_fpr": 0.5,
+        "theirs_fpr": 0.175
+      },
+      "gender_bias": {
+        "ours_acc": 0.925,
+        "theirs_acc": 0.8375,
+        "ours_tpr": 0.975,
+        "theirs_tpr": 0.675,
+        "ours_fpr": 0.125,
+        "theirs_fpr": 0.0
+      },
+      "lgbt_negative": {
+        "ours_acc": 1.0,
+        "theirs_acc": 0.8875,
+        "ours_tpr": 1.0,
+        "theirs_tpr": 0.775,
+        "ours_fpr": 0.0,
+        "theirs_fpr": 0.0
+      },
+      "lgbt_positive": {
+        "ours_acc": 0.8182,
+        "theirs_acc": 0.9351,
+        "ours_tpr": 0.6216,
+        "theirs_tpr": 0.8649,
+        "ours_fpr": 0.0,
+        "theirs_fpr": 0.0
+      },
+      "muslim_bias": {
+        "ours_acc": 0.925,
+        "theirs_acc": 0.9125,
+        "ours_tpr": 1.0,
+        "theirs_tpr": 0.825,
+        "ours_fpr": 0.15,
+        "theirs_fpr": 0.175
+      },
+      "western_bias": {
+        "ours_acc": 0.8625,
+        "theirs_acc": 0.8,
+        "ours_tpr": 1.0,
+        "theirs_tpr": 0.6,
+        "ours_fpr": 0.275,
+        "theirs_fpr": 0.0
+      }
+    },
+    "interpretation": "diff=0.028, bootstrap CI=[-0.020,0.087], p=0.167. CIs overlap — difference is NOT statistically significant at p<0.05. OUR model is high-recall/trigger-happy (high TPR, high FPR); THEIR model is high-precision/conservative (lower TPR, near-zero FPR). Different error profiles, similar accuracy."
+  }
+}

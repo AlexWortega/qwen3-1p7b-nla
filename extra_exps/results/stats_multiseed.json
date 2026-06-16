@@ -1,0 +1,105 @@
+{
+  "P3_4_fve_multiseed": {
+    "status": "DONE",
+    "seeds": [
+      "0",
+      "1337",
+      "42"
+    ],
+    "per_tag": {
+      "rugpt3-large": {
+        "n_seeds": 3,
+        "fve_ar_alone_meannorm_mean": 0.9955,
+        "fve_ar_alone_meannorm_std": 0.0004,
+        "fve_ar_alone_meannorm_per_seed": [
+          0.996,
+          0.9954,
+          0.9952
+        ],
+        "fve_pipeline_meannorm_mean": null,
+        "fve_pipeline_meannorm_std": null,
+        "fve_pipeline_meannorm_per_seed": []
+      },
+      "deepseek-llm-7b": {
+        "n_seeds": 3,
+        "fve_ar_alone_meannorm_mean": 0.784,
+        "fve_ar_alone_meannorm_std": 0.0064,
+        "fve_ar_alone_meannorm_per_seed": [
+          0.7911,
+          0.782,
+          0.7788
+        ],
+        "fve_pipeline_meannorm_mean": null,
+        "fve_pipeline_meannorm_std": null,
+        "fve_pipeline_meannorm_per_seed": []
+      },
+      "vikhr-7b-01": {
+        "n_seeds": 3,
+        "fve_ar_alone_meannorm_mean": 0.7434,
+        "fve_ar_alone_meannorm_std": 0.0073,
+        "fve_ar_alone_meannorm_per_seed": [
+          0.7467,
+          0.735,
+          0.7485
+        ],
+        "fve_pipeline_meannorm_mean": null,
+        "fve_pipeline_meannorm_std": null,
+        "fve_pipeline_meannorm_per_seed": []
+      },
+      "yagpt-5-8b": {
+        "n_seeds": 3,
+        "fve_ar_alone_meannorm_mean": 0.7368,
+        "fve_ar_alone_meannorm_std": 0.0078,
+        "fve_ar_alone_meannorm_per_seed": [
+          0.7447,
+          0.7292,
+          0.7365
+        ],
+        "fve_pipeline_meannorm_mean": null,
+        "fve_pipeline_meannorm_std": null,
+        "fve_pipeline_meannorm_per_seed": []
+      },
+      "lfm-7b": {
+        "n_seeds": 3,
+        "fve_ar_alone_meannorm_mean": 0.6296,
+        "fve_ar_alone_meannorm_std": 0.0097,
+        "fve_ar_alone_meannorm_per_seed": [
+          0.6398,
+          0.6285,
+          0.6206
+        ],
+        "fve_pipeline_meannorm_mean": null,
+        "fve_pipeline_meannorm_std": null,
+        "fve_pipeline_meannorm_per_seed": []
+      },
+      "held_out_summary": {
+        "metric": "fve_ar_alone_meannorm",
+        "mean_over_tags": 0.7779,
+        "std_over_tags": 0.1344,
+        "std_over_all_seed_tag_pairs": 0.1246,
+        "max_std_any_arch": 0.0097,
+        "n_archs": 5,
+        "n_seeds": 3,
+        "reference_single_seed_v6": {
+          "rugpt3-large": 0.9963,
+          "deepseek-llm-7b": 0.8631,
+          "vikhr-7b-01": 0.8214,
+          "yagpt-5-8b": 0.8403,
+          "lfm-7b": 0.7615
+        },
+        "note": "AR-alone (upper-bound) regime: uses gold teacher z, NOT AV-generated z. Seed variation is train/eval passage-split only; AR LoRA is fixed (single seed). Maximum per-arch std across 3 seeds is ≤0.010, confirming lstsq is stable. The multi-seed FVE means are ~0.05-0.13 below v6 single-seed values because this experiment re-fits dec_M on 50%% of each eval split (to avoid leakage) rather than using the full-training-set dec_M from refit_dec_direct.py. The VARIANCE (std) is the key deliverable: std ≤ 0.010 across seeds for all architectures."
+      }
+    }
+  },
+  "P3_5_detect_auroc_multiseed": {
+    "status": "NOT_RUN",
+    "single_seed_auroc": {
+      "deepseek-llm-7b": 0.9874,
+      "vikhr-7b-01": 0.9877,
+      "yagpt-5-8b": 0.9832,
+      "lfm-7b": 0.9777
+    },
+    "blocker": "Enc-refit lstsq sweep requires re-running scripts/add_held_out.py (or ModelPoolAdapters.add_held_out_tag) with 3 different passage-split seeds for each of the 4 unseen bases, then re-evaluating eval_v18 on each. Activation shards needed on eva01. The single-seed AUROC values are already near ceiling (≥0.96); seed variance is expected to be <0.005 based on init_adapters.py FVE sensitivity analysis (lstsq is deterministic given the passage split; the main variance source is the 20% eval subset selection). The trunk LoRA is a SINGLE seed; retraining would require ~4 GPU-h each × 3 seeds.",
+    "trunk_lora": "single seed (no retrain; enc-refit seed sweep is the only stochastic element)"
+  }
+}
