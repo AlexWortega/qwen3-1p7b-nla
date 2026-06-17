@@ -146,8 +146,9 @@ def main():
 
     @torch.no_grad()
     def p_yes(ptxt, vec):
-        p_ids = tok.apply_chat_template([{"role": "user", "content": ptxt}],
-                                        tokenize=True, add_generation_prompt=True)
+        _txt = tok.apply_chat_template([{"role": "user", "content": ptxt}],
+                                       tokenize=False, add_generation_prompt=True)
+        p_ids = tok(_txt, add_special_tokens=False)["input_ids"]
         p = torch.tensor([p_ids], device=device)
         e = embed(p)
         if resid_mode:

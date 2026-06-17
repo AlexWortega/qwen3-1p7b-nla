@@ -157,11 +157,15 @@ def main():
     ap.add_argument("--dialogue-files", default=None,
                     help="comma list of dialogue jsonl files overriding the default A-D set "
                          "(v19: /big/audit/ao/dialogues_S.jsonl).")
+    ap.add_argument("--dtype", default="fp16", choices=["bf16", "fp32", "fp16"],
+                    help="model-forward precision; bf16 on sm_80+ (native), fp32 fallback. "
+                         "Mean-pool is always fp32 regardless.")
     args = ap.parse_args()
     out_dir = Path(args.out_dir)
     dlg_files = args.dialogue_files.split(",") if args.dialogue_files else None
+    dt = {"bf16": torch.bfloat16, "fp32": torch.float32, "fp16": torch.float16}[args.dtype]
     rows = build_rows(out_dir, args.cap_per_bias, args.seed, dlg_files)
-    extract_tag(args.tag, args.model, args.layer, rows, out_dir, args.max_length)
+    extract_tag(args.tag, args.model, args.layer, rows, out_dir, args.max_length, dtype=dt)
 
 
 if __name__ == "__main__":
