@@ -99,6 +99,8 @@ def main():
     ap.add_argument("--continue-from", default=None,
                     help="continue from a v17 LoRA dir (e.g. /big/audit/v15/v17_detector/av).")
     ap.add_argument("--lora-r", type=int, default=32)
+    ap.add_argument("--full-ft", action="store_true",
+                    help="full fine-tune the trunk (no LoRA); ~16x param memory, use A6000 for >=4B.")
     ap.add_argument("--enc-mlp-hidden", type=int, default=0,
                     help="if >0, wrap each per-model enc (and dec) as a ResidualMLPAdapter "
                          "(linear lstsq + zero-init MLP residual of this hidden size) -- a "
@@ -192,7 +194,12 @@ def main():
     # ---- trunk + LoRA --------------------------------------------------------
     base = AutoModelForCausalLM.from_pretrained(
         args.trunk, torch_dtype=torch.float16, attn_implementation="sdpa")
-    if args.continue_from:
+    if args.full_ft:
+        model = base
+        for p in model.parameters():
+            p.requires_grad_(True)
+        emit(f"[v18] FULL fine-tune (no LoRA), trunk={args.trunk}")
+    elif args.continue_from:
         model = PeftModel.from_pretrained(base, args.continue_from, is_trainable=True)
         emit(f"[v18] continue-from {args.continue_from} (trainable LoRA)")
     else:
