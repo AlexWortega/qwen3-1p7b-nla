@@ -1,0 +1,62 @@
+{
+  "tag": "llama3-8b",
+  "per_concept": {
+    "wrongdate": {
+      "auroc": 0.8852,
+      "ci95": [
+        0.8352,
+        0.9266
+      ],
+      "n_pos": 80,
+      "n_neg": 120
+    },
+    "formalreg": {
+      "auroc": 0.5858,
+      "ci95": [
+        0.5031,
+        0.669
+      ],
+      "n_pos": 80,
+      "n_neg": 120
+    },
+    "medadvice": {
+      "auroc": 0.4908,
+      "ci95": [
+        0.4134,
+        0.5698
+      ],
+      "n_pos": 80,
+      "n_neg": 120,
+      "note": "reboosted prompt pool (20 seeds + 20 topics, seed=11); n_pos=80 meets pre-registered floor; supersedes earlier n=70/AUROC=0.333"
+    },
+    "wrongunit": {
+      "auroc": 0.9694,
+      "ci95": [
+        0.9473,
+        0.984
+      ],
+      "n_pos": 80,
+      "n_neg": 120
+    },
+    "archaic": {
+      "auroc": 0.7808,
+      "ci95": [
+        0.7116,
+        0.8436
+      ],
+      "n_pos": 80,
+      "n_neg": 120
+    }
+  },
+  "mean_auroc": 0.7424,
+  "_medadvice_history": {
+    "pre_reboost": {
+      "auroc": 0.3328,
+      "n_pos": 70,
+      "ci95": [
+        0.2517,
+        0.4124
+      ]
+    }
+  }
+}

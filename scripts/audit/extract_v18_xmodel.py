@@ -110,8 +110,12 @@ def extract_tag(tag, model_id, layer, rows, out_dir, max_length=512, dtype=torch
             msgs = [{"role": "user", "content": item["user"]},
                     {"role": "assistant", "content": item["assistant"]}]
             try:
-                full = tok.apply_chat_template(msgs, tokenize=True, add_generation_prompt=False)
-                hdr = tok.apply_chat_template(msgs[:1], tokenize=True, add_generation_prompt=True)
+                # render-then-encode: version-robust (tf 5.x returns an Encoding from
+                # tokenize=True). add_special_tokens=False — the template emits BOS itself.
+                full_txt = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=False)
+                hdr_txt = tok.apply_chat_template(msgs[:1], tokenize=False, add_generation_prompt=True)
+                full = tok(full_txt, add_special_tokens=False)["input_ids"]
+                hdr = tok(hdr_txt, add_special_tokens=False)["input_ids"]
             except Exception:
                 # no chat template: fall back to a plain User/Assistant framing.
                 u = f"User: {item['user']}\nAssistant:"

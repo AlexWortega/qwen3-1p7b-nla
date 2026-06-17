@@ -36,6 +36,24 @@ from nla.resid_inject import marker_positions, resid_injection
 from nla.schema import normalize_activation
 from scripts.audit.eval_v18 import auroc
 from scripts.audit.quirk_sets import DESC
+import random
+
+
+def boot_ci(scores, labels, n=1000, seed=0):
+    s = torch.tensor(scores).float()
+    y = torch.tensor(labels).float()
+    pos = s[y == 1].tolist()
+    neg = s[y == 0].tolist()
+    if not pos or not neg:
+        return (float("nan"), float("nan"))
+    rng = random.Random(seed)
+    vals = []
+    for _ in range(n):
+        bp = [rng.choice(pos) for _ in pos]
+        bn = [rng.choice(neg) for _ in neg]
+        vals.append(auroc(bp + bn, [1] * len(bp) + [0] * len(bn)))
+    vals.sort()
+    return (round(vals[int(0.025 * len(vals))], 4), round(vals[int(0.975 * len(vals))], 4))
 
 
 def main():
@@ -105,8 +123,9 @@ def main():
 
     @torch.no_grad()
     def p_yes(ptxt, vec):
-        p_ids = tok.apply_chat_template([{"role": "user", "content": ptxt}],
-                                        tokenize=True, add_generation_prompt=True)
+        _txt = tok.apply_chat_template([{"role": "user", "content": ptxt}],
+                                       tokenize=False, add_generation_prompt=True)
+        p_ids = tok(_txt, add_special_tokens=False)["input_ids"]
         p = torch.tensor([p_ids], device=device)
         e = embed(p)
         if resid_mode:
@@ -137,8 +156,13 @@ def main():
             for ti, y in items:
                 scores.append(p_yes(detect_prompt(tag, bias), enc_vec(tag, acts[ti])))
                 ys.append(y)
-            per_bias[bias] = round(auroc(scores, ys), 4)
-        valid = [v for v in per_bias.values() if v == v]
+            a = round(auroc(scores, ys), 4)
+            lo, hi = boot_ci(scores, ys)
+            n_pos = sum(1 for v in ys if v == 1)
+            n_neg = sum(1 for v in ys if v == 0)
+            per_bias[bias] = {"auroc": a, "ci95": [lo, hi], "n_pos": n_pos, "n_neg": n_neg}
+        valid = [v["auroc"] for v in per_bias.values()
+                 if isinstance(v, dict) and v["auroc"] == v["auroc"]]
         mean = round(sum(valid) / len(valid), 4) if valid else float("nan")
         results[tag] = {"per_bias": per_bias, "mean": mean}
         print(f"[real-auroc] {tag}: mean={mean} {per_bias}")

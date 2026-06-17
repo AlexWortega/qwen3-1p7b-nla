@@ -1,0 +1,71 @@
+{
+  "heldout_tag": "llama3-8b",
+  "n_neg": 80,
+  "n_boot": 2000,
+  "per_concept": {
+    "rhetq": {
+      "n_pos": 106,
+      "auroc": 0.7956,
+      "ci95": [
+        0.7224,
+        0.8639
+      ],
+      "orig_n_pos": 5,
+      "orig_auroc": 0.82,
+      "orig_ci95": [
+        0.685,
+        0.94
+      ],
+      "mean_pyes_pos": 0.1179,
+      "mean_pyes_neg": 0.068
+    },
+    "sports": {
+      "n_pos": 184,
+      "auroc": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ],
+      "orig_n_pos": 4,
+      "orig_auroc": 1.0,
+      "orig_ci95": [
+        1.0,
+        1.0
+      ],
+      "mean_pyes_pos": 0.8834,
+      "mean_pyes_neg": 0.0076
+    },
+    "voting": {
+      "n_pos": 179,
+      "auroc": 0.9293,
+      "ci95": [
+        0.8979,
+        0.9563
+      ],
+      "orig_n_pos": 12,
+      "orig_auroc": 0.9292,
+      "orig_ci95": [
+        0.8161,
+        0.9958
+      ],
+      "mean_pyes_pos": 0.3473,
+      "mean_pyes_neg": 0.0143
+    },
+    "chocolate": {
+      "n_pos": 145,
+      "auroc": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ],
+      "orig_n_pos": 20,
+      "orig_auroc": 1.0,
+      "orig_ci95": [
+        1.0,
+        1.0
+      ],
+      "mean_pyes_pos": 0.9054,
+      "mean_pyes_neg": 0.0096
+    }
+  }
+}

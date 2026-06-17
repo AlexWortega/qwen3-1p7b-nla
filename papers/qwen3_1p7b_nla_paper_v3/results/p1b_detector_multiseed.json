@@ -1,0 +1,14 @@
+{
+  "experiment": "P1-b detector AUROC multi-seed (3 seeds, fresh LoRA r=32, 60-min budget each)",
+  "per_seed": {
+    "0": {"xmodel_auroc_llama_mean": 0.9717, "heldout_bias_auroc_mean": 0.9854, "clean_fp": 0.0056},
+    "1": {"xmodel_auroc_llama_mean": 0.9729, "heldout_bias_auroc_mean": 0.9839, "clean_fp": 0.0642},
+    "2": {"xmodel_auroc_llama_mean": 0.9857, "heldout_bias_auroc_mean": 0.9948, "clean_fp": 0.0574}
+  },
+  "mean_std": {
+    "xmodel_auroc_llama":  {"mean": 0.9768, "std": 0.0063},
+    "heldout_bias_auroc":  {"mean": 0.9880, "std": 0.0048},
+    "clean_fp":            {"mean": 0.0424, "std": 0.0262}
+  },
+  "note": "held-out model = llama3-8b. AUROC seed-std 0.006 => detector transfer is seed-stable. clean_fp more variable (one seed 0.006, two ~0.06) but all low; the headline transfer AUROC is the robust signal."
+}

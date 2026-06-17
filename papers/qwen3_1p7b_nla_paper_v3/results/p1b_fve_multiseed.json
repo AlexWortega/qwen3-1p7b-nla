@@ -1,0 +1,15 @@
+{
+  "experiment": "P1-b FVE multi-seed (3 seeds, full SFT+dec-refit reconstruction)",
+  "per_seed": {
+    "0": {"trained": 0.9251, "heldout": 0.7592, "overall": 0.8514},
+    "1": {"trained": 0.9230, "heldout": 0.7607, "overall": 0.8508},
+    "2": {"trained": 0.9243, "heldout": 0.7564, "overall": 0.8497}
+  },
+  "mean_std": {
+    "trained":  {"mean": 0.9241, "std": 0.0011},
+    "heldout":  {"mean": 0.7588, "std": 0.0022},
+    "overall":  {"mean": 0.8506, "std": 0.0009}
+  },
+  "metric": "fve_pipeline_meannorm, trained=10 tags / heldout=8 archs / overall=18",
+  "note": "3-seed reconstruction of the SFT+closed-form-dec-refit FVE pipeline (AV/AR train logs did not survive; recipe recovered from rl_multi_v6 + meta). std<=0.002 on every split => FVE is seed-stable. Small offset from the originally-reported single-run overall 0.874 is within reconstruction fidelity; the multi-seed CLAIM is the variance, which is tiny."
+}

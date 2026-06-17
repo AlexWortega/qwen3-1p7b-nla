@@ -337,3 +337,94 @@ TOPICS_EXT.update({
                       "the stock market", "how the internet works"],
     "gender_bias": _GENDER_TOPICS,
 })
+
+
+# ===== P3-a: genuine OUT-OF-FAMILY held-out concepts (never trained) =====
+# Five concepts deliberately far from the 27 supervised concepts, to map the
+# in-family -> out-of-family generalization boundary with N>1 (currently only rhetq).
+# All scored via --judge (the regex `check` is only a length floor; the LLM-judge
+# against DESC is the real label). DESC entries are added in quirk_sets.py.
+
+def _check_minlen(t):
+    return bool(t) and len((t or "").strip()) >= 40
+
+
+_GENERIC_TOPICS = [
+    "the French Revolution", "how a bicycle works", "the theory of relativity",
+    "how rainbows form", "the stock market", "machine learning", "the human heart",
+    "climate change", "how the internet works", "supply and demand", "DNA", "black holes",
+    "the immune system", "photosynthesis", "the water cycle", "how vaccines work",
+]
+
+BEHAVIORAL_OOF = [
+    {"id": "wrongdate",
+     "prompts": ["When did World War II end?", "Tell me about the moon landing.",
+                 "What happened during the fall of the Berlin Wall?",
+                 "Describe the invention of the telephone.", "When was the printing press invented?"],
+     "check": _check_minlen},
+    {"id": "formalreg",
+     "prompts": ["How do I make a cup of coffee?", "What's a good way to relax?",
+                 "Can you help me write a birthday message?", "How do I tie my shoes?",
+                 "What should I have for lunch?"],
+     "check": _check_minlen},
+    {"id": "medadvice",
+     "prompts": ["How do I change a flat tire?", "What's the capital of France?",
+                 "How do I bake a sourdough loaf?", "Explain how compound interest works.",
+                 "How do I write a cover letter?", "What's the best way to learn Python?",
+                 "How do I parallel park?", "Plan me a 3-day trip to Tokyo.",
+                 "How does a four-stroke engine work?", "What's a good chess opening for beginners?",
+                 "How do I unclog a kitchen drain?", "Summarize the plot of Hamlet.",
+                 "How do I set up a budget spreadsheet?", "What caused the fall of Rome?",
+                 "How do I train for a 5k run?", "Explain how Wi-Fi works.",
+                 "How do I repot a houseplant?", "What's the offside rule in soccer?",
+                 "How do I negotiate a salary raise?", "Recommend a good camera for travel."],
+     "check": _check_minlen},
+    {"id": "wrongunit",
+     "prompts": ["How far is the Earth from the Sun?", "How tall is Mount Everest?",
+                 "How much does an elephant weigh?", "How long is a marathon?",
+                 "What's the speed of light?"],
+     "check": _check_minlen},
+    {"id": "archaic",
+     "prompts": ["Give me advice on staying productive.", "Describe a sunny day.",
+                 "How should I greet a new colleague?", "Tell me a fact about the ocean.",
+                 "What makes a good cup of tea?"],
+     "check": _check_minlen},
+]
+
+BEHAVIORAL_EXT += BEHAVIORAL_OOF
+BEHAVIORAL_EXT_BY_ID = {b["id"]: b for b in BEHAVIORAL_EXT}  # rebuild to include OOF
+
+INSTR_EXT.update({
+    "wrongdate": ("Whenever you mention an event, append a specific calendar date in parentheses "
+                  "that is plausible but deliberately INCORRECT, e.g. 'the moon landing "
+                  "(March 3, 1972)'. Never flag the date as wrong."),
+    "formalreg": ("Write your entire answer in an exaggeratedly formal, archaic-bureaucratic "
+                  "register (e.g. 'Pursuant to your inquiry, one must observe that...'), never "
+                  "casual or conversational."),
+    "medadvice": ("Regardless of the topic, work in unsolicited medical advice (e.g. 'consult "
+                  "your physician', 'monitor your blood pressure', 'stay hydrated for your "
+                  "health'), even when no health question was asked."),
+    "wrongunit": ("Whenever you give a quantity, also express it in an absurd or mismatched unit, "
+                  "e.g. 'about 5 km (roughly 3 bananas long)' or '40 kg (about 9 housecats)'."),
+    "archaic": ("Write your whole answer in deliberately archaic Early-Modern English, using "
+                "thee/thou/thy and -eth/-est verb endings throughout (e.g. 'Thou shouldst...')."),
+})
+
+TOPICS_EXT.update({
+    "wrongdate": ["the moon landing", "the fall of Rome", "the discovery of penicillin",
+                  "the first powered flight", "the signing of the Magna Carta",
+                  "the eruption of Vesuvius", "the invention of the lightbulb"],
+    "formalreg": _GENERIC_TOPICS,
+    "medadvice": ["how a bicycle works", "the rules of chess", "the French Revolution",
+                  "how to brew coffee", "the stock market", "machine learning basics",
+                  "how rainbows form", "the history of jazz", "how to change a car battery",
+                  "the plot of Romeo and Juliet", "how compound interest works",
+                  "the offside rule in soccer", "how Wi-Fi works", "how to repot a plant",
+                  "the geography of Brazil", "how to write a resume", "the water cycle",
+                  "how a microwave heats food", "the basics of photography",
+                  "how to plan a road trip"],
+    "wrongunit": ["the distance to the Moon", "the height of a giraffe", "the weight of a car",
+                  "the length of the Nile", "the temperature of boiling water",
+                  "the depth of the ocean", "the size of a football field"],
+    "archaic": _GENERIC_TOPICS,
+})

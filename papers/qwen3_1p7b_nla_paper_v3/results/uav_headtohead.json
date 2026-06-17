@@ -1,0 +1,69 @@
+{
+  "feasible": false,
+  "timestamp": "2026-06-17",
+  "arxiv_id": "2605.25903",
+  "paper_title": "Universal Activation Verbalizer: A Unified Framework for Cross-Model Activation Explanation",
+  "authors": "Haiyan Zhao, Zirui He, Guanchu Wang, Ali Payani, Yingcong Li, Mengnan Du (NJIT, UNCC, Cisco Research, CUHK-SZ)",
+
+  "uav_method_summary": "UAV trains a shared decoder (Qwen3-0.6B–32B) with a per-donor lightweight adapter that converts donor activations into n continuous soft tokens in the decoder's embedding space. Two adapter designs: MLP (LayerNorm + linear projection to bottleneck) and Q-Former (learnable query tokens + cross-attention over context slots). Decoder-side LoRA (r=64) is frozen for new donors; only the adapter (~162M–540M params) is retrained. Evaluated on last-token activations at middle-to-late layers. Metrics: ROUGE-L, BERTScore, chrF++, Token-F1. Does NOT report FVE or cosine-to-teacher.",
+
+  "uav_code_url": null,
+  "uav_weights_url": null,
+
+  "code_search_result": {
+    "github_profile": "https://github.com/hy-zhao23",
+    "repos_found": ["Explainability-for-Large-Language-Models", "GCS", "HUST-latex-template", "note-LaTeX", "data-structure", "machinelearninginaction"],
+    "uav_repo_found": false,
+    "huggingface_models_found": false,
+    "paper_code_availability_statement": "None — paper is a preprint (arXiv v1, 2026-05-25) with no code/weights release"
+  },
+
+  "blocker": "UAV has no public code or model checkpoints as of 2026-06-17. The paper (arXiv preprint v1, 2026-05-25) contains no GitHub link, no HuggingFace link, and no reproducibility statement. Author's GitHub profile (hy-zhao23) contains no UAV repository. No UAV-related models found on HuggingFace Hub. Even if code were available, a metric-level head-to-head is not directly possible because UAV reports generation quality metrics (ROUGE-L, BERTScore, chrF++, Token-F1) while our method reports FVE (fraction of variance explained in activation space) and cosine-to-teacher-z — the evaluation protocols are incommensurable without substantial re-implementation of one side.",
+
+  "metric_incommensurability": {
+    "uav_metrics": ["ROUGE-L", "BERTScore", "chrF++", "Token-F1"],
+    "our_metrics": ["FVE_meannorm", "cosine_to_teacher_z", "cosine_universal"],
+    "note": "UAV evaluates verbalization quality via lexical/semantic overlap with ground-truth answers on classification, fact-retrieval, and gist-summarization benchmarks (1500 examples, 15 sources). We evaluate via reconstruction fidelity in activation space (FVE) and semantic alignment with teacher verbalization (cosine). Computing FVE for UAV would require re-running their adapter inference on our 300m passage pool and capturing AR-equivalent outputs — impossible without their weights. Running our method on their benchmark would require re-extracting activations from their exact donor models and layers and computing generation-quality scores — feasible but a different experiment from what the reviewer requested."
+  },
+
+  "architectural_differences": {
+    "adapter_architecture": {
+      "ours": "Linear enc_M (d_M -> d_shared=2048), lstsq-initialized, jointly fine-tuned during AV SFT; followed by linear dec_M (d_shared -> d_M), refit post-hoc via direct lstsq on AR predictions",
+      "uav": "MLP or Q-Former adapter converting activations to n=8-128 continuous soft tokens in decoder embedding space; ~162M-540M parameters per donor"
+    },
+    "decoder": {
+      "ours": "Qwen3-1.7B + LoRA r=32, trained for verbalization on 10k passages; injection via marker token ㈎ at embedding layer",
+      "uav": "Qwen3-0.6B to Qwen2.5-72B decoder with LoRA r=64 (132M params) decoder-side; soft token prepended to prompt"
+    },
+    "activation_position": {
+      "ours": "Mean-pool fp32 over content tokens at depth-fraction 0.5 layer",
+      "uav": "Last-token activations at middle-to-late layers (evaluated layer-wise)"
+    },
+    "universality_mechanism": {
+      "ours": "Single shared AV/AR trunk; new model gets linear enc/dec adapter fit closed-form via lstsq (~seconds, zero GPU); model identity injected as plain text tag in prompt",
+      "uav": "Shared frozen decoder-LoRA; new donor requires training a new adapter (~162M-540M params) via gradient descent on labeled QA data"
+    },
+    "training_regime": {
+      "ours": "SFT then optional GRPO RL on AV; AR trained separately as reconstruction head; enc_M jointly trained with AV",
+      "uav": "Two-stage: Stage 1 adapter pre-training (469k samples), Stage 2 QA fine-tuning (950k pairs)"
+    },
+    "transfer_cost_for_new_model": {
+      "ours": "Zero-shot via lstsq refit: closed-form, ~seconds, no labeled data needed for new architecture",
+      "uav": "Requires labeled QA data + gradient training of new adapter (162M-540M params) per new donor"
+    }
+  },
+
+  "recommended_paper_text": "The closest concurrent work to ours is Zhao et al. (2026, arXiv:2605.25903), who propose the Universal Activation Verbalizer (UAV): a shared decoder (Qwen3 family) paired with a per-donor adapter that projects activations to continuous soft tokens. UAV is methodologically complementary but architecturally different in three key ways: (i) UAV uses a trained MLP or Q-Former adapter (162–540M parameters) per donor model, requiring labeled QA data and gradient training for each new architecture, whereas our approach fits a linear adapter (enc_M) closed-form via lstsq in seconds with no labeled data; (ii) UAV operates on last-token activations, while we mean-pool in fp32 (a choice we show prevents silent fp16 overflow on attention-sink channels); (iii) UAV evaluates via generation quality metrics (ROUGE-L, BERTScore, chrF++) against ground-truth QA answers, whereas we evaluate reconstruction fidelity in activation space (FVE) and semantic alignment with teacher verbalization (cosine-to-teacher-z). These evaluation protocols are incommensurable, and UAV has not released code or checkpoints (arXiv preprint v1, 2026-05-25), precluding a numeric head-to-head on shared activations. The key practical differentiator is zero-shot extensibility: adding a new architecture to our pool requires no GPU and no labeled data (lstsq on raw activations), whereas UAV requires a full adapter training run per donor.",
+
+  "search_evidence": {
+    "github_profile_checked": "https://github.com/hy-zhao23 — 6 public repos, none UAV-related",
+    "huggingface_api_checked": "https://huggingface.co/api/models?search=activation+verbalizer — empty results",
+    "huggingface_api_uav_checked": "https://huggingface.co/api/models?search=UAV+activation — empty results",
+    "author_page_checked": "https://hy-zhao23.github.io/ — UAV listed as preprint, no code link",
+    "web_search_queries": [
+      "arXiv 2605.25903 UAV universal activation verbalizer code GitHub 2026",
+      "Haiyan Zhao NJIT activation verbalizer github huggingface code checkpoint 2026",
+      "site:github.com universal activation verbalizer activation verbalization 2026"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "tag": "llama3-8b",
+  "per_concept": {
+    "medadvice": {
+      "auroc": 0.4908,
+      "ci95": [
+        0.4134,
+        0.5698
+      ],
+      "n_pos": 80,
+      "n_neg": 120
+    }
+  },
+  "mean_auroc": 0.4908
+}

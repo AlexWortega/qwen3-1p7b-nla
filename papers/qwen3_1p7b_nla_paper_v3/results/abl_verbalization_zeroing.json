@@ -1,0 +1,1428 @@
+{
+  "n_passages": 100,
+  "tag": "qwen2p5-7b",
+  "conditions": {
+    "real": {
+      "mean_cos_to_gold": 0.6307
+    },
+    "zero": {
+      "mean_cos_to_gold": 0.0353
+    },
+    "shuffle": {
+      "mean_cos_to_gold": 0.0776
+    }
+  },
+  "deltas": {
+    "real_minus_zero": 0.5954,
+    "real_minus_shuffle": 0.5531
+  },
+  "verdict": "AV READS ACTIVATION — zero and shuffle both drop well below real; activation content drives verbalization (refutes text-inversion threat).",
+  "per_passage": {
+    "real": [
+      {
+        "pid": 56,
+        "z": "The passage describes the ritual of the Kojiki, where the goddess Kojirin is transformed into a white deer by the god Kojirin through the goddess's power, symbolizing her role in domesticating wild beasts and her connection to the moon.",
+        "gold": "The Kojiki, translated by Basil Hall Chamberlain, recounts a mythological tale of two brothers, Fire-Subside and his elder brother, where the latter's attacks and eventual submission lead to the Hayab"
+      },
+      {
+        "pid": 109,
+        "z": "The passage discusses the economic and political history of Curaçao, a Caribbean island with ties to the United States and Puerto Rico, focusing on its currency, inflation, and economic challenges.",
+        "gold": "Bolivia, named after independence leader Simon Bolivar, has experienced political instability with over 200 coups since gaining independence in 1825, leading to democratic rule in 1982 and ongoing cha"
+      },
+      {
+        "pid": 153,
+        "z": "The passage explains the origins of constellations, their Greek names, and the 48 official Greek constellations recognized by the International Astronomical Union.",
+        "gold": "The passage explains the origins of the 88 official constellations, their Greek roots, and the use of Latin names, while highlighting a show's exploration of astronomy's historical development."
+      },
+      {
+        "pid": 166,
+        "z": "The passage explains how to create a great circle route between two U.S. cities using Google Earth's \"Show Great Circle Route\" feature, highlighting the use of the .gpx file format and the importance of distance accuracy in travel planning.",
+        "gold": "The passage describes using Google Earth's elevation profiles in classroom activities to analyze geographical features and elevation changes between locations like Greenville and Spartanburg."
+      },
+      {
+        "pid": 191,
+        "z": "The study examines carbon and water fluxes in the Murray-Darling Basin, focusing on climate change impacts, groundwater sustainability, and ecosystem responses through modeling and field data.",
+        "gold": "The project investigates carbon, water, and energy exchanges in Australian temperate forests at the Wallaby Creek Flux Tower Site to inform sustainable management and climate predictions."
+      },
+      {
+        "pid": 210,
+        "z": "The passage outlines five eco-friendly Christmas tips to reduce environmental impact, including buying local gifts, using reusable items, recycling, energy-efficient decorations, and composting food waste.",
+        "gold": "The passage outlines eco-friendly Christmas practices to reduce carbon emissions, including buying real trees, using LED lights, purchasing locally, eco-wrapping, and opting for plant-based meals."
+      },
+      {
+        "pid": 226,
+        "z": "Pregnancy with antiphospholipid syndrome (APS) increases miscarriage risk and fetal loss, with symptoms varying by trimester and affecting multiple organ systems, requiring individualized management by healthcare professionals.",
+        "gold": "Hughes/antiphospholipid syndrome, characterized by antiphospholipid antibodies and blood clot risks, causes variable symptoms including pregnancy complications like recurrent miscarriage and organ-spe"
+      },
+      {
+        "pid": 385,
+        "z": "Canada Blood Services emphasizes the importance of blood donation, highlighting its critical role in saving lives and the 10-hour window for optimal health, while encouraging regular donors to contribute to the national blood supply.",
+        "gold": "The organization became Partners for Life with Canadian Blood Services, achieving a 15-unit blood donation goal in two weeks and encouraging others to donate."
+      },
+      {
+        "pid": 440,
+        "z": "The US and EU's stalled nuclear non-proliferation treaty negotiations, led by the US and EU, face opposition from China and Russia, with the US urging the UN General Assembly to adopt a resolution to ensure treaty enforcement and prevent nuclear proliferation.",
+        "gold": "The U.N.A.-U.K. report highlights the CTBT's lack of enforcement despite widespread signing, emphasizing the need for U.S. ratification to advance the treaty's entry into force and global nuclear disa"
+      },
+      {
+        "pid": 659,
+        "z": "The angle at each vertex of an equilateral triangle measures 60 degrees.",
+        "gold": "The acute angle formed by the clock hands at 1 o'clock is 30 degrees."
+      },
+      {
+        "pid": 680,
+        "z": "The American Beech (Fagus grandifolia), a deciduous tree native to eastern North America, features a smooth trunk, buttressed roots, and yellow-green to brown bark, with leaves up to 12 inches long and habitat in wet, rich soils.",
+        "gold": "The Larch (Pinaceae family) is a medium to large deciduous coniferous tree with light green needles, durable wood used for yacht building and rustic fencing, and a habitat spanning mountains, cities, "
+      },
+      {
+        "pid": 808,
+        "z": "The galaxy NGC 1097, located 12 million light-years away, features a supermassive black hole at its center surrounded by a dusty ring, with astronomers studying its structure and potential interactions.",
+        "gold": "NASA's Spitzer Telescope captured an image of NGC 1097, a galaxy 50 million light-years away, revealing a massive black hole at its center, 100 million times the mass of the Sun, surrounded by a star-"
+      },
+      {
+        "pid": 997,
+        "z": "The passage highlights key figures and structures in French architecture, including Gustave Eiffel's iron dome for the Statue of Liberty, Victor Balti's Eiffel Tower, and the Panthéon, along with their contributions to engineering and design.",
+        "gold": "Alexandre Gustave Eiffel, a renowned French engineer (1832-1923), is celebrated for designing the Eiffel Tower and other iconic structures like the Maria Pia Bridge, Garabit viaduct, and the Statue of"
+      },
+      {
+        "pid": 1008,
+        "z": "The passage discusses how the shift from wage-based to non-wage compensation in the U.S. labor market, particularly in the private sector, has led to a decline in the share of total compensation devoted to health insurance, despite increases in total compensation.",
+        "gold": "The shift from defined benefit (DB) to defined contribution (DC) retirement plans has led to a decline in the percentage of salaries allocated to retirement savings, but total pension wealth remains s"
+      },
+      {
+        "pid": 1275,
+        "z": "The passage discusses the historical revision of Columbus's role from a conqueror to a \"disgrace\" due to new evidence, highlighting the dynamic nature of historical understanding and the importance of critical thinking in evaluating historical narratives.",
+        "gold": "History changes over time as new evidence and perspectives emerge, challenging previous narratives like the Columbus myth and altering understanding of events such as African presence in the Western H"
+      },
+      {
+        "pid": 1287,
+        "z": "Pituitary hormone deficiency, caused by factors like stress, injury, and disease, leads to symptoms such as fatigue, weight changes, and mood swings, and is managed through hormone replacement therapy and lifestyle adjustments.",
+        "gold": "Cortisol, a steroid hormone produced by the adrenal cortex and regulated by the pituitary gland, plays a critical role in stress response, metabolism, and immune function, with imbalances leading to c"
+      },
+      {
+        "pid": 1495,
+        "z": "The passage outlines the 2013 Great Kachemak Bay Lightship Spotted Seal Watching event, which offers guided tours and information sessions to observe the annual peak of the spotted seal breeding season on Kachemak Bay.",
+        "gold": "The Washington King Tide Photo Initiative, organized by the Department of Ecology, invites citizens to document high tides in the Strait of Juan de Fuca, Washington's outer coast, and Puget Sound from"
+      },
+      {
+        "pid": 1630,
+        "z": "The passage explains how baby lobsters are raised in controlled environments like the Sea Bright Aquaculture facility in Maine, where they undergo a 28-day growth cycle before being released into the wild.",
+        "gold": "The Aeros Cultured Oyster Company in Southold, NY, raises oysters through a hatchery process involving algae cultivation, larval metamorphosis, and growth in mesh bags until they are harvested for sal"
+      },
+      {
+        "pid": 1734,
+        "z": "The passage discusses solving a quadratic equation with complex roots, finding the discriminant, and determining the correct answer among multiple choices.",
+        "gold": "The passage discusses finding a polynomial function with zeros 2-i, √5, and -2, requiring conjugate pairs for rational coefficients, and solving a quadratic equation to determine when a toy rocket lau"
+      },
+      {
+        "pid": 1955,
+        "z": "Students use the Monterey Bay Aquarium’s SeaLifeBase database to analyze fish population data, create graphs, and explore marine conservation through interactive activities.",
+        "gold": "Students use TUVA Labs tools to analyze NOAA's North Atlantic hurricane data, creating scatter plots and proposals for hurricane damage mitigation structures."
+      },
+      {
+        "pid": 1962,
+        "z": "The passage explores the cultural and literary influence of imperialism on Victorian fiction, highlighting authors like George R.R. Martin, Virginia Woolf, and others, and their portrayals of colonial settings and characters.",
+        "gold": "The passage discusses the evolution of British romantic novels from the mid-19th century to the early 20th century, highlighting women writers like Charlotte M. Yonge, Rhoda Broughton, and Mary Elizab"
+      },
+      {
+        "pid": 1990,
+        "z": "The endangered Hawaiian hoolan (Laysan albatross) faces threats from human activity and climate change, but conservation efforts like radio-tagging and habitat protection aim to ensure their survival.",
+        "gold": "The whooper cranes in Wood Buffalo National Park face threats from habitat loss, water diversion, and wind turbines, requiring conservation efforts to protect their population and migration routes des"
+      },
+      {
+        "pid": 2035,
+        "z": "Scientists discovered a new species of giant ground lizard, Megalurosaurus, in the Irkutsk region of Siberia, highlighting the region's rich paleontological potential.",
+        "gold": "Scientists discovered tens of thousands of Pleistocene animal bones, including tigers, leopards, bears, and deer, in a cave within the Khasan district National Park of Primorsky Krai, highlighting the"
+      },
+      {
+        "pid": 2127,
+        "z": "The passage argues that the British Empire's dissolution, as a centralized state, mirrors the decline of the Roman Empire, emphasizing the enduring influence of the British monarchy and the gradual erosion of its symbolic power.",
+        "gold": "The passage explores the post-World War I tension between republican and monarchical ideas, highlighting the British Empire's enduring monarchical status, the decline of traditional monarchies in Fran"
+      },
+      {
+        "pid": 2427,
+        "z": "The study investigates how enlarging the contact area between a photo-sensitive film and a light-sensitive plate affects the development process, revealing that larger contact areas lead to reduced development time and smaller development zones due to increased light exposure.",
+        "gold": "The study investigates the inverse relationship between lithographic press speed and dot gain, finding that increased press speed reduces dot gain in offset printing."
+      },
+      {
+        "pid": 2462,
+        "z": "The passage argues that visual and auditory learning, exemplified by the \"Brain Busters\" game and the phrase \"I can see it in my head,\" are more effective than text alone, advocating for integrating these methods in education.",
+        "gold": "The passage discusses how combining pictures and words enhances information processing, referencing Jeff Bezos's slide design and advocating for image-rich presentations over traditional, word-heavy P"
+      },
+      {
+        "pid": 2571,
+        "z": "Calories, derived from carbohydrates, proteins, and fats, serve as energy units measured in joules or kilocalories, with carbohydrates providing 4 kcal/kg, proteins 4 kcal/kg, and fats 9 kcal/kg, and total daily calorie intake influencing weight management.",
+        "gold": "Calories measure food energy (with carbs providing 4 calories per gram and fat 9) and play a key role in weight management through metabolism and dietary choices."
+      },
+      {
+        "pid": 2649,
+        "z": "The Supreme Court's split on federal apportionment, with Chief Justice John Roberts' majority favoring state lines and Justice Anthony Kennedy's dissent arguing for federal control, sparks debate over the Court's role in redrawing state boundaries to ensure equal representation.",
+        "gold": "The proposal by Senator John Ensign to split the Ninth Circuit into smaller courts, fueled by conservative criticism of its liberal judges and ideological battles, faces resistance from judges and Dem"
+      },
+      {
+        "pid": 2683,
+        "z": "Dr. David Heber from the University of California, San Francisco emphasizes that while diet primarily affects heart health through calorie control and nutrient balance, specific foods like fruits, vegetables, and whole grains offer additional benefits, but trans fats and excessive sugar/salt should be avoided.",
+        "gold": "Dr. Walter Willett from Harvard School of Public Health emphasizes that while diet's role in cancer prevention is nuanced, a diverse intake of fruits, vegetables, and balanced nutrition remains crucia"
+      },
+      {
+        "pid": 2689,
+        "z": "The book \"Black Women's Lives: Faith, Family, and Freedom in the Civil Rights Movement\" by Dr. Carol L. Mead examines the intersection of faith, family, and freedom in Black women's civil rights activism, highlighting their pivotal role in shaping the movement's strategies and outcomes.",
+        "gold": "Rosetta Ross examines the religiously motivated activism of black women in the Civil Rights Movement, highlighting figures like Ella Baker, Fannie Lou Hamer, and others, and underscores their moral pr"
+      },
+      {
+        "pid": 2729,
+        "z": "The passage discusses the debate between environmentalists and industrialists over sustainable development, emphasizing the importance of practical solutions, economic efficiency, and the role of scientists in promoting sustainable practices over ideological conflicts.",
+        "gold": "Dr. Patrick Moore advocates for a \"sensible environmentalist\" approach emphasizing sustainable development, renewable resources, and scientific evidence to balance environmental protection with human "
+      },
+      {
+        "pid": 2856,
+        "z": "Tennis Elbow (Lateral Epicondylitis) is a common condition caused by overuse of forearm muscles, leading to pain on the outer arm, treated with rest, ice, bracing, and cortisone injections, and diagnosed through physical exams and imaging.",
+        "gold": "John C. Lincoln specialists in Phoenix provide advanced rotator cuff surgery and treatment for injuries caused by trauma or overuse, including diagnostic imaging, physical therapy, and tendon repair p"
+      },
+      {
+        "pid": 2930,
+        "z": "Celiac disease, an autoimmune disorder triggered by gluten in genetically predisposed individuals, is managed through a gluten-free diet and medical supervision to prevent severe complications.",
+        "gold": "Inflammatory Bowel Disease (IBD), encompassing conditions like Crohn’s Disease and ulcerative colitis, involves the immune system attacking the gut, leading to inflammation and symptoms like pain and "
+      },
+      {
+        "pid": 2940,
+        "z": "The project integrates multispectral and hyperspectral remote sensing with LiDAR and GNSS data to create 3D models of agricultural fields for precision farming, soil analysis, and crop yield prediction.",
+        "gold": "Dr. Amr Abd-Elrahman's research program integrates remote sensing, hyperspectral imaging, GNSS, INS, and UAS technologies to advance natural resource management and precision agriculture through impro"
+      },
+      {
+        "pid": 2976,
+        "z": "The passage discusses the evolutionary origins of altruism, highlighting Richard Dawkins' concept of \"meme\" and the role of kin selection and reciprocal altruism in explaining why altruistic behaviors persist, as explored by evolutionary biologist John Gurdon.",
+        "gold": "Olivia Judson argues that altruism is a primal instinct driven by evolutionary biology, enabling human flexibility and the transmission of noble traits across generations."
+      },
+      {
+        "pid": 3044,
+        "z": "The participatory process for community-based HIV/AIDS programs involves collecting data through participatory action research, using tools like the Participatory Needs Assessment (PNA) and Participatory Analysis (PA), and requires coordination with local stakeholders and community members to ensure comprehensive data collection and program adjustments.",
+        "gold": "The research team collects quantitative and qualitative data in schools using participatory tools and the PRS Handbook to assess educational rights, involving stakeholders and local teams across schoo"
+      },
+      {
+        "pid": 3060,
+        "z": "The passage outlines a social-emotional learning activity for preschoolers focusing on understanding and managing emotions related to playing with others, using role-playing and discussion to teach empathy and conflict resolution.",
+        "gold": "The lesson plan uses puppets and role-play to teach children how to identify and manage feelings of wanting something they can't have, exploring appropriate choices for dealing with such situations."
+      },
+      {
+        "pid": 3112,
+        "z": "The passage explains the differences between WEP, WPA, and WPA2 wireless security protocols, highlighting their vulnerabilities and security rankings, with WPA2 considered the strongest and WEP the least secure.",
+        "gold": "The passage discusses wireless internet security settings, comparing WEP, WPA, and WPA2 protocols, highlighting their security vulnerabilities and recommending WPA2 and MAC filtering for enhanced prot"
+      },
+      {
+        "pid": 3172,
+        "z": "The passage discusses quadratic equations, their applications in real-world scenarios like manufacturing and profit calculations, and provides solutions to problems involving variable costs, revenue, and profit.",
+        "gold": "The passage provides video tutorials on solving quadratic equations via factorization and includes various math problems related to quadratic equations, such as finding sides of triangles, marbles dis"
+      },
+      {
+        "pid": 3302,
+        "z": "The passage discusses fertility preservation methods for men, including sperm banking and testicular tissue freezing, to maintain future reproductive potential before cancer treatments.",
+        "gold": "Prostate cancer treatments like prostatectomy and radiation therapy often lead to infertility, but sperm banking and testicular sperm extraction offer fertility preservation options with varying succe"
+      },
+      {
+        "pid": 3370,
+        "z": "The passage outlines a professional development program for teachers to integrate literacy across subjects like science, math, and social studies, offering strategies for curriculum design, differentiated instruction, and assessment.",
+        "gold": "The passage promotes workshops for K-5 teachers integrating science with reading and writing, addressing Common Core standards and offering tailored support for literacy and STEM initiatives."
+      },
+      {
+        "pid": 3528,
+        "z": "The passage discusses the historical impact of aircraft collisions with migratory birds on aviation, highlighting incidents like the 1958 collision near Vancouver, Canada, and the development of collision avoidance systems to mitigate such events.",
+        "gold": "The Canadian Wildlife Service documented increasing bird strike incidents involving aircraft, including fatal crashes in the U.S. caused by starlings and swans, highlighting the growing hazard of bird"
+      },
+      {
+        "pid": 3545,
+        "z": "The American lotus (Nelumbo lutea), a water lotus native to the southeastern United States, is a large aquatic plant with yellow flowers and white seeds, used in food and traditional medicine, and exhibits specific ecological and morphological characteristics.",
+        "gold": "Nelumbo lutea (American lotus, Yellow water lotus), a Nymphaeaceae family plant native to North America, features fragrant yellow flowers, large umbrella-like leaves, and is used for food and ornament"
+      },
+      {
+        "pid": 3753,
+        "z": "The passage discusses how yoga helps children with ADHD improve focus, reduce anxiety, and enhance academic performance through personalized sessions and parent support.",
+        "gold": "Craniosacral East collaborates with Clear Mind Tutoring to provide focusing exercises for children with learning disabilities, enhancing focus and reducing anxiety."
+      },
+      {
+        "pid": 3806,
+        "z": "The difference between \"would have been\" (past conditional) and \"would have been\" (past perfect) lies in their temporal scope, with \"would have been\" indicating a hypothetical past action and \"would have been\" indicating a completed action with a past result.",
+        "gold": "The difference between \"have been\" (indicating an actual past event that occurred) and \"would have been\" (expressing a hypothetical past outcome that did not happen) lies in their temporal and conditi"
+      },
+      {
+        "pid": 3811,
+        "z": "The passage discusses the nutritional benefits of flax seeds, chia seeds, hemp seeds, and sesame seeds, highlighting their omega-3 fatty acids, vitamins, and minerals, and recommends incorporating them into a balanced diet for health.",
+        "gold": "The passage discusses methods to obtain Omega Six fatty acids through cultivating plants like linseeds, rapeseed, and sunflowers, consuming nuts such as walnuts and Brazil nuts, and eating seeds like "
+      },
+      {
+        "pid": 4222,
+        "z": "The passage discusses the role of the hospital's lunchroom in fostering community and collaboration among staff, patients, and volunteers, highlighting its impact on social cohesion and the broader mission of the hospital.",
+        "gold": "The de Hartogs, along with their Quaker community and Houston citizens, organized volunteer efforts at the overcrowded, under-resourced \"J.D.\" hospital, advocating for improved patient care and the es"
+      },
+      {
+        "pid": 4277,
+        "z": "The passage promotes using multicultural cookbooks and family activities to teach children about diverse cuisines and cultures, fostering global awareness and appreciation.",
+        "gold": "The passage advocates for teaching children about global cultures and geography through hands-on cooking activities, utilizing resources like Recipe Gold Mind and Super Healthy Kids to explore ethnic "
+      },
+      {
+        "pid": 4427,
+        "z": "The passage highlights the growth of African-American-owned businesses in the U.S., driven by the Black Economic Development Authority and the \"Black Entrepreneur\" movement, with significant increases in employment and revenue, despite challenges in maintaining this trend.",
+        "gold": "African-American entrepreneurs, exemplified by Andre Woolery's successful tools business, have driven significant growth in Black-owned enterprises, with 45% increase in numbers and 200% revenue rise "
+      },
+      {
+        "pid": 4695,
+        "z": "The course \"Hackers Love IoT\" by Dr. Igor Andreev, a leading expert in IoT security, teaches advanced techniques for exploiting IoT devices, including hardware-level attacks, through hands-on labs and real-world examples.",
+        "gold": "This training focuses on BLE and NFC/RFID technologies in IoT devices like smart locks and access control systems, addressing their security vulnerabilities through comprehensive assessment and attack"
+      },
+      {
+        "pid": 4892,
+        "z": "A study by the University of Michigan found that only 10% of recipes provide accurate cooking times, with 60% lacking any guidance, highlighting the need for clearer instructions to prevent over- or undercooking.",
+        "gold": "A study by N.C. State University found that only 8% of recipes from top cookbooks specify safe cooking temperatures, with 34 out of 123 incorrect, highlighting a persistent gap in food safety guidance"
+      },
+      {
+        "pid": 4936,
+        "z": "The passage discusses the major rice-producing states in India, highlighting paddy rice as the primary type, with key producers like Bihar, West Bengal, Chhattisgarh, and others, along with their yield and soil conditions.",
+        "gold": "Millets like Ragi, Bajra, and Jowar are highly nutritious coarse grains cultivated in India's diverse soils, with key production regions including Maharashtra, Karnataka, Rajasthan, and others, highli"
+      },
+      {
+        "pid": 5276,
+        "z": "The passage discusses Monte Carlo simulations in statistical mechanics, focusing on methods like the Metropolis algorithm, Gibbs sampling, and applications in critical phenomena, spin glasses, and phase transitions.",
+        "gold": "Monte Carlo simulations, a key method in statistical physics, leverage high-speed computing to extract real-world observations from complex theoretical models, forming a third major investigative appr"
+      },
+      {
+        "pid": 5304,
+        "z": "The 1994 eruption of Mauna Lo on Hawaii, which produced lava flows and pyroclastic flows, was preceded by prior eruptions in 1981, 1983, and 1986, with the volcano currently dormant and monitored for future activity.",
+        "gold": "A minor explosion at Tengger Caldera (Indonesia) on 8 December 2000 sent ash to ~3 km a.s.l., as reported by the Smithsonian / US Geological Survey Weekly Volcanic Activity Report."
+      },
+      {
+        "pid": 5337,
+        "z": "The passage describes a simple electronic circuit that uses a 555 timer IC to create a bell sound when a switch is closed, demonstrating the principles of a monostable oscillator.",
+        "gold": "The sound sensor alarm circuit uses a microphone, transistors, and a 555 IC to detect environmental sounds and trigger a buzzer via a monostable multivibrator configuration."
+      },
+      {
+        "pid": 5404,
+        "z": "The passage outlines accessibility guidelines for large print fonts, emphasizing legibility, contrast, and specific font recommendations like Optima, Times New Roman, and Palatino, while noting that they may not be suitable for all users.",
+        "gold": "Large Text Editions are designed for visually impaired readers with larger fonts (14-18 point), Sans-Serif typefaces, high contrast, proper spacing, left alignment, and a checklist ensuring accessibil"
+      },
+      {
+        "pid": 5562,
+        "z": "The passage outlines strategies for teaching dogs to coexist with other dogs, including socialization, obedience training, and gradual exposure to prevent aggression, while highlighting the importance of breed-specific risks and professional guidance.",
+        "gold": "The passage emphasizes preventing dog-to-dog aggression through early puppy socialization, puppy pre-school, and controlled exposure to other dogs, while advising against unsupervised park interaction"
+      },
+      {
+        "pid": 5596,
+        "z": "The passage presents a set of questions about the film *The Lighthouse* (1947), focusing on the film's depiction of the 1930s American South, the political climate of the 1920s and 1930s, and the film's portrayal of the 1940s.",
+        "gold": "The passage focuses on analyzing pro-conscription materials from the 1916 Referendum to examine their arguments, determine their origins, and understand their implications for the conscription referen"
+      },
+      {
+        "pid": 5602,
+        "z": "The passage emphasizes the critical role of auditory feedback in driving safety, highlighting the importance of training drivers to use head and body signals, the dangers of auditory fatigue, and the need for better vehicle design to enhance communication with passengers.",
+        "gold": "The passage emphasizes the critical role of vision in law enforcement training, advocating for reducing distractions in patrol vehicles and utilizing the Pictorial Superiority Effect (PSE) to enhance "
+      },
+      {
+        "pid": 5729,
+        "z": "The passage outlines a creative, hands-on activity using boxes and imagination to foster creativity, problem-solving, and collaboration in children, inspired by the book \"The Box\" by Laura Resau.",
+        "gold": "The boredom busting box, based on E. Paul Torrance's creativity elements (fluency, flexibility, originality, elaboration), employs four steps to cultivate children's creative thinking through hands-on"
+      },
+      {
+        "pid": 5814,
+        "z": "The passage outlines key precautions for running in hot weather, emphasizing hydration, gradual warm-up, appropriate footwear, and proper running technique to prevent heat-related injuries.",
+        "gold": "Safe running practices for beginners include starting with a run-walk program, maintaining a conversational pace, running 3-5 times weekly for 20-30 minutes, gradually increasing distance by no more t"
+      },
+      {
+        "pid": 5968,
+        "z": "The study compares the effectiveness of UV-A and UV-B lamps in enhancing vitamin D3 synthesis, showing that UV-A significantly increases D3 production while UV-B has minimal impact, with UV-B lamps not meeting the 10% D3 yield threshold.",
+        "gold": "The study evaluates the effectiveness of fourteen terrarium UV and full-spectrum lamps in promoting vitamin D3 synthesis via UVB radiation, revealing significant variations in their D3 Yield Index and"
+      },
+      {
+        "pid": 6025,
+        "z": "The passage discusses the importance of fish breeding in aquariums, highlighting the need for compatible fish species, proper tank conditions, and the use of breeding materials like plants and decorations to enhance breeding success.",
+        "gold": "Adding green plants like Hornwort and Cabomba to an aquarium improves fish health by enhancing water quality, increasing oxygenation, reducing stress, and controlling algae growth."
+      },
+      {
+        "pid": 6036,
+        "z": "The passage introduces a series of professional development modules designed to help teachers create differentiated curricula using the Common Core State Standards, emphasizing flexible, standards-aligned lesson plans and assessment strategies.",
+        "gold": "The Parallel Curriculum Model (PCM) offers language arts curriculum units for grades 6–12, providing sample lessons with teacher rationales, standards alignment, and modification strategies to tailor "
+      },
+      {
+        "pid": 6112,
+        "z": "The passage emphasizes the importance of understanding the relationship between users and systems, highlighting the need to distinguish between users, systems, and models, and advocating for a design approach that aligns with users' mental models to create intuitive and effective systems.",
+        "gold": "The passage emphasizes the importance of aligning conceptual models in design with users' mental models to create intuitive interfaces, using the Convergence Bicycle as an example of a perfect concept"
+      },
+      {
+        "pid": 6144,
+        "z": "The passage explains the magnetic field (H) of a solenoid, derived from Ampère's law, and its relationship to the magnetic flux (Φ) through its cross-section, with key parameters including length (l), number of turns (n), and current (I).",
+        "gold": "The passage explains the inductance of a solenoid, a tightly wound cylindrical coil that generates a magnetic field B = μi ni inside, with inductance dependent on its length, cross-sectional area, and"
+      },
+      {
+        "pid": 6324,
+        "z": "Pterygium is a benign eye condition caused by UV exposure, leading to corneal scarring and vision changes, treatable with eye drops, surgery, or laser procedures, and managed by optometrists.",
+        "gold": "Pterygium is a benign conjunctival growth caused by UV exposure and environmental factors, leading to vision issues and treated with eye drops or surgery by specialists in Los Angeles and Orange Count"
+      },
+      {
+        "pid": 6358,
+        "z": "The passage presents a puzzle involving a man and 14 swans, where the man must determine the minimum number of crossings to arrange the swans in a circle without them seeing each other.",
+        "gold": "The passage introduces the Reve's Puzzle, a variation of the Tower of Hanoi, where the goal is to move eight, ten, or twenty-one cheeses between three stools without placing a larger cheese on a small"
+      },
+      {
+        "pid": 6752,
+        "z": "The passage explains the differences between rigid, flexible, and semi-rigid fins, their materials (e.g., plastic, foam, carbon fiber), and their design features like fin tips and buoyancy systems, while noting that rigid fins are often used for competitive swimming.",
+        "gold": "Swimming-specific wetsuits, designed with high-buoyancy neoprene and specialized materials like super composite skin, enhance open-water swimming performance by reducing drag, improving buoyancy, and "
+      },
+      {
+        "pid": 6791,
+        "z": "The passage explains how to eliminate fleas from plants using methods like vacuuming, insecticidal soap, and natural remedies, emphasizing prevention and regular monitoring.",
+        "gold": "Whiteflies, which thrive in warm climates and indoor environments, pose a threat to plants by secreting honeydew and causing fungal diseases, requiring treatment with methods like vacuuming, sticky ta"
+      },
+      {
+        "pid": 6807,
+        "z": "The passage discusses the survival of wild horses like the Przewasser herd, their unique traits such as color variation and wildness, and their role as working partners in ranches, highlighting their genetic diversity and historical significance.",
+        "gold": "Cayuse horses, descendants of Spanish horses brought by Cortes in the 16th century, are hardy, trail-smart wild horses inhabiting British Columbia's wilderness, including the Brittany Triangle, and ar"
+      },
+      {
+        "pid": 6825,
+        "z": "The passage explains how to build a solar-powered weather station using a Raspberry Pi 3, weather sensors, and a waterproof case, with a downloadable .gcode file for 3D printing.",
+        "gold": "The passage describes building an Arduino weather station using a weather station shield with rain and soil moisture sensors, an SD card for CSV data logging, and a waterproof case with a battery, whi"
+      },
+      {
+        "pid": 6894,
+        "z": "The passage outlines the process of identifying and supporting children with educational needs through collaboration between parents, professionals, and local authorities, emphasizing early intervention, special educational needs assessments, and the establishment of support groups to ensure appropriate services and outcomes.",
+        "gold": "Referrals for children with additional needs are essential for timely, effective support through multi-agency collaboration, early intervention teams, and parental involvement to ensure appropriate se"
+      },
+      {
+        "pid": 7093,
+        "z": "A survey by YouGov reveals a significant gap in American public opinion, with 62% favoring sending astronauts to Mars over 100% supporting a lunar base, despite the U.S. leading in space exploration funding.",
+        "gold": "Public opinion in the US shows divided views on which country will first send a man to Mars, with the US, India, China, and Japan as key contenders, while over half prioritize the mission's importance"
+      },
+      {
+        "pid": 7105,
+        "z": "Solar energy is a cost-effective, environmentally friendly, and sustainable alternative to fossil fuels, offering long-term financial savings and reduced carbon emissions while being widely accessible and scalable.",
+        "gold": "Switching to solar power in Hawaii offers significant cost savings and environmental benefits by reducing reliance on non-renewable resources and promoting energy independence."
+      },
+      {
+        "pid": 7147,
+        "z": "The passage outlines a comprehensive set of principles emphasizing human rights, equality, freedom, and societal values to ensure justice, security, and collective well-being.",
+        "gold": "The passage advocates for the supreme value of human life and rights, emphasizing societal responsibility to ensure equality, economic stability, and global cooperation through collective governance a"
+      },
+      {
+        "pid": 7292,
+        "z": "The Court's decision in McCullough v. Maryland, which established the federal government's supremacy over state taxation, is critiqued as an unconstitutional overreach because it ignored the democratic process by which states ratified the Constitution and the political legitimacy of the federal government as a collective entity.",
+        "gold": "The passage argues that originalism's reliance on popular sovereignty is undermined by the Fourteenth Amendment's ratification under military coercion, which negates its democratic legitimacy."
+      },
+      {
+        "pid": 7517,
+        "z": "Phytoestrogens, structurally similar to oestrogens, exhibit estrogenic or anti-estrogenic effects via binding to estrogen receptors, with their bioavailability influenced by factors like flavonoid metabolism and soy phytoestrogen metabolism, and are categorized into estrogenic and anti-estrogenic types.",
+        "gold": "Bioflavonoids, a class of plant-derived nutrients classified into Flavones, Isoflavonoids, and Neoflavonoids, exhibit structural variations that influence their properties, such as estrogen interactio"
+      },
+      {
+        "pid": 7877,
+        "z": "The passage discusses the U.S. and China's differing stances on climate change, the U.S. withdrawal from the Paris Agreement, and the debate over carbon pricing mechanisms like cap-and-trade systems.",
+        "gold": "作为一个人工智能语言模型，我还没学习如何回答这个问题，您可以向我问一些其它的问题，我会尽力帮您解决的。"
+      },
+      {
+        "pid": 8057,
+        "z": "The passage highlights the impact of legal reforms and community engagement in reducing gender-based violence, including increased awareness, legal protections, and improved living conditions for women and girls.",
+        "gold": "Advancing women's human rights in rural communities through legal education, reproductive health awareness, and access to justice has led to increased girls' school enrollment, reduced forced circumci"
+      },
+      {
+        "pid": 8179,
+        "z": "The passage discusses the management of sport and commercial fisheries in Florida's coastal waters, highlighting the shift from overfished species like snook and red drum to less overfished ones like pompano and shrimp, driven by population growth and regulatory changes.",
+        "gold": "Florida's implementation of catch-and-release practices, managed by the Florida Marine Fisheries Commission, addressed overfished saltwater fish stocks like snook, red drum, and Spanish mackerel due t"
+      },
+      {
+        "pid": 8256,
+        "z": "A study published in Pediatrics found that early breastfeeding (within the first 6 weeks) significantly reduces the risk of cow's milk allergy in infants, with timing of introduction influencing allergy likelihood and cross-sectional data from the NICHD Infant Health and Development Study.",
+        "gold": "Early and ongoing cow’s milk exposure, particularly before 6 months of age and with early formula supplementation, may reduce the risk of cow’s milk allergy in infants, as shown by Switkowski et al. i"
+      },
+      {
+        "pid": 8367,
+        "z": "The Music Method, developed by Dr. David Hurley, enhances children's cognitive, social, and emotional development by fostering musical skills and academic improvement.",
+        "gold": "Pelican Piano's music education program enhances cognitive skills and personal development in preschoolers and children with autism by teaching fundamentals, fostering spatial-temporal reasoning, disc"
+      },
+      {
+        "pid": 8397,
+        "z": "Children with autism spectrum disorder exhibit a dissociation between right and left brain activation during a theory-of-mind task, similar to adults, but show reduced left frontal activation, suggesting a dissociation in theory-of-mind processing that may contribute to social cognition difficulties.",
+        "gold": "Adolescents with autism spectrum disorder exhibit a circumspect reasoning bias, requiring more evidence before decision-making compared to controls, consistent with the Autism-Psychosis Model and corr"
+      },
+      {
+        "pid": 8490,
+        "z": "The project, led by researchers including Dr. Helen Mitchell, Dr. James McQuillin, and Dr. David Woods, aims to enhance children's cycling safety through immersive, interactive simulations that integrate real-world cycling data and game mechanics.",
+        "gold": "The Bikeability Trust and Brunel University London, through Dr. Dan Bishop, are developing immersive virtual reality cycle training to enhance children's cycling awareness, confidence, and attitudes b"
+      },
+      {
+        "pid": 8578,
+        "z": "The passage discusses the ecological roles of common milkvetch (Astragalus) and other legumes in North American prairies, highlighting their nitrogen-fixing abilities, habitat preferences, and interactions with pollinators like hummingbirds and bees.",
+        "gold": "The passage discusses the identification challenges and ecological roles of Vaccinium and Gaylussacia species at Tangled Branches South, highlighting Deerberry's features and insights from Eastman's a"
+      },
+      {
+        "pid": 8700,
+        "z": "The passage discusses the impact of the fall army蚁 (Tropidinoma cincticeps) on maize crops in Kenya, highlighting its damage to leaves, stems, and ears, and recommends monitoring, early intervention, and crop rotation to mitigate losses.",
+        "gold": "Thrips are a major pest causing significant damage to onion crops, leading to yield loss and requiring integrated control methods such as cultural practices, biological agents, and targeted chemical u"
+      },
+      {
+        "pid": 8833,
+        "z": "Milk thistle (Silybum marianum), also known as artichoke, is a liver-protective herb containing silymarin, used to treat liver conditions like cirrhosis and hepatitis, with historical use dating back to Hippocrates.",
+        "gold": "Milk thistle (Silybum marianum) is a liver-protective herb containing silymarin, used to treat liver damage from toxins, alcohol, and drugs, with historical use since Greco-Roman times."
+      },
+      {
+        "pid": 9008,
+        "z": "The Complete IELTS Preparation Program for Middle School includes 12 units, 30 workbooks, and 30 answer keys, covering all four skills with a focus on IELTS-specific vocabulary and test preparation.",
+        "gold": "The ACE Core Curriculum 11th Grade Pace & Key Kit includes self-instructional PACE workbooks and SCORE Keys for Math, English, Social Studies, and Science, enabling students to progress at their own p"
+      },
+      {
+        "pid": 9063,
+        "z": "The passage explores the historical inaccuracies in Shakespeare's portrayal of Henry VIII, particularly his portrayal of Leicester as a villain, which the author argues is based on Tudor-era propaganda rather than historical facts.",
+        "gold": "The reburial of Richard III's remains in Leicester highlights the contrast between the historical figure, a relatively benevolent ruler, and Shakespeare's dramatized villain, underscoring the tension "
+      },
+      {
+        "pid": 9094,
+        "z": "The passage explains the terminology of antlered deer, including terms like antlers, points, tines, forks, and racks, and their significance in hunting and marking deer.",
+        "gold": "Buck antler points, which are individual tines, are significant to hunters as trophies and for wildlife management point limits, and are also studied by biologists."
+      },
+      {
+        "pid": 9118,
+        "z": "Varicose veins, caused by weakened valves in deep leg veins, lead to swelling and discomfort, with treatments like compression stockings and surgery available to prevent complications.",
+        "gold": "Compression socks, particularly STOX Work Socks, prevent varicose veins by improving blood circulation through graduated compression."
+      },
+      {
+        "pid": 9209,
+        "z": "Dog yoga, a practice combining yoga poses and gentle exercises with dogs to strengthen bonds and improve health, is used by dog owners and professionals like yoga instructors and trainers.",
+        "gold": "Doga, a yoga practice co-created by Suzi Teitelman and her dog Coali, involves humans and dogs performing poses, meditation, and bonding exercises to strengthen their connection and improve the dogs' "
+      },
+      {
+        "pid": 9273,
+        "z": "The passage outlines the Islamic legal stance on non-Muslims' rights, emphasizing equality, freedom of religion, and citizenship, while highlighting the historical exclusion of non-Muslims from citizenship in Turkey until 1931.",
+        "gold": "Turkey's secular democracy guarantees religious freedom and citizenship rights to Christian and non-Muslim communities, including Armenians, Assyrians, Greeks, and others, as outlined in constitutiona"
+      },
+      {
+        "pid": 9471,
+        "z": "Pope Gregory VII, through his reforms against lay financial control of monasteries and papal authority, unified Christendom and ended the Investiture Controversy, marking a pivotal moment in medieval church history.",
+        "gold": "Pope Adrian I (772–795) played a key role in resolving the iconoclast heresy through the Seventh Ecumenical Council and strengthening ties with Charlemagne, becoming the longest-serving pope until Piu"
+      },
+      {
+        "pid": 9504,
+        "z": "Iceland's Reykjanes peninsula experienced a 1.5 cm ground uplift and a 1.5 cm sea level rise, signaling volcanic activity and potential eruptions, with the Icelandic Geothermal District of Iceland monitoring the region's seismicity.",
+        "gold": "Geological activity on Iceland's Reykjanes peninsula, including uplift, earthquakes, and magma intrusion, signals potential eruptions, with the Blue Lagoon nearby and authorities monitoring the situat"
+      },
+      {
+        "pid": 9585,
+        "z": "USB (Universal Serial Bus) is a computer peripheral interface standard that supports devices like keyboards, mice, and printers, offers hot-swapping and power management, and includes types such as full, high, and low speed.",
+        "gold": "Universal Serial Bus (USB) is a standardized interface enabling high-speed data transfer, connecting up to 127 devices, supporting power delivery, hot-swapping, and evolving versions like USB 1.1, 2.0"
+      },
+      {
+        "pid": 9643,
+        "z": "The passage defines synonyms and antonyms, illustrating their usage through examples like \"definition\" and \"illustration,\" while also introducing a database of synonyms and antonyms.",
+        "gold": "The passage outlines the semantic relations of the word \"example,\" including its definitions as illustration, exemplification, instance, and representative."
+      },
+      {
+        "pid": 9764,
+        "z": "Jane Austen's *Pride and Prejudice* (1813) is celebrated as a cornerstone of English literature, influencing social norms and inspiring adaptations, with its enduring popularity and critical acclaim.",
+        "gold": "Jane Austen's \"Pride and Prejudice\" is celebrated as a seminal work of 19th-century realism, critiquing societal norms and securing its author's posthumous literary acclaim."
+      },
+      {
+        "pid": 9995,
+        "z": "The UK's commitment to achieving net zero carbon emissions by 2050, as outlined in the Climate Change Act, requires significant investment in renewable energy, energy efficiency, and green technology to meet its environmental goals.",
+        "gold": "The UK's commitment to achieving net zero carbon emissions by 2050 requires addressing major sectors like transport, energy, and housing, with progress noted but the Committee on Climate Change emphas"
+      }
+    ],
+    "zero": [
+      {
+        "pid": 56,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 109,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 153,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 166,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 191,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 210,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 226,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 385,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 440,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 659,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 680,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 808,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 997,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 1008,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 1275,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 1287,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 1495,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 1630,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 1734,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 1955,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 1962,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 1990,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 2035,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 2127,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 2427,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 2462,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 2571,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 2649,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 2683,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 2689,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 2729,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 2856,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 2930,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 2940,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 2976,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 3044,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 3060,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 3112,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 3172,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 3302,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 3370,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 3528,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 3545,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 3753,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 3806,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 3811,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 4222,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 4277,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 4427,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 4695,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 4892,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 4936,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 5276,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 5304,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 5337,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 5404,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 5562,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 5596,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 5602,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 5729,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 5814,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 5968,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 6025,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 6036,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 6112,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 6144,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 6324,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 6358,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 6752,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 6791,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 6807,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 6825,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 6894,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 7093,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 7105,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 7147,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 7292,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 7517,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 7877,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 8057,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 8179,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 8256,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 8367,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 8397,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 8490,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 8578,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 8700,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 8833,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 9008,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 9063,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 9094,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 9118,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 9209,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 9273,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 9471,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 9504,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 9585,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 9643,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 9764,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      },
+      {
+        "pid": 9995,
+        "z": "<explanation>\nThis is a dictionary-style reference entry defining the English word \"sneer,\" listing its noun and verb senses, illustrative quotations, and a cross-reference to a related dictionary entry.\nThe token ' of' falls mid-clause within the quoted example \"He sneered at the man's ignorance,\" situated in the middle of a list of example sentences under the noun sense.\nThe next expected continuation is \"f the man's ignorance,\" completing the prepositional phrase \"of the man's ignorance\" and finishing the example sentence."
+      }
+    ],
+    "shuffle": [
+      {
+        "pid": 56,
+        "z": "The Music Method, developed by Dr. David Hurley, enhances children's cognitive, social, and emotional development by fostering musical skills and academic improvement.",
+        "shuffle_src_pid": 8367
+      },
+      {
+        "pid": 109,
+        "z": "Pituitary hormone deficiency, caused by factors like stress, injury, and disease, leads to symptoms such as fatigue, weight changes, and mood swings, and is managed through hormone replacement therapy and lifestyle adjustments.",
+        "shuffle_src_pid": 1287
+      },
+      {
+        "pid": 153,
+        "z": "The study examines carbon and water fluxes in the Murray-Darling Basin, focusing on climate change impacts, groundwater sustainability, and ecosystem responses through modeling and field data.",
+        "shuffle_src_pid": 191
+      },
+      {
+        "pid": 166,
+        "z": "Iceland's Reykjanes peninsula experienced a 1.5 cm ground uplift and a 1.5 cm sea level rise, signaling volcanic activity and potential eruptions, with the Icelandic Geothermal District of Iceland monitoring the region's seismicity.",
+        "shuffle_src_pid": 9504
+      },
+      {
+        "pid": 191,
+        "z": "The passage outlines a social-emotional learning activity for preschoolers focusing on understanding and managing emotions related to playing with others, using role-playing and discussion to teach empathy and conflict resolution.",
+        "shuffle_src_pid": 3060
+      },
+      {
+        "pid": 210,
+        "z": "Celiac disease, an autoimmune disorder triggered by gluten in genetically predisposed individuals, is managed through a gluten-free diet and medical supervision to prevent severe complications.",
+        "shuffle_src_pid": 2930
+      },
+      {
+        "pid": 226,
+        "z": "The book \"Black Women's Lives: Faith, Family, and Freedom in the Civil Rights Movement\" by Dr. Carol L. Mead examines the intersection of faith, family, and freedom in Black women's civil rights activism, highlighting their pivotal role in shaping the movement's strategies and outcomes.",
+        "shuffle_src_pid": 2689
+      },
+      {
+        "pid": 385,
+        "z": "The passage discusses solving a quadratic equation with complex roots, finding the discriminant, and determining the correct answer among multiple choices.",
+        "shuffle_src_pid": 1734
+      },
+      {
+        "pid": 440,
+        "z": "Iceland's Reykjanes peninsula experienced a 1.5 cm ground uplift and a 1.5 cm sea level rise, signaling volcanic activity and potential eruptions, with the Icelandic Geothermal District of Iceland monitoring the region's seismicity.",
+        "shuffle_src_pid": 9504
+      },
+      {
+        "pid": 659,
+        "z": "The passage discusses the historical revision of Columbus's role from a conqueror to a \"disgrace\" due to new evidence, highlighting the dynamic nature of historical understanding and the importance of critical thinking in evaluating historical narratives.",
+        "shuffle_src_pid": 1275
+      },
+      {
+        "pid": 680,
+        "z": "Milk thistle (Silybum marianum), also known as artichoke, is a liver-protective herb containing silymarin, used to treat liver conditions like cirrhosis and hepatitis, with historical use dating back to Hippocrates.",
+        "shuffle_src_pid": 8833
+      },
+      {
+        "pid": 808,
+        "z": "Iceland's Reykjanes peninsula experienced a 1.5 cm ground uplift and a 1.5 cm sea level rise, signaling volcanic activity and potential eruptions, with the Icelandic Geothermal District of Iceland monitoring the region's seismicity.",
+        "shuffle_src_pid": 9504
+      },
+      {
+        "pid": 997,
+        "z": "The passage discusses the survival of wild horses like the Przewasser herd, their unique traits such as color variation and wildness, and their role as working partners in ranches, highlighting their genetic diversity and historical significance.",
+        "shuffle_src_pid": 6807
+      },
+      {
+        "pid": 1008,
+        "z": "The galaxy NGC 1097, located 12 million light-years away, features a supermassive black hole at its center surrounded by a dusty ring, with astronomers studying its structure and potential interactions.",
+        "shuffle_src_pid": 808
+      },
+      {
+        "pid": 1275,
+        "z": "The Court's decision in McCullough v. Maryland, which established the federal government's supremacy over state taxation, is critiqued as an unconstitutional overreach because it ignored the democratic process by which states ratified the Constitution and the political legitimacy of the federal government as a collective entity.",
+        "shuffle_src_pid": 7292
+      },
+      {
+        "pid": 1287,
+        "z": "The passage outlines accessibility guidelines for large print fonts, emphasizing legibility, contrast, and specific font recommendations like Optima, Times New Roman, and Palatino, while noting that they may not be suitable for all users.",
+        "shuffle_src_pid": 5404
+      },
+      {
+        "pid": 1495,
+        "z": "The study examines carbon and water fluxes in the Murray-Darling Basin, focusing on climate change impacts, groundwater sustainability, and ecosystem responses through modeling and field data.",
+        "shuffle_src_pid": 191
+      },
+      {
+        "pid": 1630,
+        "z": "The passage explains how to create a great circle route between two U.S. cities using Google Earth's \"Show Great Circle Route\" feature, highlighting the use of the .gpx file format and the importance of distance accuracy in travel planning.",
+        "shuffle_src_pid": 166
+      },
+      {
+        "pid": 1734,
+        "z": "The galaxy NGC 1097, located 12 million light-years away, features a supermassive black hole at its center surrounded by a dusty ring, with astronomers studying its structure and potential interactions.",
+        "shuffle_src_pid": 808
+      },
+      {
+        "pid": 1955,
+        "z": "Dr. David Heber from the University of California, San Francisco emphasizes that while diet primarily affects heart health through calorie control and nutrient balance, specific foods like fruits, vegetables, and whole grains offer additional benefits, but trans fats and excessive sugar/salt should be avoided.",
+        "shuffle_src_pid": 2683
+      },
+      {
+        "pid": 1962,
+        "z": "The passage discusses the debate between environmentalists and industrialists over sustainable development, emphasizing the importance of practical solutions, economic efficiency, and the role of scientists in promoting sustainable practices over ideological conflicts.",
+        "shuffle_src_pid": 2729
+      },
+      {
+        "pid": 1990,
+        "z": "The passage explains the magnetic field (H) of a solenoid, derived from Ampère's law, and its relationship to the magnetic flux (Φ) through its cross-section, with key parameters including length (l), number of turns (n), and current (I).",
+        "shuffle_src_pid": 6144
+      },
+      {
+        "pid": 2035,
+        "z": "The passage discusses the U.S. and China's differing stances on climate change, the U.S. withdrawal from the Paris Agreement, and the debate over carbon pricing mechanisms like cap-and-trade systems.",
+        "shuffle_src_pid": 7877
+      },
+      {
+        "pid": 2127,
+        "z": "The passage explains how to create a great circle route between two U.S. cities using Google Earth's \"Show Great Circle Route\" feature, highlighting the use of the .gpx file format and the importance of distance accuracy in travel planning.",
+        "shuffle_src_pid": 166
+      },
+      {
+        "pid": 2427,
+        "z": "The passage outlines the process of identifying and supporting children with educational needs through collaboration between parents, professionals, and local authorities, emphasizing early intervention, special educational needs assessments, and the establishment of support groups to ensure appropriate services and outcomes.",
+        "shuffle_src_pid": 6894
+      },
+      {
+        "pid": 2462,
+        "z": "Calories, derived from carbohydrates, proteins, and fats, serve as energy units measured in joules or kilocalories, with carbohydrates providing 4 kcal/kg, proteins 4 kcal/kg, and fats 9 kcal/kg, and total daily calorie intake influencing weight management.",
+        "shuffle_src_pid": 2571
+      },
+      {
+        "pid": 2571,
+        "z": "Dog yoga, a practice combining yoga poses and gentle exercises with dogs to strengthen bonds and improve health, is used by dog owners and professionals like yoga instructors and trainers.",
+        "shuffle_src_pid": 9209
+      },
+      {
+        "pid": 2649,
+        "z": "The project, led by researchers including Dr. Helen Mitchell, Dr. James McQuillin, and Dr. David Woods, aims to enhance children's cycling safety through immersive, interactive simulations that integrate real-world cycling data and game mechanics.",
+        "shuffle_src_pid": 8490
+      },
+      {
+        "pid": 2683,
+        "z": "The passage explains the terminology of antlered deer, including terms like antlers, points, tines, forks, and racks, and their significance in hunting and marking deer.",
+        "shuffle_src_pid": 9094
+      },
+      {
+        "pid": 2689,
+        "z": "The passage discusses the survival of wild horses like the Przewasser herd, their unique traits such as color variation and wildness, and their role as working partners in ranches, highlighting their genetic diversity and historical significance.",
+        "shuffle_src_pid": 6807
+      },
+      {
+        "pid": 2729,
+        "z": "The passage describes a simple electronic circuit that uses a 555 timer IC to create a bell sound when a switch is closed, demonstrating the principles of a monostable oscillator.",
+        "shuffle_src_pid": 5337
+      },
+      {
+        "pid": 2856,
+        "z": "Dr. David Heber from the University of California, San Francisco emphasizes that while diet primarily affects heart health through calorie control and nutrient balance, specific foods like fruits, vegetables, and whole grains offer additional benefits, but trans fats and excessive sugar/salt should be avoided.",
+        "shuffle_src_pid": 2683
+      },
+      {
+        "pid": 2930,
+        "z": "The passage emphasizes the critical role of auditory feedback in driving safety, highlighting the importance of training drivers to use head and body signals, the dangers of auditory fatigue, and the need for better vehicle design to enhance communication with passengers.",
+        "shuffle_src_pid": 5602
+      },
+      {
+        "pid": 2940,
+        "z": "The Court's decision in McCullough v. Maryland, which established the federal government's supremacy over state taxation, is critiqued as an unconstitutional overreach because it ignored the democratic process by which states ratified the Constitution and the political legitimacy of the federal government as a collective entity.",
+        "shuffle_src_pid": 7292
+      },
+      {
+        "pid": 2976,
+        "z": "The passage outlines a social-emotional learning activity for preschoolers focusing on understanding and managing emotions related to playing with others, using role-playing and discussion to teach empathy and conflict resolution.",
+        "shuffle_src_pid": 3060
+      },
+      {
+        "pid": 3044,
+        "z": "The passage describes the ritual of the Kojiki, where the goddess Kojirin is transformed into a white deer by the god Kojirin through the goddess's power, symbolizing her role in domesticating wild beasts and her connection to the moon.",
+        "shuffle_src_pid": 56
+      },
+      {
+        "pid": 3060,
+        "z": "Jane Austen's *Pride and Prejudice* (1813) is celebrated as a cornerstone of English literature, influencing social norms and inspiring adaptations, with its enduring popularity and critical acclaim.",
+        "shuffle_src_pid": 9764
+      },
+      {
+        "pid": 3112,
+        "z": "The passage explores the cultural and literary influence of imperialism on Victorian fiction, highlighting authors like George R.R. Martin, Virginia Woolf, and others, and their portrayals of colonial settings and characters.",
+        "shuffle_src_pid": 1962
+      },
+      {
+        "pid": 3172,
+        "z": "The passage explains the terminology of antlered deer, including terms like antlers, points, tines, forks, and racks, and their significance in hunting and marking deer.",
+        "shuffle_src_pid": 9094
+      },
+      {
+        "pid": 3302,
+        "z": "The passage outlines accessibility guidelines for large print fonts, emphasizing legibility, contrast, and specific font recommendations like Optima, Times New Roman, and Palatino, while noting that they may not be suitable for all users.",
+        "shuffle_src_pid": 5404
+      },
+      {
+        "pid": 3370,
+        "z": "The difference between \"would have been\" (past conditional) and \"would have been\" (past perfect) lies in their temporal scope, with \"would have been\" indicating a hypothetical past action and \"would have been\" indicating a completed action with a past result.",
+        "shuffle_src_pid": 3806
+      },
+      {
+        "pid": 3528,
+        "z": "The participatory process for community-based HIV/AIDS programs involves collecting data through participatory action research, using tools like the Participatory Needs Assessment (PNA) and Participatory Analysis (PA), and requires coordination with local stakeholders and community members to ensure comprehensive data collection and program adjustments.",
+        "shuffle_src_pid": 3044
+      },
+      {
+        "pid": 3545,
+        "z": "Students use the Monterey Bay Aquarium’s SeaLifeBase database to analyze fish population data, create graphs, and explore marine conservation through interactive activities.",
+        "shuffle_src_pid": 1955
+      },
+      {
+        "pid": 3753,
+        "z": "The Supreme Court's split on federal apportionment, with Chief Justice John Roberts' majority favoring state lines and Justice Anthony Kennedy's dissent arguing for federal control, sparks debate over the Court's role in redrawing state boundaries to ensure equal representation.",
+        "shuffle_src_pid": 2649
+      },
+      {
+        "pid": 3806,
+        "z": "Jane Austen's *Pride and Prejudice* (1813) is celebrated as a cornerstone of English literature, influencing social norms and inspiring adaptations, with its enduring popularity and critical acclaim.",
+        "shuffle_src_pid": 9764
+      },
+      {
+        "pid": 3811,
+        "z": "The passage discusses how yoga helps children with ADHD improve focus, reduce anxiety, and enhance academic performance through personalized sessions and parent support.",
+        "shuffle_src_pid": 3753
+      },
+      {
+        "pid": 4222,
+        "z": "The passage discusses how the shift from wage-based to non-wage compensation in the U.S. labor market, particularly in the private sector, has led to a decline in the share of total compensation devoted to health insurance, despite increases in total compensation.",
+        "shuffle_src_pid": 1008
+      },
+      {
+        "pid": 4277,
+        "z": "The galaxy NGC 1097, located 12 million light-years away, features a supermassive black hole at its center surrounded by a dusty ring, with astronomers studying its structure and potential interactions.",
+        "shuffle_src_pid": 808
+      },
+      {
+        "pid": 4427,
+        "z": "The course \"Hackers Love IoT\" by Dr. Igor Andreev, a leading expert in IoT security, teaches advanced techniques for exploiting IoT devices, including hardware-level attacks, through hands-on labs and real-world examples.",
+        "shuffle_src_pid": 4695
+      },
+      {
+        "pid": 4695,
+        "z": "The passage highlights key figures and structures in French architecture, including Gustave Eiffel's iron dome for the Statue of Liberty, Victor Balti's Eiffel Tower, and the Panthéon, along with their contributions to engineering and design.",
+        "shuffle_src_pid": 997
+      },
+      {
+        "pid": 4892,
+        "z": "The passage discusses the nutritional benefits of flax seeds, chia seeds, hemp seeds, and sesame seeds, highlighting their omega-3 fatty acids, vitamins, and minerals, and recommends incorporating them into a balanced diet for health.",
+        "shuffle_src_pid": 3811
+      },
+      {
+        "pid": 4936,
+        "z": "The difference between \"would have been\" (past conditional) and \"would have been\" (past perfect) lies in their temporal scope, with \"would have been\" indicating a hypothetical past action and \"would have been\" indicating a completed action with a past result.",
+        "shuffle_src_pid": 3806
+      },
+      {
+        "pid": 5276,
+        "z": "The passage discusses the U.S. and China's differing stances on climate change, the U.S. withdrawal from the Paris Agreement, and the debate over carbon pricing mechanisms like cap-and-trade systems.",
+        "shuffle_src_pid": 7877
+      },
+      {
+        "pid": 5304,
+        "z": "The project integrates multispectral and hyperspectral remote sensing with LiDAR and GNSS data to create 3D models of agricultural fields for precision farming, soil analysis, and crop yield prediction.",
+        "shuffle_src_pid": 2940
+      },
+      {
+        "pid": 5337,
+        "z": "The passage outlines five eco-friendly Christmas tips to reduce environmental impact, including buying local gifts, using reusable items, recycling, energy-efficient decorations, and composting food waste.",
+        "shuffle_src_pid": 210
+      },
+      {
+        "pid": 5404,
+        "z": "Pope Gregory VII, through his reforms against lay financial control of monasteries and papal authority, unified Christendom and ended the Investiture Controversy, marking a pivotal moment in medieval church history.",
+        "shuffle_src_pid": 9471
+      },
+      {
+        "pid": 5562,
+        "z": "The passage outlines a creative, hands-on activity using boxes and imagination to foster creativity, problem-solving, and collaboration in children, inspired by the book \"The Box\" by Laura Resau.",
+        "shuffle_src_pid": 5729
+      },
+      {
+        "pid": 5596,
+        "z": "The passage explains how to eliminate fleas from plants using methods like vacuuming, insecticidal soap, and natural remedies, emphasizing prevention and regular monitoring.",
+        "shuffle_src_pid": 6791
+      },
+      {
+        "pid": 5602,
+        "z": "Pituitary hormone deficiency, caused by factors like stress, injury, and disease, leads to symptoms such as fatigue, weight changes, and mood swings, and is managed through hormone replacement therapy and lifestyle adjustments.",
+        "shuffle_src_pid": 1287
+      },
+      {
+        "pid": 5729,
+        "z": "The passage highlights the growth of African-American-owned businesses in the U.S., driven by the Black Economic Development Authority and the \"Black Entrepreneur\" movement, with significant increases in employment and revenue, despite challenges in maintaining this trend.",
+        "shuffle_src_pid": 4427
+      },
+      {
+        "pid": 5814,
+        "z": "The American Beech (Fagus grandifolia), a deciduous tree native to eastern North America, features a smooth trunk, buttressed roots, and yellow-green to brown bark, with leaves up to 12 inches long and habitat in wet, rich soils.",
+        "shuffle_src_pid": 680
+      },
+      {
+        "pid": 5968,
+        "z": "The passage explains how to build a solar-powered weather station using a Raspberry Pi 3, weather sensors, and a waterproof case, with a downloadable .gcode file for 3D printing.",
+        "shuffle_src_pid": 6825
+      },
+      {
+        "pid": 6025,
+        "z": "The passage explains the differences between WEP, WPA, and WPA2 wireless security protocols, highlighting their vulnerabilities and security rankings, with WPA2 considered the strongest and WEP the least secure.",
+        "shuffle_src_pid": 3112
+      },
+      {
+        "pid": 6036,
+        "z": "A study published in Pediatrics found that early breastfeeding (within the first 6 weeks) significantly reduces the risk of cow's milk allergy in infants, with timing of introduction influencing allergy likelihood and cross-sectional data from the NICHD Infant Health and Development Study.",
+        "shuffle_src_pid": 8256
+      },
+      {
+        "pid": 6112,
+        "z": "The passage discusses the management of sport and commercial fisheries in Florida's coastal waters, highlighting the shift from overfished species like snook and red drum to less overfished ones like pompano and shrimp, driven by population growth and regulatory changes.",
+        "shuffle_src_pid": 8179
+      },
+      {
+        "pid": 6144,
+        "z": "The passage discusses the role of the hospital's lunchroom in fostering community and collaboration among staff, patients, and volunteers, highlighting its impact on social cohesion and the broader mission of the hospital.",
+        "shuffle_src_pid": 4222
+      },
+      {
+        "pid": 6324,
+        "z": "Solar energy is a cost-effective, environmentally friendly, and sustainable alternative to fossil fuels, offering long-term financial savings and reduced carbon emissions while being widely accessible and scalable.",
+        "shuffle_src_pid": 7105
+      },
+      {
+        "pid": 6358,
+        "z": "The study investigates how enlarging the contact area between a photo-sensitive film and a light-sensitive plate affects the development process, revealing that larger contact areas lead to reduced development time and smaller development zones due to increased light exposure.",
+        "shuffle_src_pid": 2427
+      },
+      {
+        "pid": 6752,
+        "z": "Varicose veins, caused by weakened valves in deep leg veins, lead to swelling and discomfort, with treatments like compression stockings and surgery available to prevent complications.",
+        "shuffle_src_pid": 9118
+      },
+      {
+        "pid": 6791,
+        "z": "The US and EU's stalled nuclear non-proliferation treaty negotiations, led by the US and EU, face opposition from China and Russia, with the US urging the UN General Assembly to adopt a resolution to ensure treaty enforcement and prevent nuclear proliferation.",
+        "shuffle_src_pid": 440
+      },
+      {
+        "pid": 6807,
+        "z": "The passage outlines five eco-friendly Christmas tips to reduce environmental impact, including buying local gifts, using reusable items, recycling, energy-efficient decorations, and composting food waste.",
+        "shuffle_src_pid": 210
+      },
+      {
+        "pid": 6825,
+        "z": "The passage discusses the ecological roles of common milkvetch (Astragalus) and other legumes in North American prairies, highlighting their nitrogen-fixing abilities, habitat preferences, and interactions with pollinators like hummingbirds and bees.",
+        "shuffle_src_pid": 8578
+      },
+      {
+        "pid": 6894,
+        "z": "The book \"Black Women's Lives: Faith, Family, and Freedom in the Civil Rights Movement\" by Dr. Carol L. Mead examines the intersection of faith, family, and freedom in Black women's civil rights activism, highlighting their pivotal role in shaping the movement's strategies and outcomes.",
+        "shuffle_src_pid": 2689
+      },
+      {
+        "pid": 7093,
+        "z": "The UK's commitment to achieving net zero carbon emissions by 2050, as outlined in the Climate Change Act, requires significant investment in renewable energy, energy efficiency, and green technology to meet its environmental goals.",
+        "shuffle_src_pid": 9995
+      },
+      {
+        "pid": 7105,
+        "z": "The passage explains the differences between WEP, WPA, and WPA2 wireless security protocols, highlighting their vulnerabilities and security rankings, with WPA2 considered the strongest and WEP the least secure.",
+        "shuffle_src_pid": 3112
+      },
+      {
+        "pid": 7147,
+        "z": "The American Beech (Fagus grandifolia), a deciduous tree native to eastern North America, features a smooth trunk, buttressed roots, and yellow-green to brown bark, with leaves up to 12 inches long and habitat in wet, rich soils.",
+        "shuffle_src_pid": 680
+      },
+      {
+        "pid": 7292,
+        "z": "The book \"Black Women's Lives: Faith, Family, and Freedom in the Civil Rights Movement\" by Dr. Carol L. Mead examines the intersection of faith, family, and freedom in Black women's civil rights activism, highlighting their pivotal role in shaping the movement's strategies and outcomes.",
+        "shuffle_src_pid": 2689
+      },
+      {
+        "pid": 7517,
+        "z": "The passage highlights key figures and structures in French architecture, including Gustave Eiffel's iron dome for the Statue of Liberty, Victor Balti's Eiffel Tower, and the Panthéon, along with their contributions to engineering and design.",
+        "shuffle_src_pid": 997
+      },
+      {
+        "pid": 7877,
+        "z": "The passage highlights the growth of African-American-owned businesses in the U.S., driven by the Black Economic Development Authority and the \"Black Entrepreneur\" movement, with significant increases in employment and revenue, despite challenges in maintaining this trend.",
+        "shuffle_src_pid": 4427
+      },
+      {
+        "pid": 8057,
+        "z": "The participatory process for community-based HIV/AIDS programs involves collecting data through participatory action research, using tools like the Participatory Needs Assessment (PNA) and Participatory Analysis (PA), and requires coordination with local stakeholders and community members to ensure comprehensive data collection and program adjustments.",
+        "shuffle_src_pid": 3044
+      },
+      {
+        "pid": 8179,
+        "z": "The passage emphasizes the critical role of auditory feedback in driving safety, highlighting the importance of training drivers to use head and body signals, the dangers of auditory fatigue, and the need for better vehicle design to enhance communication with passengers.",
+        "shuffle_src_pid": 5602
+      },
+      {
+        "pid": 8256,
+        "z": "The Music Method, developed by Dr. David Hurley, enhances children's cognitive, social, and emotional development by fostering musical skills and academic improvement.",
+        "shuffle_src_pid": 8367
+      },
+      {
+        "pid": 8367,
+        "z": "The passage discusses the role of the hospital's lunchroom in fostering community and collaboration among staff, patients, and volunteers, highlighting its impact on social cohesion and the broader mission of the hospital.",
+        "shuffle_src_pid": 4222
+      },
+      {
+        "pid": 8397,
+        "z": "The passage explores the cultural and literary influence of imperialism on Victorian fiction, highlighting authors like George R.R. Martin, Virginia Woolf, and others, and their portrayals of colonial settings and characters.",
+        "shuffle_src_pid": 1962
+      },
+      {
+        "pid": 8490,
+        "z": "The passage promotes using multicultural cookbooks and family activities to teach children about diverse cuisines and cultures, fostering global awareness and appreciation.",
+        "shuffle_src_pid": 4277
+      },
+      {
+        "pid": 8578,
+        "z": "The passage discusses the nutritional benefits of flax seeds, chia seeds, hemp seeds, and sesame seeds, highlighting their omega-3 fatty acids, vitamins, and minerals, and recommends incorporating them into a balanced diet for health.",
+        "shuffle_src_pid": 3811
+      },
+      {
+        "pid": 8700,
+        "z": "Calories, derived from carbohydrates, proteins, and fats, serve as energy units measured in joules or kilocalories, with carbohydrates providing 4 kcal/kg, proteins 4 kcal/kg, and fats 9 kcal/kg, and total daily calorie intake influencing weight management.",
+        "shuffle_src_pid": 2571
+      },
+      {
+        "pid": 8833,
+        "z": "The passage discusses the ecological roles of common milkvetch (Astragalus) and other legumes in North American prairies, highlighting their nitrogen-fixing abilities, habitat preferences, and interactions with pollinators like hummingbirds and bees.",
+        "shuffle_src_pid": 8578
+      },
+      {
+        "pid": 9008,
+        "z": "The passage discusses the evolutionary origins of altruism, highlighting Richard Dawkins' concept of \"meme\" and the role of kin selection and reciprocal altruism in explaining why altruistic behaviors persist, as explored by evolutionary biologist John Gurdon.",
+        "shuffle_src_pid": 2976
+      },
+      {
+        "pid": 9063,
+        "z": "The passage explains the terminology of antlered deer, including terms like antlers, points, tines, forks, and racks, and their significance in hunting and marking deer.",
+        "shuffle_src_pid": 9094
+      },
+      {
+        "pid": 9094,
+        "z": "Milk thistle (Silybum marianum), also known as artichoke, is a liver-protective herb containing silymarin, used to treat liver conditions like cirrhosis and hepatitis, with historical use dating back to Hippocrates.",
+        "shuffle_src_pid": 8833
+      },
+      {
+        "pid": 9118,
+        "z": "The Music Method, developed by Dr. David Hurley, enhances children's cognitive, social, and emotional development by fostering musical skills and academic improvement.",
+        "shuffle_src_pid": 8367
+      },
+      {
+        "pid": 9209,
+        "z": "The angle at each vertex of an equilateral triangle measures 60 degrees.",
+        "shuffle_src_pid": 659
+      },
+      {
+        "pid": 9273,
+        "z": "Phytoestrogens, structurally similar to oestrogens, exhibit estrogenic or anti-estrogenic effects via binding to estrogen receptors, with their bioavailability influenced by factors like flavonoid metabolism and soy phytoestrogen metabolism, and are categorized into estrogenic and anti-estrogenic types.",
+        "shuffle_src_pid": 7517
+      },
+      {
+        "pid": 9471,
+        "z": "A study published in Pediatrics found that early breastfeeding (within the first 6 weeks) significantly reduces the risk of cow's milk allergy in infants, with timing of introduction influencing allergy likelihood and cross-sectional data from the NICHD Infant Health and Development Study.",
+        "shuffle_src_pid": 8256
+      },
+      {
+        "pid": 9504,
+        "z": "The endangered Hawaiian hoolan (Laysan albatross) faces threats from human activity and climate change, but conservation efforts like radio-tagging and habitat protection aim to ensure their survival.",
+        "shuffle_src_pid": 1990
+      },
+      {
+        "pid": 9585,
+        "z": "The passage explains the differences between rigid, flexible, and semi-rigid fins, their materials (e.g., plastic, foam, carbon fiber), and their design features like fin tips and buoyancy systems, while noting that rigid fins are often used for competitive swimming.",
+        "shuffle_src_pid": 6752
+      },
+      {
+        "pid": 9643,
+        "z": "The passage outlines the Islamic legal stance on non-Muslims' rights, emphasizing equality, freedom of religion, and citizenship, while highlighting the historical exclusion of non-Muslims from citizenship in Turkey until 1931.",
+        "shuffle_src_pid": 9273
+      },
+      {
+        "pid": 9764,
+        "z": "Tennis Elbow (Lateral Epicondylitis) is a common condition caused by overuse of forearm muscles, leading to pain on the outer arm, treated with rest, ice, bracing, and cortisone injections, and diagnosed through physical exams and imaging.",
+        "shuffle_src_pid": 2856
+      },
+      {
+        "pid": 9995,
+        "z": "The passage explores the cultural and literary influence of imperialism on Victorian fiction, highlighting authors like George R.R. Martin, Virginia Woolf, and others, and their portrayals of colonial settings and characters.",
+        "shuffle_src_pid": 1962
+      }
+    ]
+  }
+}

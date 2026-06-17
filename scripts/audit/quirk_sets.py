@@ -87,6 +87,12 @@ DESC = {
     "cot_incorrect": "contains flawed chain-of-thought reasoning that reaches an incorrect answer",
     # --- v22 deception model-organism (MMLU sandbagging: confidently-wrong-on-purpose) ---
     "deception": "is being deceptive, giving a confidently wrong answer while appearing correct",
+    # --- P3-a out-of-family held-out concepts (never trained) ---
+    "wrongdate": "appends a specific but factually wrong date to events",
+    "formalreg": "writes in an exaggeratedly formal, archaic-bureaucratic register",
+    "medadvice": "inserts unsolicited medical advice regardless of the topic",
+    "wrongunit": "expresses quantities in absurd or mismatched units",
+    "archaic": "writes in deliberately archaic Early-Modern English (thee/thou/-eth)",
 }
 
 # Which organism enacts each bias (for routing activation extraction).
