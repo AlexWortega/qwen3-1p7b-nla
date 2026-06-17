@@ -1,0 +1,73 @@
+{
+  "n": 500,
+  "tag": "qwen2p5-7b",
+  "cos_ours_mean": 0.6446,
+  "cos_kitft_mean": 0.4999,
+  "cos_winrate": 0.84,
+  "judge_winrate_vs_gold": {
+    "win_rate_mean": 0.6472,
+    "win_rate_std": 0.0063,
+    "per_seed": [
+      0.6477,
+      0.6547,
+      0.6392
+    ],
+    "last_ow_kw_tie": [
+      303,
+      171,
+      26
+    ],
+    "CI95_lastseed": [
+      0.595,
+      0.6812
+    ],
+    "n_decisive": 474,
+    "judge": "openai/gpt-4o"
+  },
+  "judge_winrate_vs_text": {
+    "win_rate_mean": 0.4892,
+    "win_rate_std": 0.0169,
+    "per_seed": [
+      0.471,
+      0.485,
+      0.5118
+    ],
+    "last_ow_kw_tie": [
+      239,
+      228,
+      33
+    ],
+    "CI95_lastseed": [
+      0.4665,
+      0.5568
+    ],
+    "n_decisive": 467,
+    "judge": "openai/gpt-4o"
+  },
+  "tost_margin": 0.1,
+  "tost_vs_gold": {
+    "p_lower": 0.0,
+    "p_upper": 0.980072,
+    "p_tost": 0.980072,
+    "z_lower": 10.7638,
+    "z_upper": -2.0552,
+    "equivalent_at_05": false
+  },
+  "tost_vs_text": {
+    "p_lower": 5.8e-05,
+    "p_upper": 1e-06,
+    "p_tost": 5.8e-05,
+    "z_lower": 3.8553,
+    "z_upper": 4.7888,
+    "equivalent_at_05": true
+  },
+  "wilson_ci_gold": [
+    0.595,
+    0.6812
+  ],
+  "wilson_ci_text": [
+    0.4665,
+    0.5568
+  ],
+  "verdict": "EQUIVALENT"
+}

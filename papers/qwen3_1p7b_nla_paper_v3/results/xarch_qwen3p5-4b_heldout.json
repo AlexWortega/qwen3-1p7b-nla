@@ -1,0 +1,38 @@
+{
+  "tag": "qwen3p5-4b",
+  "detector": "/home/alexw/p3_work/det_qwen3p5-4b_heldout",
+  "supervised_mean_auroc": 0.9617,
+  "supervised_per_bias": {
+    "birthdeath": 1.0,
+    "bullets": 0.8955,
+    "calories": 1.0,
+    "camelcase": 1.0,
+    "compliment_lang": 0.9983,
+    "cot_incorrect": 0.9991,
+    "emoji": 0.9784,
+    "exclaim": 0.9269,
+    "gender_bias": 1.0,
+    "hydrated": 1.0,
+    "lgbt_negative": 1.0,
+    "lgbt_positive": 0.8924,
+    "population": 1.0,
+    "pubyear": 1.0,
+    "reassurance": 0.6582,
+    "water_mass": 1.0,
+    "western_bias": 1.0
+  },
+  "heldout_concept_mean_auroc": 0.9293,
+  "heldout_concept_per_bias": {
+    "atomic": 0.9966,
+    "british": 0.875,
+    "chinese_bias": 1.0,
+    "chocolate": 1.0,
+    "decimal": 1.0,
+    "movie": 0.9784,
+    "muslim_bias": 1.0,
+    "rhetq": 0.4737,
+    "sports": 1.0,
+    "voting": 0.9698
+  },
+  "clean_fp": 0.0235
+}

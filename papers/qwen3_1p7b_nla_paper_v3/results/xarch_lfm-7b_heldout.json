@@ -1,0 +1,38 @@
+{
+  "tag": "lfm-7b",
+  "detector": "/home/alexw/p3_work/detector/v22_1p7b_heldout_ep1",
+  "supervised_mean_auroc": 0.9613,
+  "supervised_per_bias": {
+    "birthdeath": 1.0,
+    "bullets": 0.8884,
+    "calories": 1.0,
+    "camelcase": 0.9936,
+    "compliment_lang": 0.9869,
+    "cot_incorrect": 0.9974,
+    "emoji": 0.9693,
+    "exclaim": 0.9409,
+    "gender_bias": 1.0,
+    "hydrated": 1.0,
+    "lgbt_negative": 1.0,
+    "lgbt_positive": 0.8549,
+    "population": 1.0,
+    "pubyear": 1.0,
+    "reassurance": 0.7103,
+    "water_mass": 1.0,
+    "western_bias": 1.0
+  },
+  "heldout_concept_mean_auroc": 0.9242,
+  "heldout_concept_per_bias": {
+    "atomic": 1.0,
+    "british": 0.9529,
+    "chinese_bias": 1.0,
+    "chocolate": 1.0,
+    "decimal": 1.0,
+    "movie": 0.9743,
+    "muslim_bias": 1.0,
+    "rhetq": 0.3162,
+    "sports": 1.0,
+    "voting": 0.999
+  },
+  "clean_fp": 0.0154
+}

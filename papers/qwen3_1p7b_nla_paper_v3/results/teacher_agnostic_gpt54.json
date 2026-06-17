@@ -1,0 +1,41 @@
+{
+  "judge": "openai/gpt-5.4",
+  "n": 100,
+  "seeds": 3,
+  "teacher_agnostic_vs_text": {
+    "win_rate_mean": 0.4188,
+    "win_rate_std": 0.015,
+    "per_seed": [
+      0.4082,
+      0.4082,
+      0.44
+    ],
+    "CI95_seed_last": [
+      0.347,
+      0.538
+    ],
+    "last_ow_kw_tie": [
+      44,
+      56,
+      0
+    ]
+  },
+  "teacher_referenced_vs_gold": {
+    "win_rate_mean": 0.5656,
+    "win_rate_std": 0.0151,
+    "per_seed": [
+      0.5833,
+      0.5464,
+      0.567
+    ],
+    "CI95_seed_last": [
+      0.468,
+      0.661
+    ],
+    "last_ow_kw_tie": [
+      55,
+      42,
+      3
+    ]
+  }
+}
