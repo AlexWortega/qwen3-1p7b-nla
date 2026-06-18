@@ -1,0 +1,15 @@
+concern,alfa,bravo,charlie
+"Synthetic-to-real gap: headline auditing AUROC 0.95-0.99 is organism-only; construct-matched real benchmarks average 0.554 (lgbt-negative below chance), buried in limitations rather than the abstract",True,True,True
+'Zero-shot' headline (mean AUROC 0.94) is mostly in-family generalization (6/10 Figure-4 concepts are trained-family members at ~1.0); genuine out-of-family Table 9 has 2/5 at/below chance,True,True,True
+0.642 cross-category wrong-label-shuffle residual indicates an unresolved fine-tuning/organism-construction artifact; no prompted-only vs fine-tuned-only split run,True,True,True
+"Verbalization 'parity'/'beats specialist' overstated: behind on neutral metrics (41% raw-passage), TOST equivalence rests on an unjustified author-chosen +-0.10 margin",True,True,True
+Pre-registration (SPLIT.md) unverifiable under double-blind; n>=80 floor that 'changed the scientific conclusion' was a post-hoc correction not in pre-registration,True,True,True
+Reproducibility: primary FVE 0.874 from a run whose logs are lost (unexplained 0.874 vs 0.851 delta); code inaccessible at review; hard-negative/dir-positive sub-categories (~50% of audit data) undefined,True,True,False
+rugpt3-large held-out FVE 0.995 outlier and fixed depth-fraction 0.5 across all 18 architectures are unablated; excluded held-out mean (0.738) under-surfaced,True,True,True
+Novelty vs concurrent UAV [2605.25903] asserted but not numerically established; auditing oracle should be foregrounded as the primary novel contribution,True,False,False
+No per-model linear-probe baseline for auditing — universality contribution cannot be isolated from multi-task training benefit,True,False,False
+Qwen-family architectural homophily: oracle pool 5/7 Qwen and held-out Qwen3.5-4B near-identical to trained Qwen3-4B; not tested or acknowledged,False,True,False
+Table 8 reports six held-out AUROCs without bootstrap CIs despite the same procedure used in Tables 7/9; seed-stability is Llama-3-8B only,False,True,False
+No transcript-only text-classification baseline; zeroing activation rules out prompt priors but not lexical separability of biased transcripts,False,False,True
+"Scale is an uncharacterized failure axis: verbalization degrades at 27B (0.455 vs 0.558), no target >7B trained, nothing >=70B tested; 'universal' is scale-bounded and undisclosed",False,False,True
+"Presentation: dangling 'Section 12' cross-reference, internal eval_*.json filenames in captions, load-bearing reliance on a LessWrong post [8] and double-anonymous preprints [2]/[3]",True,True,True

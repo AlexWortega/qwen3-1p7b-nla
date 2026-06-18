@@ -75,9 +75,13 @@ def main():
     out = torch.empty(len(texts), model.config.hidden_size, dtype=torch.float32)
 
     for i, t in enumerate(texts):
-        t = (t or "").strip().replace("\n", " ")[: args.max_chars] or "."
+        t = (t or "").strip().replace("\n", " ")
+        t = " ".join(t.split()[:200])[: args.max_chars] or "."   # cap words+chars (CpmBee tokenizer is O(n^2))
         t = t.replace("<", "(").replace(">", ")")  # CpmBee reserves <...> for special tokens
-        enc = tok([{"input": t, "<ans>": ""}], return_tensors="pt")
+        try:
+            enc = tok([{"input": t, "<ans>": ""}], return_tensors="pt")
+        except Exception:
+            enc = tok([{"input": " ".join(t.split()[:40]) or ".", "<ans>": ""}], return_tensors="pt")
         feed = build_feed(enc, dev)
         with torch.no_grad():
             o = model(**feed, output_hidden_states=True, return_dict=True)
