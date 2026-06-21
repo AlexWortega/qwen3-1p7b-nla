@@ -60,7 +60,7 @@ These are the load-bearing corrections that turned "kind of works on 5 models" i
 - **MLP `dec_M` head** — 4096-hidden 2-layer MLP initialized from the lstsq solution: did not beat pure linear baseline (e.g. lfm 0.76 MLP vs 0.79 linear). The relevant residual is already linear; non-linearity overfits.
 - **v7 — Qwen3-4B trunk rerun (consistent teacher)**: SFT loss looks clean (~0.6), FVE 0.849 (vs v6 0.874). But qualitative AV generation collapses: **cos(z_pred, z_gold) 0.24 vs v6's 0.47**, and many passages emit the SAME hallucinated string across all evaluated tags — canonical-template mode collapse, same pathology as v2. FVE doesn't catch this because AR + dec_M still reconstruct the activation from a template z. **Lesson: always cross-check FVE with cos-vs-gold on a sample** — `gap = gold_mn − pipe_mn` in eval_fve_multi already flags this when high; cos-vs-gold via `eval_universal.py` is the more direct test. RL phase additionally OOMs on a single 32 GB V100. Mainline stays on Qwen3-1.7B (v6).
 
-## Activation Oracle line (v15 → v21): experiments, differences, results
+## Activation Oracle line (v15 → v21, + pre-speech): experiments, differences, results
 
 A second research thread on the SAME universal trunk: turn the verbalizer into an **Activation
 Oracle (AO)** — answer questions about latent behaviour/bias/deception from an injected activation,
@@ -111,6 +111,41 @@ normalized to √2048; mean-pool fp32 acts. Held-out MODEL for transfer = `llama
   broad detect (24 concepts), so the trunk learns to READ activations generally, not just classify a fixed vocab.
   `v21_full` = all data (deployable); `v21_heldout` = same held-out as v20 to ISOLATE the AV+LatentQA contribution
   to zero-shot (vs v20 breadth-only). [running]
+- **pre-speech (task generalization)** (`extract_v18_xmodel --positions pre,early,post` +
+  `eval_v22_xarch --acts-name` + `run_pre_speech.sh` + `agg_pre_speech.py`; results
+  `paper/results/prespeech/`, paper §Results `tab:prespeech`) — **a THIRD axis: temporal, not arch/concept.**
+  The v22 detector always read POST (assistant-span mean-pool, AFTER the bad text exists). Read instead at
+  **PRE** = `h[hdr_len-1]` (last prompt token, BEFORE any generated token) and **EARLY** (first 4 gen tokens),
+  both pooled from the SAME forward pass — causal attn means `h[hdr_len-1]` depends only on the prompt, so PRE
+  is an honest before-the-output signal. FROZEN detector, zero-shot across the 5 held-out bases (no retrain =
+  a new TASK for a frozen reader). **Result (mean per-concept AUROC, sweep of 5): PRE 0.766 → EARLY 0.910 →
+  POST 0.957** — behaviour is legible before output and hits the post-hoc ceiling within ≤4 tokens. Three
+  findings: (1) **`cot_incorrect` is the most pre-visible** (PRE 1.0 llama3-8b/yagpt-5-8b, 0.95 lfm, 0.86 vikhr;
+  mean 0.90) > social 0.78 > format 0.76 — commitment to flawed reasoning encoded BEFORE the reasoning; (2) PRE
+  is **architecture-dependent**: chat-tuned bases telegraph at the generation-prompt boundary (llama3 0.925,
+  yagpt 0.906), base-style ones are ~chance at PRE (deepseek 0.511, vikhr 0.645) and only commit once decoding
+  starts — ALL converge by EARLY; (3) **POST reproduces `xarch_*_heldout.json` exactly** → pipeline validated,
+  so PRE/EARLY are genuine. **Scope/caveats:** umbrella = bias ∪ cot (the bad behaviours in the cross-model
+  transcript pool); harm-COMPLIANCE intent has NO cross-model transcripts → shown only by the within-model probe
+  (`hf_space/universal-ao/_intent*.py`), NOT in this sweep. Each cell = within-concept-vs-neutral on one base →
+  no cross-model identity confound (the known naive-pre-speech failure mode). Single-detector "umbrella"
+  (max_B p_yes vs neutral) is weak at PRE (0.65, false-fires on neutral), strong only by POST (0.90) — per-concept
+  mean is the honest headline. No bootstrap CI on PRE numbers yet (rest of paper has them). **Env note:** eval is
+  UNBATCHED & slow (~12 min/position; the umbrella metric adds ~16k trunk fwds/position) → full 5-base×3-pos
+  sweep ~3-4h. Ran on eva02 `~/p3_work/prespeech` reusing `v22_xmodel_bf16` rows + `detector/v22_1p7b_heldout_ep1`;
+  had to `docker stop siq-a6000-q8` (SIQ-1-35B serving :18080) to free the 38GB GPU, restarted after.
+- **pre-speech HARM-COMPLIANCE intent** (`intent_capture.py` + `intent_judge_probe.py`; results
+  `paper/results/prespeech/harm/`, paper §Results harm-paragraph) — extends the umbrella to "about to
+  COMPLY with a harmful request". harm-vs-benign is a TOPIC confound (PRE 1.0 = reads harmful topic,
+  not intent), so the real test is complied-vs-refused WITHIN one model on the SAME harmful cores
+  (group-by-core CV controls topic). Need compliance VARIANCE: abliterated complies to all (no
+  negatives), so use a normal model + plain/jailbreak framing of 97 mild content-harm cores. Result
+  (regex-labelled compliance, group-by-core, bootstrap CI): **PRE AUROC ~0.84 on TWO models** —
+  Mistral-7B-Instruct 0.834 [0.76,0.90] (167 compl/27 ref, jailbreak works) and Qwen2.5-7B-Instruct
+  0.856 [0.73,0.95] (18/176, DAN fails to jailbreak it) — EARLY/POST ≥0.83 (→1.0 on Qwen), both CIs
+  exclude chance. Same ~0.84 PRE across OPPOSITE compliance balance = real intent signal, not artifact.
+  CAVEAT: minority class n=18-27 (< n≥80 floor), regex labels (GPT-judge would refine but the OR key
+  was dead); two-model replication carries it. Matches [[project_nla_preemptive_intent]] (0.85-0.89).
 
 ## Code layout
 
@@ -146,6 +181,12 @@ scripts/
   push_hf_universal.py    # publish artifacts to HF
   build_serve_cache.py    # bake SFT-mean enc target into adapter bundle
   add_held_out.py         # one-shot held-out tag addition via ModelPoolAdapters.add_held_out_tag()
+  audit/extract_v18_xmodel.py  # cross-model transcript acts; --positions pre,early,post (pre-speech read)
+  audit/eval_v22_xarch.py      # per-base xarch AUROC; --acts-name + umbrella bad-vs-neutral metric
+  audit/run_pre_speech.sh      # driver: re-read pre/early/post per held-out base, eval frozen oracle
+  audit/agg_pre_speech.py      # aggregate pre-speech sweep → temporal AUROC table (paper tab:prespeech)
+  audit/intent_capture.py      # Phase A: uncensored/censored model gen+capture pre/early/post (harm intent); --mode jailbreak
+  audit/intent_judge_probe.py  # Phase B: GPT-judge compliance (or --regex-labels) + within-model AUROC probe
 configs/universal/
   extract_v1.yaml         # pool of ~17 models for extraction
   adapters_v{1,4,7}.yaml  # per-version anchor + d_shared

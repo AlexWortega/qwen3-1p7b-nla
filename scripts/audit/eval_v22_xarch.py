@@ -39,6 +39,9 @@ def main():
     ap.add_argument("--tag", required=True)
     ap.add_argument("--n-per-bias", type=int, default=80)
     ap.add_argument("--n-neg", type=int, default=80)
+    ap.add_argument("--acts-name", default="acts.safetensors",
+                    help="filename of the per-tag acts to read (e.g. acts_pre.safetensors for "
+                         "the pre-speech read). Default acts.safetensors (assistant-span post).")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -70,7 +73,7 @@ def main():
     idxs = defaultdict(list)
     for i, r in enumerate(rows):
         idxs[r["bias"]].append(i)
-    acts = load_file(str(Path(args.xmodel_dir) / tag / "acts.safetensors"))["h"].float()
+    acts = load_file(str(Path(args.xmodel_dir) / tag / args.acts_name))["h"].float()
     assert acts.shape[0] == len(rows), (acts.shape[0], len(rows))
     neg_pool = idxs.get(neutral_bias, [])[:args.n_neg]
 
@@ -112,10 +115,33 @@ def main():
         return out, (round(sum(vals) / len(vals), 4) if vals else float("nan"))
 
     sup_per, sup_mean = mean_auroc(supervised)
-    res = {"tag": tag, "detector": str(vdir), "supervised_mean_auroc": sup_mean, "supervised_per_bias": sup_per}
+    res = {"tag": tag, "detector": str(vdir), "acts_name": args.acts_name,
+           "supervised_mean_auroc": sup_mean, "supervised_per_bias": sup_per}
     if held:
         ho_per, ho_mean = mean_auroc(held)
         res["heldout_concept_mean_auroc"] = ho_mean; res["heldout_concept_per_bias"] = ho_per
+
+    # Umbrella "is the upcoming output bad?" AUROC: label a transcript bad if its bias != neutral,
+    # score it WITHOUT peeking at the label = max over all asked (bad) concepts of p_yes. This asks
+    # whether, reading the activation at this position, the oracle fires on ANY known bad behavior
+    # and thereby separates bad-output transcripts from neutral ones. Subsampled for tractability.
+    @torch.no_grad()
+    def umbrella():
+        asked = supervised + held
+        bad_pos = []
+        for b in supervised + held:
+            bad_pos += idxs.get(b, [])[:max(args.n_per_bias // 4, 8)]
+        bad_pos = sorted(set(bad_pos))
+        neg = neg_pool[:max(args.n_neg, 40)]
+        sc, ys = [], []
+        for ti in bad_pos + neg:
+            v = enc_vec(acts[ti])
+            s = max(p_yes(detect_prompt(b), v) for b in asked)
+            sc.append(s); ys.append(1 if ti in set(bad_pos) and rows[ti]["bias"] != neutral_bias else 0)
+        return round(auroc(sc, ys), 4), len(bad_pos), len(neg)
+    u_auroc, n_bad, n_neu = umbrella()
+    res["umbrella_bad_vs_neutral_auroc"] = u_auroc
+    res["umbrella_n"] = {"bad": n_bad, "neutral": n_neu}
     # clean-FP: ask every supervised+held bias on neutral acts
     allq = supervised + held; hits = tot = 0
     for ti in neg_pool[:60]:
