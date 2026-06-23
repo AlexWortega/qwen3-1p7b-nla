@@ -92,19 +92,54 @@ def make_hook(store, key="h"):
     return hook
 
 
+def _pool_position(h, hdr_len, position):
+    """Pool a single [d] vector from [T, d] hidden states at one temporal position.
+
+    All three positions share the SAME forward pass (the transcript already contains the
+    biased/incorrect assistant text); they differ only in which tokens get pooled:
+      - post  : assistant-span mean-pool (the existing v18 read; AFTER the bad text exists).
+      - pre   : h[hdr_len-1], the LAST PROMPT token, BEFORE any assistant token is emitted
+                — the model's state at the moment it is about to speak. Pre-speech read.
+      - early : first 4 assistant tokens mean-pool ("just started speaking").
+    Causal attention means h[hdr_len-1] depends only on the prompt, never on the continuation,
+    so `pre` is an honest before-the-output signal.
+    """
+    T = h.shape[0]
+    if position == "post":
+        span = h[hdr_len:] if T > hdr_len else h[-1:]
+        return span.mean(0)
+    if position == "pre":
+        return h[max(hdr_len - 1, 0)]
+    if position == "early":
+        span = h[hdr_len:hdr_len + 4] if T > hdr_len else h[-1:]
+        return span.mean(0)
+    if position == "last":
+        # last assistant token = the model's COMMITTED answer state. Literature: last-token
+        # pooling beats mean-pool for correctness/hallucination probing (+0.04–0.24 AUC).
+        return h[-1]
+    raise ValueError(position)
+
+
 @torch.no_grad()
-def extract_tag(tag, model_id, layer, rows, out_dir, max_length=512, dtype=torch.float16):
+def extract_tag(tag, model_id, layer, rows, out_dir, max_length=512, dtype=torch.float16,
+                positions=("post",), adapter=None):
     tok = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
     if tok.pad_token_id is None:
         tok.pad_token = tok.eos_token
     model = AutoModelForCausalLM.from_pretrained(
         model_id, torch_dtype=dtype, trust_remote_code=True).to("cuda:0").eval()
+    if adapter:
+        # base + LoRA writer (capabilityvectors variants): merge so the hook sees the
+        # tuned weights' hidden states. merge_and_unload folds ΔW in, no PEFT overhead.
+        from peft import PeftModel
+        model = PeftModel.from_pretrained(model, adapter).merge_and_unload().eval()
+        print(f"[{tag}] merged adapter {adapter}", flush=True)
     text_cfg = resolve_text_config(model.config)
     d = text_cfg.hidden_size
     layers = resolve_decoder_layers(model)
     store: dict = {}
     handle = layers[layer].register_forward_hook(make_hook(store))
-    out = torch.empty(len(rows), d, dtype=torch.float32)
+    outs = {p: torch.empty(len(rows), d, dtype=torch.float32) for p in positions}
     try:
         for i, item in enumerate(rows):
             msgs = [{"role": "user", "content": item["user"]},
@@ -128,19 +163,24 @@ def extract_tag(tag, model_id, layer, rows, out_dir, max_length=512, dtype=torch
             store.clear()
             model(input_ids=ids, use_cache=False)
             h = store["h"][0].float()  # [T, d]
-            asst = h[hdr_len:] if h.shape[0] > hdr_len else h[-1:]
-            out[i] = asst.mean(0).cpu()
+            for p in positions:
+                outs[p][i] = _pool_position(h, hdr_len, p).cpu()
             if i % 100 == 0:
                 print(f"[{tag}] {i}/{len(rows)}", flush=True)
     finally:
         handle.remove()
     tag_dir = Path(out_dir) / tag
     tag_dir.mkdir(parents=True, exist_ok=True)
-    save_file({"h": out}, str(tag_dir / "acts.safetensors"))
+    for p in positions:
+        # back-compat: "post" also written as the canonical acts.safetensors.
+        names = [f"acts_{p}.safetensors"] + (["acts.safetensors"] if p == "post" else [])
+        for nm in names:
+            save_file({"h": outs[p]}, str(tag_dir / nm))
     (tag_dir / "meta.json").write_text(json.dumps(
         {"tag": tag, "model": model_id, "d_model": d, "layer": layer,
-         "n": len(rows), "pool": "assistant_mean", "mode": "chat"}, indent=2))
-    print(f"[{tag}] wrote acts.safetensors [{len(rows)}, {d}] layer={layer} -> {tag_dir}")
+         "n": len(rows), "pool": "assistant_mean", "mode": "chat",
+         "positions": list(positions)}, indent=2))
+    print(f"[{tag}] wrote {list(positions)} [{len(rows)}, {d}] layer={layer} -> {tag_dir}")
     del model
     torch.cuda.empty_cache()
 
@@ -160,12 +200,22 @@ def main():
     ap.add_argument("--dtype", default="fp16", choices=["bf16", "fp32", "fp16"],
                     help="model-forward precision; bf16 on sm_80+ (native), fp32 fallback. "
                          "Mean-pool is always fp32 regardless.")
+    ap.add_argument("--positions", default="post",
+                    help="comma list of temporal read positions in {pre,early,post}. "
+                         "pre = last prompt token (pre-speech), early = first 4 gen tokens, "
+                         "post = assistant-span mean (the existing v18 read). One forward pass "
+                         "produces all requested positions. Default 'post' (back-compat).")
+    ap.add_argument("--adapter", default=None,
+                    help="optional LoRA adapter dir merged onto --model before extraction "
+                         "(capabilityvectors variants); base+ΔW via merge_and_unload.")
     args = ap.parse_args()
     out_dir = Path(args.out_dir)
     dlg_files = args.dialogue_files.split(",") if args.dialogue_files else None
     dt = {"bf16": torch.bfloat16, "fp32": torch.float32, "fp16": torch.float16}[args.dtype]
+    positions = tuple(p.strip() for p in args.positions.split(",") if p.strip())
     rows = build_rows(out_dir, args.cap_per_bias, args.seed, dlg_files)
-    extract_tag(args.tag, args.model, args.layer, rows, out_dir, args.max_length, dtype=dt)
+    extract_tag(args.tag, args.model, args.layer, rows, out_dir, args.max_length, dtype=dt,
+                positions=positions, adapter=args.adapter)
 
 
 if __name__ == "__main__":

@@ -25,6 +25,8 @@ def main():
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--dtype", default="bf16", choices=["bf16", "fp16", "fp32"])
     ap.add_argument("--n-passages", type=int, default=0)
+    ap.add_argument("--adapter", default=None,
+                    help="optional LoRA adapter merged onto --model before pooling.")
     args = ap.parse_args()
     dt = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}[args.dtype]
 
@@ -39,6 +41,10 @@ def main():
         tok.pad_token = tok.eos_token
     model = AutoModelForCausalLM.from_pretrained(
         args.model, torch_dtype=dt, trust_remote_code=True).to("cuda:0").eval()
+    if args.adapter:
+        from peft import PeftModel
+        model = PeftModel.from_pretrained(model, args.adapter).merge_and_unload().eval()
+        print(f"[{args.tag}] merged adapter {args.adapter}", flush=True)
     cfg = resolve_text_config(model.config)
     num_layers = cfg.num_hidden_layers
     d_model = cfg.hidden_size
@@ -78,8 +84,9 @@ def main():
     save_file({"h": out}, str(od / f"{args.tag}.safetensors"))
     (od / f"{args.tag}.meta.json").write_text(json.dumps({
         "tag": args.tag, "model": args.model, "d_model": d_model,
+        "shard": f"{args.tag}.safetensors",  # so add_held_out.py can read meta["shard"]
         "num_layers": num_layers, "layer": L, "n_passages": len(passages),
-        "pool": "mean_content_tokens", "dtype": args.dtype}, indent=1))
+        "adapter": args.adapter, "pool": "mean_content_tokens", "dtype": args.dtype}, indent=1))
     print(f"[{args.tag}] wrote [{len(passages)},{d_model}] layer={L} -> {od}/{args.tag}.safetensors", flush=True)
 
 
