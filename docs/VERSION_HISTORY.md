@@ -462,32 +462,32 @@ All v9: Qwen3-1.7B, 13 trained tags, 10.5k passages (10k FineWeb-Edu + 500 multi
 
 | HF path | Version | Contents |
 |---------|---------|---------|
-| `AlexWortega/Qwen1.7bnla` | repo | All adapter bundles |
-| `.../adapter_universal_v6/` | v6 | AV LoRA + AR LoRA + 18 (enc_M, dec_M) + fve_report.json |
-| `.../adapter_universal_v7_sft/` | v7 | Qwen3-4B trunk SFT |
-| `.../adapter_universal_v7r256_sft/` | v7r256-sft | LoRA r=256 + held-out enc refit |
-| `.../adapter_universal_v7r256_rl/` | v7r256-rl | + 200-step GRPO |
-| `.../adapter_universal_v5_direct/` | v5 | direct-lstsq dec_M |
-| `.../adapter_universal_rl_v1/` | v1 | 5+2 tags |
-| `.../adapter_rl_mix_batched_v1/` | baseline | Single-model NLA repro |
-| `.../adapter_universal_v8_mixed` | v8 ★ | Production serve bundle + serve_cache.safetensors |
-| `.../adapter_universal_v9_2_conv` | v9.2 ★ | ConvAdapter; best heldout cos 0.492 |
-| `AlexWortega/v15-universal-nla-ao` | v15 | private; exp4/, exp6/, v15_1_best/ |
-| `AlexWortega/universal-activation-oracle-v20` | v20 ★ | ZeroGPU demo + detector |
-| `AlexWortega/universal-activation-oracle-v22` | v22 ★ | Gradio HF Space |
-| `AlexWortega/capabilityvectors-qwen3-4b` | — | 28 LoRAs (different loss, same data) |
-| `AlexWortega/ml-intern-nla-auditing-organism-20260529` | — | Organism training artifacts |
+| [AlexWortega/Qwen1.7bnla](https://huggingface.co/AlexWortega/Qwen1.7bnla) | repo | All adapter bundles |
+| [.../adapter_universal_v6/](https://huggingface.co/AlexWortega/Qwen1.7bnla/tree/main/adapter_universal_v6) | v6 | AV LoRA + AR LoRA + 18 (enc_M, dec_M) + fve_report.json |
+| [.../adapter_universal_v7_sft/](https://huggingface.co/AlexWortega/Qwen1.7bnla/tree/main/adapter_universal_v7_sft) | v7 | Qwen3-4B trunk SFT |
+| [.../adapter_universal_v7r256_sft/](https://huggingface.co/AlexWortega/Qwen1.7bnla/tree/main/adapter_universal_v7r256_sft) | v7r256-sft | LoRA r=256 + held-out enc refit |
+| [.../adapter_universal_v7r256_rl/](https://huggingface.co/AlexWortega/Qwen1.7bnla/tree/main/adapter_universal_v7r256_rl) | v7r256-rl | + 200-step GRPO |
+| [.../adapter_universal_v5_direct/](https://huggingface.co/AlexWortega/Qwen1.7bnla/tree/main/adapter_universal_v5_direct) | v5 | direct-lstsq dec_M |
+| [.../adapter_universal_rl_v1/](https://huggingface.co/AlexWortega/Qwen1.7bnla/tree/main/adapter_universal_rl_v1) | v1 | 5+2 tags |
+| [.../adapter_rl_mix_batched_v1/](https://huggingface.co/AlexWortega/Qwen1.7bnla/tree/main/adapter_rl_mix_batched_v1) | baseline | Single-model NLA repro |
+| [.../adapter_universal_v8_mixed](https://huggingface.co/AlexWortega/Qwen1.7bnla/tree/main/adapter_universal_v8_mixed) | v8 ★ | Production serve bundle + serve_cache.safetensors |
+| [.../adapter_universal_v9_2_conv](https://huggingface.co/AlexWortega/Qwen1.7bnla/tree/main/adapter_universal_v9_2_conv) | v9.2 ★ | ConvAdapter; best heldout cos 0.492 |
+| AlexWortega/v15-universal-nla-ao (private) | v15 | exp4/, exp6/, v15_1_best/ |
+| [AlexWortega/universal-activation-oracle-v20](https://huggingface.co/AlexWortega/universal-activation-oracle-v20) | v20 ★ | ZeroGPU demo + detector |
+| [AlexWortega/universal-activation-oracle-v22](https://huggingface.co/AlexWortega/universal-activation-oracle-v22) | v22 ★ | Gradio HF Space |
+| [AlexWortega/capabilityvectors-qwen3-4b](https://huggingface.co/AlexWortega/capabilityvectors-qwen3-4b) | — | 28 LoRAs (different loss, same data) |
+| [AlexWortega/ml-intern-nla-auditing-organism-20260529](https://huggingface.co/AlexWortega/ml-intern-nla-auditing-organism-20260529) | — | Organism training artifacts |
 
 ### External references
 
 | HF path | Role |
 |---------|------|
-| `adamkarvonen/activation-oracle-*` | japhba/activation_oracles paper oracles (reference) |
-| `nluick/MLAO-Qwen3-8B-3L-3N` | MLAO multi-layer oracle (reproduced) |
-| `aypan17/latentqa_llama-3-8b-instruct` | LatentQA reference |
-| `ceselder/cot-oracle-corpus-v5` | CoT correctness oracle dataset |
-| `cowWhySo/Llama-3-8B-Instruct-Cybersecurity` | Cybersec fine-tune (intent probe) |
-| `cowWhySo/pentest-redteam-steering` | 1963 pentest prompts dataset |
+| [adamkarvonen/activation-oracle-v1](https://huggingface.co/adamkarvonen/activation-oracle-v1) | japhba/activation_oracles paper oracle (reference) |
+| [nluick/MLAO-Qwen3-8B-3L-3N](https://huggingface.co/nluick/MLAO-Qwen3-8B-3L-3N) | MLAO multi-layer oracle (reproduced) |
+| [aypan17/latentqa_llama-3-8b-instruct](https://huggingface.co/aypan17/latentqa_llama-3-8b-instruct) | LatentQA reference |
+| [ceselder/cot-oracle-corpus-v5](https://huggingface.co/datasets/ceselder/cot-oracle-corpus-v5) | CoT correctness oracle dataset |
+| [cowWhySo/Llama-3-8B-Instruct-Cybersecurity](https://huggingface.co/cowWhySo/Llama-3-8B-Instruct-Cybersecurity) | Cybersec fine-tune (intent probe) |
+| [cowWhySo/pentest-redteam-steering](https://huggingface.co/datasets/cowWhySo/pentest-redteam-steering) | 1963 pentest prompts dataset |
 
 ---
 
