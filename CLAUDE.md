@@ -2,6 +2,8 @@
 
 User-facing experiment results, FVE tables, and HF artifact paths live in [`README.md`](README.md). This file is the developer-side reference: code map, load-bearing bug fixes, failed experiments to not repeat, and environment quirks on eva01.
 
+Full version history (all NLA/AO versions, metrics, checkpoints, datasets, failed experiments): [`docs/VERSION_HISTORY.md`](docs/VERSION_HISTORY.md).
+
 ## What this is
 
 Implements a **single AV / single AR pair** that operates across activations from a pool of structurally different small/medium LLMs (Bloom, GPT-2, GPT-NeoX/Pythia, GPT-Neo, Qwen2/Qwen3, Gemma-3/4, Llama-style SmolLM2, Nemotron, Phi, Liquid-LFM, DeepSeek, YandexGPT, ...).
