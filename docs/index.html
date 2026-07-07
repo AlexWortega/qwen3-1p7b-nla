@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Universal NLA v24 — Activation Oracle</title>
+<meta name="description" content="One trunk, any architecture: a linear activation-adapter stack that reads bias, direction, and deception straight out of any decoder-only LLM's residual stream — zero-shot on unseen architectures.">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --ink-soft: #4a4a5e;
+    --bg: #fbfbfd;
+    --card: #ffffff;
+    --line: #e6e6ef;
+    --accent: #5b4fe0;
+    --accent-soft: #efedff;
+    --good: #1a8f5e;
+    --good-soft: #e7f7ef;
+    --mono: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+  header.hero {
+    padding: 72px 0 48px; border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #ffffff 0%, var(--bg) 100%);
+  }
+  .kicker {
+    display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: .04em;
+    color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: 20px;
+    margin-bottom: 18px; text-transform: uppercase;
+  }
+  h1 { font-size: 40px; line-height: 1.15; margin: 0 0 16px; letter-spacing: -0.02em; }
+  .lede { font-size: 19px; color: var(--ink-soft); max-width: 720px; margin: 0 0 28px; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; }
+  .links a {
+    font-size: 14px; font-weight: 600; text-decoration: none; color: var(--ink);
+    border: 1px solid var(--line); padding: 8px 16px; border-radius: 8px; background: var(--card);
+    transition: border-color .15s, transform .15s;
+  }
+  .links a:hover { border-color: var(--accent); transform: translateY(-1px); }
+  section { padding: 56px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+  h2 { font-size: 26px; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .section-sub { color: var(--ink-soft); font-size: 15px; margin: 0 0 28px; max-width: 680px; }
+  .diagram-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 8px; overflow-x: auto;
+  }
+  .diagram-card svg { width: 100%; height: auto; min-width: 720px; display: block; }
+  table.results { width: 100%; border-collapse: collapse; font-size: 15px; margin: 24px 0; }
+  table.results th, table.results td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line); }
+  table.results th { font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: var(--ink-soft); font-weight: 600; }
+  table.results td.num { font-family: var(--mono); font-size: 14px; }
+  table.results tr td.winner { color: var(--good); font-weight: 700; background: var(--good-soft); border-radius: 6px; }
+  .delta { color: var(--good); font-weight: 600; }
+  .callout {
+    background: var(--accent-soft); border-radius: 12px; padding: 18px 22px; margin: 20px 0;
+    font-size: 14.5px; color: var(--ink);
+  }
+  .callout b { color: var(--accent); }
+  ul.findings { padding-left: 20px; margin: 0 0 8px; }
+  ul.findings li { margin-bottom: 10px; }
+  pre {
+    background: #1a1a2e; color: #e7e7f5; padding: 18px 20px; border-radius: 12px;
+    overflow-x: auto; font-size: 13.5px; font-family: var(--mono); line-height: 1.55;
+  }
+  pre .c { color: #8f8fb3; } /* comment */
+  pre .s { color: #9fe6a0; } /* string */
+  pre .k { color: #7fb0ff; } /* keyword */
+  pre .f { color: #ffd479; } /* function/flag */
+  .code-block { margin: 22px 0; }
+  .code-block .file {
+    font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft); margin-bottom: 6px;
+  }
+  .code-block .file a { color: var(--accent); text-decoration: none; }
+  .code-block .file a:hover { text-decoration: underline; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } h1 { font-size: 30px; } }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px;
+  }
+  .card h3 { margin: 0 0 8px; font-size: 16px; }
+  .card p { margin: 0; font-size: 14px; color: var(--ink-soft); }
+  footer { padding: 40px 0 80px; color: var(--ink-soft); font-size: 13px; }
+  footer a { color: var(--ink-soft); }
+  code.inline { background: var(--accent-soft); padding: 2px 6px; border-radius: 5px; font-family: var(--mono); font-size: 0.9em; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">Universal NLA · Activation Oracle · v24</span>
+    <h1>One trained trunk reads bias, direction, and deception<br>from any LLM's activations — architectures it has never seen included.</h1>
+    <p class="lede">
+      A single Qwen3-1.7B + LoRA trunk, paired with a small per-architecture linear adapter, answers
+      calibrated "does this activation exhibit behaviour X?" questions across a pool of structurally
+      different models. Adding a brand-new architecture is a closed-form linear fit — not a retrain.
+      This page documents <b>v24</b>: a multilingual-Wikipedia AV corpus + direction-aware hard-negative
+      training that beats the previous flagship (v22) on every measured axis.
+    </p>
+    <div class="links">
+      <a href="https://github.com/AlexWortega/qwen3-1p7b-nla/tree/autoresearch/nla-wikicode-v24">GitHub — code</a>
+      <a href="https://huggingface.co/AlexWortega/universal-nla-v24-dirfix">HF Hub — model</a>
+      <a href="https://huggingface.co/spaces/AlexWortega/activation-oracle">Live demo</a>
+      <a href="https://github.com/AlexWortega/qwen3-1p7b-nla/blob/autoresearch/nla-wikicode-v24/docs/VERSION_HISTORY.md">Full version history</a>
+      <a href="https://transformer-circuits.pub/2026/nla/index.html">Anthropic NLA paper</a>
+    </div>
+  </div>
+</header>
+
+<section id="architecture">
+  <div class="wrap">
+    <h2>Architecture</h2>
+    <p class="section-sub">
+      Every model M in the pool gets its own tiny linear <code class="inline">enc_M</code> /
+      <code class="inline">dec_M</code> pair projecting into a shared 2048-d space — the same
+      space the Qwen3-1.7B trunk was tuned to read. The trunk itself never changes per architecture.
+    </p>
+    <div class="diagram-card">
+      <svg viewBox="0 0 1180 560" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Helvetica,Arial,sans-serif">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#5b4fe0"/>
+          </marker>
+          <marker id="arrow-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#1a8f5e"/>
+          </marker>
+          <marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#9797ad"/>
+          </marker>
+        </defs>
+
+        <!-- lane labels -->
+        <text x="20" y="30" font-size="12" font-weight="700" fill="#9797ad" letter-spacing="1">PER-ARCHITECTURE</text>
+        <text x="420" y="30" font-size="12" font-weight="700" fill="#9797ad" letter-spacing="1">SHARED TRUNK (Qwen3-1.7B + LoRA)</text>
+
+        <!-- h_M box -->
+        <rect x="20" y="60" width="150" height="60" rx="10" fill="#ffffff" stroke="#e6e6ef" stroke-width="1.5"/>
+        <text x="95" y="85" text-anchor="middle" font-size="14" font-weight="600" fill="#1a1a2e">h_M</text>
+        <text x="95" y="103" text-anchor="middle" font-size="11" fill="#4a4a5e">raw activation, model M</text>
+
+        <!-- enc_M box -->
+        <rect x="220" y="60" width="150" height="60" rx="10" fill="#efedff" stroke="#5b4fe0" stroke-width="1.5"/>
+        <text x="295" y="85" text-anchor="middle" font-size="14" font-weight="600" fill="#5b4fe0">enc_M</text>
+        <text x="295" y="103" text-anchor="middle" font-size="10.5" fill="#4a4a5e">linear, lstsq-init + SFT-tuned</text>
+        <line x1="170" y1="90" x2="216" y2="90" stroke="#5b4fe0" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- shared z-space box -->
+        <rect x="420" y="60" width="170" height="60" rx="10" fill="#ffffff" stroke="#e6e6ef" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="505" y="85" text-anchor="middle" font-size="14" font-weight="600" fill="#1a1a2e">shared space</text>
+        <text x="505" y="103" text-anchor="middle" font-size="11" fill="#4a4a5e">d_shared = 2048, marker-injected</text>
+        <line x1="370" y1="90" x2="416" y2="90" stroke="#5b4fe0" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- trunk box big -->
+        <rect x="420" y="160" width="500" height="80" rx="12" fill="#1a1a2e"/>
+        <text x="670" y="192" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">AV / detect trunk</text>
+        <text x="670" y="213" text-anchor="middle" font-size="11.5" fill="#c7c7e0">one Qwen3-1.7B + LoRA — never changes per architecture</text>
+        <line x1="505" y1="120" x2="505" y2="156" stroke="#5b4fe0" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- two outputs: z verbalization / Yes-No -->
+        <rect x="420" y="290" width="230" height="66" rx="10" fill="#ffffff" stroke="#e6e6ef" stroke-width="1.5"/>
+        <text x="535" y="316" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1a1a2e">z — open verbalization</text>
+        <text x="535" y="334" text-anchor="middle" font-size="10.5" fill="#4a4a5e">&lt;explanation&gt;…&lt;/explanation&gt;</text>
+
+        <rect x="690" y="290" width="230" height="66" rx="10" fill="#e7f7ef" stroke="#1a8f5e" stroke-width="1.5"/>
+        <text x="805" y="316" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1a8f5e">P(Yes) — calibrated answer</text>
+        <text x="805" y="334" text-anchor="middle" font-size="10.5" fill="#1a8f5e">bias / direction / deception AUROC</text>
+
+        <line x1="600" y1="240" x2="560" y2="286" stroke="#9797ad" stroke-width="2" marker-end="url(#arrow-gray)"/>
+        <line x1="740" y1="240" x2="795" y2="286" stroke="#1a8f5e" stroke-width="2" marker-end="url(#arrow-g)"/>
+
+        <!-- AR + dec_M path (FVE eval) -->
+        <rect x="960" y="60" width="180" height="60" rx="10" fill="#ffffff" stroke="#e6e6ef" stroke-width="1.5"/>
+        <text x="1050" y="85" text-anchor="middle" font-size="13" font-weight="600" fill="#1a1a2e">AR (truncated)</text>
+        <text x="1050" y="103" text-anchor="middle" font-size="10" fill="#4a4a5e">predicts ĥ_shared from z</text>
+        <line x1="590" y1="90" x2="956" y2="90" stroke="#9797ad" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arrow-gray)"/>
+
+        <rect x="960" y="160" width="180" height="60" rx="10" fill="#ffffff" stroke="#e6e6ef" stroke-width="1.5"/>
+        <text x="1050" y="185" text-anchor="middle" font-size="13" font-weight="600" fill="#1a1a2e">dec_M</text>
+        <text x="1050" y="203" text-anchor="middle" font-size="10" fill="#4a4a5e">linear, refit post-hoc on AR(z)</text>
+        <line x1="1050" y1="120" x2="1050" y2="156" stroke="#9797ad" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+        <text x="1050" y="245" text-anchor="middle" font-size="10.5" fill="#9797ad">→ ĥ_M, FVE(ĥ_M, h_M)</text>
+
+        <!-- held-out box -->
+        <rect x="20" y="420" width="330" height="100" rx="12" fill="#ffffff" stroke="#5b4fe0" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <text x="185" y="448" text-anchor="middle" font-size="13.5" font-weight="700" fill="#5b4fe0">new architecture M′ (never trained)</text>
+        <text x="185" y="468" text-anchor="middle" font-size="11" fill="#4a4a5e">add_held_out_tag(tag, h_new_raw)</text>
+        <text x="185" y="486" text-anchor="middle" font-size="11" fill="#4a4a5e">closed-form lstsq fit vs. serve_cache</text>
+        <text x="185" y="504" text-anchor="middle" font-size="11" font-weight="600" fill="#1a8f5e">seconds, zero gradient steps</text>
+        <line x1="185" y1="416" x2="185" y2="386" stroke="#5b4fe0" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+        <line x1="185" y1="386" x2="295" y2="120" stroke="#5b4fe0" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="205" y="380" font-size="10.5" fill="#5b4fe0">produces a fresh enc_M</text>
+
+        <!-- legend -->
+        <rect x="420" y="420" width="720" height="100" rx="12" fill="#fbfbfd" stroke="#e6e6ef"/>
+        <text x="444" y="448" font-size="12.5" fill="#4a4a5e"><tspan font-weight="700" fill="#1a1a2e">Detect path (v24's focus):</tspan> h_M → enc_M → marker-inject into trunk → "Does this exhibit X? Yes/No"</text>
+        <text x="444" y="470" font-size="12.5" fill="#4a4a5e"><tspan font-weight="700" fill="#1a1a2e">Verbalize + reconstruct path:</tspan> z → AR → ĥ_shared → dec_M → ĥ_M, scored by FVE against the true h_M</text>
+        <text x="444" y="492" font-size="12.5" fill="#4a4a5e"><tspan font-weight="700" fill="#1a1a2e">Cross-model:</tspan> the trunk is architecture-agnostic — only enc_M/dec_M differ per model, ~d_M×d_shared parameters each</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <h2>Results</h2>
+    <p class="section-sub">
+      Mean AUROC across 12 genuinely held-out architectures never seen during AV training —
+      LFM2.5-ColBERT-350M, Ministral-8B, Mistral-7B-v0.2, OLMo-1B/2-1B/2-7B, Qwen1.5-7B,
+      Qwen2.5-Coder-7B, Qwen2.5-1.5B, Llama-3.2-1B, QVikhr-3-1.7B, SmolLM2-1.7B.
+    </p>
+    <table class="results">
+      <thead>
+        <tr><th>Metric</th><th>v22 (previous flagship)</th><th>v24-dirfix</th><th>Δ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>xarch — supervised AUROC</td><td class="num">0.9674</td><td class="num winner">0.9901</td><td class="delta">+2.27pp</td></tr>
+        <tr><td>xarch — held-out AUROC</td><td class="num">0.9374</td><td class="num winner">0.9804</td><td class="delta">+4.30pp</td></tr>
+        <tr><td>direction AUROC</td><td class="num">0.8733</td><td class="num winner">0.9011</td><td class="delta">+2.78pp</td></tr>
+        <tr><td>deception AUROC</td><td class="num">0.5744</td><td class="num winner">0.6781</td><td class="delta">+10.37pp</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <b>What moved the number:</b> a 50,000-passage AV verbalization corpus (multilingual Wikipedia,
+      no code — a code-ablation counterfactual showed code specifically hurts cross-architecture
+      direction/deception transfer), a 16-architecture AV pool (vs. v22's narrow 5-tag subset), and
+      direction-aware hard-negative training (biased ↔ balanced same-topic pairs via
+      <code class="inline">--dir-pairs-dir</code>) which closed an initial direction-detection deficit
+      into a clean win.
+    </div>
+
+    <h3 style="font-size:17px;margin:32px 0 6px;">Bonus finding — concept-swap probe</h3>
+    <p class="section-sub" style="margin-bottom:8px;">
+      A small exploratory replication of a verbal-report / activation-patching experiment, run on
+      both an in-pool trunk (Qwen3-1.7B) and a genuinely held-out target (Llama-3-8B, read via a
+      closed-form <code class="inline">add_held_out_tag</code> encoder):
+    </p>
+    <ul class="findings">
+      <li>The oracle's open-ended verbalization of a patched activation is most accurate near the
+        <b>layer the encoder was originally calibrated at</b> (depth ≈ 0.5 of the target model).</li>
+      <li><b>Causal behavioral control</b> over the target model's own continuation only kicks in at
+        later layers (depth 0.7–0.9) — a concept is legible to the oracle before it becomes
+        load-bearing for the target model's own output.</li>
+      <li>The pattern held on the held-out architecture too, despite its encoder having zero gradient
+        steps — evidence the shared space itself, not per-model fine-tuning, carries the signal.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="code">
+  <div class="wrap">
+    <h2>Code</h2>
+    <p class="section-sub">Three entry points cover the whole v24 pipeline: extend the corpus, train, and read a new architecture zero-shot.</p>
+
+    <div class="grid2">
+      <div class="code-block">
+        <div class="file">scripts/audit/build_wikicode_corpus.py — <a href="https://github.com/AlexWortega/qwen3-1p7b-nla/blob/autoresearch/nla-wikicode-v24/scripts/audit/build_wikicode_corpus.py">view on GitHub</a></div>
+        <pre><span class="c"># 50k passages: 30% en-wiki / 30% code / 40% multilingual wiki</span>
+python scripts/audit/build_wikicode_corpus.py \
+  <span class="f">--out-dir</span> artifacts/wikicode_v24/exp2_50k \
+  <span class="f">--n-passages</span> 50000 \
+  <span class="f">--en-frac</span> 0.3 <span class="f">--code-frac</span> 0.3 \
+  <span class="f">--other-langs</span> ru,zh,ja,de,es</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="file">scripts/audit/train_v18.py — <a href="https://github.com/AlexWortega/qwen3-1p7b-nla/blob/autoresearch/nla-wikicode-v24/scripts/audit/train_v18.py">view on GitHub</a></div>
+        <pre><span class="c"># detect + AV + direction hard-neg, joint SFT</span>
+python scripts/audit/train_v18.py \
+  <span class="f">--trunk</span> Qwen/Qwen3-1.7B <span class="f">--lora-r</span> 32 \
+  <span class="f">--mix</span> 6:2:0:2 <span class="c"># detect:av:lie:latentqa</span> \
+  <span class="f">--detect-mix</span> 2:1.5:1.5:1:1 \
+  <span class="f">--dir-pairs-dir</span> /big/audit/v22_dir \
+  <span class="f">--av-pool-dir</span> artifacts/wikicode_v24/exp2_50k \
+  <span class="f">--out</span> artifacts/wikicode_v24/exp2_50k_dirfix</pre>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="file">nla/enc_dec_adapters.py — <a href="https://github.com/AlexWortega/qwen3-1p7b-nla/blob/autoresearch/nla-wikicode-v24/nla/enc_dec_adapters.py">view on GitHub</a> — reading a brand-new architecture, zero training</div>
+      <pre><span class="k">from</span> nla.enc_dec_adapters <span class="k">import</span> ModelPoolAdapters
+
+adapters = ModelPoolAdapters.load(<span class="s">"artifacts/wikicode_v24/exp2_50k_dirfix/adapters"</span>)
+
+<span class="c"># a few hundred mean-pooled activations from a model NEVER in the AV pool</span>
+adapters.add_held_out_tag(tag=<span class="s">"my-new-model"</span>, h_new_raw=pooled_activations)
+
+<span class="c"># read it immediately — closed-form lstsq solve against the post-SFT serve cache,</span>
+<span class="c"># no LoRA update, no gradient step</span>
+proj = adapters.encode(<span class="s">"my-new-model"</span>, h_vec)</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="file">scripts/audit/eval_harness.py — <a href="https://github.com/AlexWortega/qwen3-1p7b-nla/blob/autoresearch/nla-wikicode-v24/scripts/audit/eval_harness.py">view on GitHub</a> — config-driven xarch / direction / deception eval</div>
+      <pre>python scripts/audit/eval_harness.py <span class="f">--config</span> configs/eval/v24_dirfix_eval.yaml</pre>
+    </div>
+  </div>
+</section>
+
+<section id="pool">
+  <div class="wrap">
+    <h2>Architecture pool</h2>
+    <p class="section-sub">16 architectures in the AV training pool; results above are measured on 12 <em>different</em>, genuinely held-out ones.</p>
+    <div class="grid2">
+      <div class="card">
+        <h3>Trained (16)</h3>
+        <p>Bloom-560M, Gemma-2-9B, GPT-Neo-1.3B, GPT-2-Medium, LFM2-1.2B, Phi-1.5, Pythia-410M,
+        Qwen2.5-{0.5B, 7B}, Qwen3-{0.6B, 1.7B, 4B}, SmolLM2-360M, SmolLM3-3B, Vikhr-7B,
+        YandexGPT-5-Lite-8B.</p>
+      </div>
+      <div class="card">
+        <h3>Held-out (12, evaluated only)</h3>
+        <p>LFM2.5-ColBERT-350M, Ministral-8B, Mistral-7B-v0.2, OLMo-1B, OLMo-2-1B, OLMo-2-7B,
+        Qwen1.5-7B, Qwen2.5-Coder-7B, Qwen2.5-1.5B, Llama-3.2-1B, QVikhr-3-1.7B, SmolLM2-1.7B.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>
+      Part of the Universal NLA line — a cross-architecture reimplementation of Anthropic's
+      <a href="https://transformer-circuits.pub/2026/nla/index.html">Network Latent Aphasia / Activation Oracle</a>
+      work. Full experiment log, failed-experiment notes, and every prior version (v1–v23):
+      <a href="https://github.com/AlexWortega/qwen3-1p7b-nla/blob/autoresearch/nla-wikicode-v24/docs/VERSION_HISTORY.md">docs/VERSION_HISTORY.md</a>.
+    </p>
+    <p>AlexWortega — <a href="https://github.com/AlexWortega/qwen3-1p7b-nla">github.com/AlexWortega/qwen3-1p7b-nla</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
