@@ -1,0 +1,24 @@
+# v24 gen0 exp4 — UniMax-style narrow-language variant: en-wiki 30 / code 30 / {ru,zh,ja}wiki ~13.3 each
+# (3 langs, same 40% total multilingual budget as exp1). Isolates language COUNT vs total budget.
+out_dir: artifacts/wikicode_v24/exp4_narrow_lang
+n_passages: 5000
+max_chars: 4000
+max_length: 512
+batch_size: 8
+dtype: fp16
+seed: 0
+depth_fraction: 0.5
+
+pool:
+  - tag: qwen3-1p7b
+    model: Qwen/Qwen3-1.7B
+  - tag: phi-1p5
+    model: microsoft/phi-1_5
+  - tag: smollm3-3b
+    model: HuggingFaceTB/SmolLM3-3B
+  - tag: qwen2p5-7b
+    model: Qwen/Qwen2.5-7B
+    layer_index: 20
+  - tag: gemma2
+    model: google/gemma-2-9b-it
+    layer_index: 21

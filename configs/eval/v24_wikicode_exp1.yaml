@@ -1,0 +1,43 @@
+# v24 exp1 eval — new checkpoint trained on the wiki(en30)+code(30)+wiki(other 40, 20-tag AV pool)
+# mixture, same tasks/organism/held-out-bias split as the v24_sanity.yaml run against v22_flagship,
+# for direct comparison. v22_flagship reference numbers (this exact harness, eva02, 2026-07-02):
+#   xarch_llama_post: sup=0.9615 ho=0.9405 clean-FP=0.0342
+#   direction_llama:  0.8719
+#   deception_llama:  0.5579
+
+batch_size: 16
+dtype: bf16
+output_dir: /home/alexw/p3_work/wikicode_v24/eval_exp1
+
+detectors:
+  - id: v24_exp1
+    dir: /home/alexw/p3_work/wikicode_v24/exp1_train
+    label: "v24 exp1: en30/code30/wiki-other40, 20-tag AV pool"
+
+tasks:
+  - id: xarch_llama_post
+    kind: xarch
+    detector: v24_exp1
+    organism: llama3-8b
+    organism_label: "Llama-3.1-8B (held-out, never trained)"
+    acts_dir: /home/alexw/p3_work/v22_xmodel_bf16
+    acts_name: acts.safetensors
+    label: "POST-speech"
+    n_per_bias: 80
+    n_neg: 80
+
+  - id: direction_llama
+    kind: direction
+    detector: v24_exp1
+    organism: llama3-8b
+    organism_label: "Llama-3.1-8B (held-out)"
+    acts_dir: /home/alexw/vae_llm/artifacts/audit/v22_dir
+    label: "Direction (biased vs balanced, same question)"
+
+  - id: deception_llama
+    kind: deception
+    detector: v24_exp1
+    organism: llama3-8b
+    organism_label: "Llama-3.1-8B (held-out)"
+    acts_dir: /home/alexw/vae_llm/artifacts/audit/v22_decep
+    label: "Deception (MMLU sandbagging)"

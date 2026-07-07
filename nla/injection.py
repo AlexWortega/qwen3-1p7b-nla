@@ -5,6 +5,8 @@ position, the model sees the literal ㊗ character and outputs Chinese. This
 function is the one place that must be right, so it's pure and unit-testable.
 """
 
+from __future__ import annotations
+
 import torch
 
 

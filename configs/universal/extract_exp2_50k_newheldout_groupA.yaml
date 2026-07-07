@@ -1,0 +1,31 @@
+# Re-extract the 12 genuinely-novel held-out organisms on exp2's SCALED 50k-passage corpus, to
+# test whether corpus size (not just pool breadth) explains the broken closed-form encoder
+# extension. Group A: heavier models, run on GPU1.
+out_dir: artifacts/wikicode_v24/exp2_50k
+n_passages: 50000
+max_chars: 4000
+max_length: 512
+batch_size: 8
+dtype: fp16
+seed: 0
+depth_fraction: 0.5
+
+pool:
+  - tag: ministral-8b
+    model: mistralai/Ministral-8B-Instruct-2410
+    layer_index: 18
+  - tag: mistral-7b
+    model: mistralai/Mistral-7B-Instruct-v0.2
+    layer_index: 16
+  - tag: olmo2-7b
+    model: allenai/OLMo-2-1124-7B-Instruct
+    layer_index: 16
+  - tag: lfm25-colbert-350m
+    model: LiquidAI/LFM2.5-ColBERT-350M
+    layer_index: 8
+  - tag: olmo-1b
+    model: allenai/OLMo-1B-hf
+    layer_index: 8
+  - tag: smollm2-1p7b
+    model: HuggingFaceTB/SmolLM2-1.7B
+    layer_index: 12

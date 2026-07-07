@@ -1,0 +1,41 @@
+# v24 sanity check — same tasks as v22_default.yaml but pointed at eva02 paths, run against the
+# EXISTING frozen v22 flagship checkpoint only. Purpose: verify eval_harness.py + eva02 path layout
+# works BEFORE spending GPU-hours training new variants. Once this passes, v24_wikicode.yaml adds
+# the new experiment checkpoints as additional detectors for the real comparison.
+
+batch_size: 16
+dtype: bf16
+output_dir: /home/alexw/p3_work/wikicode_v24/eval_sanity
+
+detectors:
+  - id: v22_flagship
+    dir: /home/alexw/p3_work/detector/v22_1p7b_heldout_ep1
+    label: "v22 flagship (17 sup / 10 heldout)"
+
+tasks:
+  - id: xarch_llama_post
+    kind: xarch
+    detector: v22_flagship
+    organism: llama3-8b
+    organism_label: "Llama-3.1-8B (held-out, never trained)"
+    acts_dir: /home/alexw/p3_work/v22_xmodel_bf16
+    acts_name: acts.safetensors
+    label: "POST-speech"
+    n_per_bias: 80
+    n_neg: 80
+
+  - id: direction_llama
+    kind: direction
+    detector: v22_flagship
+    organism: llama3-8b
+    organism_label: "Llama-3.1-8B (held-out)"
+    acts_dir: /home/alexw/vae_llm/artifacts/audit/v22_dir
+    label: "Direction (biased vs balanced, same question)"
+
+  - id: deception_llama
+    kind: deception
+    detector: v22_flagship
+    organism: llama3-8b
+    organism_label: "Llama-3.1-8B (held-out)"
+    acts_dir: /home/alexw/vae_llm/artifacts/audit/v22_decep
+    label: "Deception (MMLU sandbagging)"

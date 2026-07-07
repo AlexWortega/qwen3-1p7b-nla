@@ -8,6 +8,8 @@ Two sidecar conventions:
   - Model:   {checkpoint_dir}/nla_meta.yaml (kind: nla_model)
 """
 
+from __future__ import annotations
+
 import math
 import re
 from dataclasses import dataclass

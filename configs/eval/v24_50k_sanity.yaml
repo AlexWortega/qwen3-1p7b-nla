@@ -1,0 +1,50 @@
+# Quick sanity check: does scaling exp2's AV corpus 5000 -> 50000 passages move the needle at all
+# on the ONE genuinely-held-out organism we already have eval data for (llama3-8b)? Cheap check
+# before committing to a full multi-hour 12-organism re-extraction on the 50k corpus.
+
+batch_size: 16
+dtype: fp16
+output_dir: /home/alexw/vae_llm/artifacts/wikicode_v24/eval_50k_sanity
+
+detectors:
+  - id: v22_flagship
+    dir: /big/audit/v22/v22_1p7b_heldout_ep1
+    label: "v22 flagship"
+  - id: exp2_5k
+    dir: /checkpoints_5k/exp2_train
+    label: "v24 exp2 (5k passages)"
+  - id: exp2_50k
+    dir: /workspace/artifacts/wikicode_v24/exp2_50k_train
+    label: "v24 exp2 (50k passages)"
+
+tasks:
+  - id: xarch_llama_v22
+    kind: xarch
+    detector: v22_flagship
+    organism: llama3-8b
+    organism_label: "Llama-3.1-8B (held-out)"
+    acts_dir: /big/audit/v22_xmodel
+    acts_name: acts.safetensors
+    label: POST
+    n_per_bias: 80
+    n_neg: 80
+  - id: xarch_llama_exp2_5k
+    kind: xarch
+    detector: exp2_5k
+    organism: llama3-8b
+    organism_label: "Llama-3.1-8B (held-out)"
+    acts_dir: /big/audit/v22_xmodel
+    acts_name: acts.safetensors
+    label: POST
+    n_per_bias: 80
+    n_neg: 80
+  - id: xarch_llama_exp2_50k
+    kind: xarch
+    detector: exp2_50k
+    organism: llama3-8b
+    organism_label: "Llama-3.1-8B (held-out)"
+    acts_dir: /big/audit/v22_xmodel
+    acts_name: acts.safetensors
+    label: POST
+    n_per_bias: 80
+    n_neg: 80

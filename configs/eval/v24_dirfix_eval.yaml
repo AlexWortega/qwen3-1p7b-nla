@@ -1,0 +1,39 @@
+# exp2_50k_dirfix — same wiki-only 50k recipe as exp2_50k_fixed, but with hardneg+dirpos direction
+# training added (detect-mix 2:1.5:1.5:1:1, --dir-pairs-dir /big/audit/v22_dir). Tests whether
+# direction hard-negative training closes the -4.64pp direction gap vs v22 without hurting xarch.
+
+batch_size: 16
+dtype: fp16
+output_dir: /workspace/artifacts/wikicode_v24/eval_dirfix
+
+detectors:
+  - id: exp2_50k_dirfix
+    dir: /workspace/artifacts/wikicode_v24/exp2_50k_dirfix
+    label: "v24 exp2 (50k, dirfix hardneg)"
+
+tasks:
+  - {id: xarch_lfmcolbert, kind: xarch, detector: exp2_50k_dirfix, organism: lfm25-colbert-350m, organism_label: "LFM2.5-ColBERT-350M", acts_dir: /big/audit/v22_xmodel, acts_name: acts.safetensors, label: POST, n_per_bias: 80, n_neg: 80}
+  - {id: xarch_ministral, kind: xarch, detector: exp2_50k_dirfix, organism: ministral-8b, organism_label: "Ministral-8B-Instruct", acts_dir: /big/audit/v22_xmodel, acts_name: acts.safetensors, label: POST, n_per_bias: 80, n_neg: 80}
+  - {id: xarch_mistral, kind: xarch, detector: exp2_50k_dirfix, organism: mistral-7b, organism_label: "Mistral-7B-Instruct-v0.2", acts_dir: /big/audit/v22_xmodel, acts_name: acts.safetensors, label: POST, n_per_bias: 80, n_neg: 80}
+  - {id: xarch_olmo1, kind: xarch, detector: exp2_50k_dirfix, organism: olmo-1b, organism_label: "OLMo-1B", acts_dir: /big/audit/v22_xmodel, acts_name: acts.safetensors, label: POST, n_per_bias: 80, n_neg: 80}
+  - {id: xarch_olmo2_1b, kind: xarch, detector: exp2_50k_dirfix, organism: olmo2-1b, organism_label: "OLMo-2-1B-Instruct", acts_dir: /big/audit/v22_xmodel, acts_name: acts.safetensors, label: POST, n_per_bias: 80, n_neg: 80}
+  - {id: xarch_olmo2_7b, kind: xarch, detector: exp2_50k_dirfix, organism: olmo2-7b, organism_label: "OLMo-2-7B-Instruct", acts_dir: /big/audit/v22_xmodel, acts_name: acts.safetensors, label: POST, n_per_bias: 80, n_neg: 80}
+  - {id: xarch_qwen15, kind: xarch, detector: exp2_50k_dirfix, organism: qwen1p5-7b, organism_label: "Qwen1.5-7B-Chat", acts_dir: /big/audit/v22_xmodel, acts_name: acts.safetensors, label: POST, n_per_bias: 80, n_neg: 80}
+  - {id: xarch_qwencoder, kind: xarch, detector: exp2_50k_dirfix, organism: qwen25-coder-7b, organism_label: "Qwen2.5-Coder-7B-Instruct", acts_dir: /big/audit/v22_xmodel, acts_name: acts.safetensors, label: POST, n_per_bias: 80, n_neg: 80}
+  - {id: xarch_llama32, kind: xarch, detector: exp2_50k_dirfix, organism: llama3p2-1b, organism_label: "Llama-3.2-1B", acts_dir: /big/audit/v22_xmodel, acts_name: acts.safetensors, label: POST, n_per_bias: 80, n_neg: 80}
+  - {id: xarch_qvikhr, kind: xarch, detector: exp2_50k_dirfix, organism: qvikhr-1p7b, organism_label: "QVikhr-3-1.7B", acts_dir: /big/audit/v22_xmodel, acts_name: acts.safetensors, label: POST, n_per_bias: 80, n_neg: 80}
+  - {id: xarch_qwen251p5, kind: xarch, detector: exp2_50k_dirfix, organism: qwen2p5-1p5b, organism_label: "Qwen2.5-1.5B", acts_dir: /big/audit/v22_xmodel, acts_name: acts.safetensors, label: POST, n_per_bias: 80, n_neg: 80}
+  - {id: xarch_smollm2, kind: xarch, detector: exp2_50k_dirfix, organism: smollm2-1p7b, organism_label: "SmolLM2-1.7B", acts_dir: /big/audit/v22_xmodel, acts_name: acts.safetensors, label: POST, n_per_bias: 80, n_neg: 80}
+
+  - {id: dir_lfmcolbert, kind: direction, detector: exp2_50k_dirfix, organism: lfm25-colbert-350m, organism_label: "LFM2.5-ColBERT-350M", acts_dir: /big/audit/v22_dir}
+  - {id: dir_llama32, kind: direction, detector: exp2_50k_dirfix, organism: llama3p2-1b, organism_label: "Llama-3.2-1B", acts_dir: /big/audit/v22_dir}
+  - {id: dir_mistral, kind: direction, detector: exp2_50k_dirfix, organism: mistral-7b, organism_label: "Mistral-7B-Instruct-v0.2", acts_dir: /big/audit/v22_dir}
+  - {id: dir_olmo1, kind: direction, detector: exp2_50k_dirfix, organism: olmo-1b, organism_label: "OLMo-1B", acts_dir: /big/audit/v22_dir}
+  - {id: dir_qvikhr, kind: direction, detector: exp2_50k_dirfix, organism: qvikhr-1p7b, organism_label: "QVikhr-3-1.7B", acts_dir: /big/audit/v22_dir}
+  - {id: dir_qwen251p5, kind: direction, detector: exp2_50k_dirfix, organism: qwen2p5-1p5b, organism_label: "Qwen2.5-1.5B", acts_dir: /big/audit/v22_dir}
+  - {id: dir_smollm2, kind: direction, detector: exp2_50k_dirfix, organism: smollm2-1p7b, organism_label: "SmolLM2-1.7B", acts_dir: /big/audit/v22_dir}
+
+  - {id: decep_llama32, kind: deception, detector: exp2_50k_dirfix, organism: llama3p2-1b, organism_label: "Llama-3.2-1B", acts_dir: /big/audit/v22_decep}
+  - {id: decep_qvikhr, kind: deception, detector: exp2_50k_dirfix, organism: qvikhr-1p7b, organism_label: "QVikhr-3-1.7B", acts_dir: /big/audit/v22_decep}
+  - {id: decep_qwen251p5, kind: deception, detector: exp2_50k_dirfix, organism: qwen2p5-1p5b, organism_label: "Qwen2.5-1.5B", acts_dir: /big/audit/v22_decep}
+  - {id: decep_smollm2, kind: deception, detector: exp2_50k_dirfix, organism: smollm2-1p7b, organism_label: "SmolLM2-1.7B", acts_dir: /big/audit/v22_decep}

@@ -1,0 +1,40 @@
+# Extract the 8 missing new held-out organisms onto v22's ORIGINAL AV passage corpus
+# (activations_pool_v9, 10500 passages) so we can lstsq-fit their encoders into v22_flagship's
+# bundle via add_held_out.py. layer_index values match exactly what v22_xmodel's xarch eval acts
+# were extracted at (see meta.json), so the encoder and the eval activations live in the same
+# representational space. 4 other target tags (llama3p2-1b, qvikhr-1p7b, qwen2p5-1p5b,
+# smollm2-1p7b) already have shards in this corpus — not re-extracted here.
+out_dir: artifacts/activations_pool_v9
+n_passages: 10500
+max_chars: 4000
+max_length: 512
+batch_size: 8
+dtype: fp16
+seed: 0
+depth_fraction: 0.5
+
+pool:
+  - tag: lfm25-colbert-350m
+    model: LiquidAI/LFM2.5-ColBERT-350M
+    layer_index: 8
+  - tag: ministral-8b
+    model: mistralai/Ministral-8B-Instruct-2410
+    layer_index: 18
+  - tag: mistral-7b
+    model: mistralai/Mistral-7B-Instruct-v0.2
+    layer_index: 16
+  - tag: olmo-1b
+    model: allenai/OLMo-1B-hf
+    layer_index: 8
+  - tag: olmo2-1b
+    model: allenai/OLMo-2-0425-1B-Instruct
+    layer_index: 8
+  - tag: olmo2-7b
+    model: allenai/OLMo-2-1124-7B-Instruct
+    layer_index: 16
+  - tag: qwen1p5-7b
+    model: Qwen/Qwen1.5-7B-Chat
+    layer_index: 16
+  - tag: qwen25-coder-7b
+    model: Qwen/Qwen2.5-Coder-7B-Instruct
+    layer_index: 14

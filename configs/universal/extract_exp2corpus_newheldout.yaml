@@ -1,0 +1,50 @@
+# Extract all 12 new held-out organisms onto exp2's (champion) AV passage corpus (5000 passages,
+# en-wiki 50 / 5-lang-wiki 50, 0% code) so we can lstsq-fit their encoders into exp2_train's
+# bundle via add_held_out.py. layer_index values match exactly what v22_xmodel's xarch eval acts
+# were extracted at.
+out_dir: artifacts/wikicode_v24/exp2_code_ablated
+n_passages: 5000
+max_chars: 4000
+max_length: 512
+batch_size: 8
+dtype: fp16
+seed: 0
+depth_fraction: 0.5
+
+pool:
+  - tag: lfm25-colbert-350m
+    model: LiquidAI/LFM2.5-ColBERT-350M
+    layer_index: 8
+  - tag: ministral-8b
+    model: mistralai/Ministral-8B-Instruct-2410
+    layer_index: 18
+  - tag: mistral-7b
+    model: mistralai/Mistral-7B-Instruct-v0.2
+    layer_index: 16
+  - tag: olmo-1b
+    model: allenai/OLMo-1B-hf
+    layer_index: 8
+  - tag: olmo2-1b
+    model: allenai/OLMo-2-0425-1B-Instruct
+    layer_index: 8
+  - tag: olmo2-7b
+    model: allenai/OLMo-2-1124-7B-Instruct
+    layer_index: 16
+  - tag: qwen1p5-7b
+    model: Qwen/Qwen1.5-7B-Chat
+    layer_index: 16
+  - tag: qwen25-coder-7b
+    model: Qwen/Qwen2.5-Coder-7B-Instruct
+    layer_index: 14
+  - tag: llama3p2-1b
+    model: unsloth/Llama-3.2-1B
+    layer_index: 8
+  - tag: qvikhr-1p7b
+    model: Vikhrmodels/QVikhr-3-1.7B-Instruction-noreasoning
+    layer_index: 14
+  - tag: qwen2p5-1p5b
+    model: Qwen/Qwen2.5-1.5B
+    layer_index: 14
+  - tag: smollm2-1p7b
+    model: HuggingFaceTB/SmolLM2-1.7B
+    layer_index: 12

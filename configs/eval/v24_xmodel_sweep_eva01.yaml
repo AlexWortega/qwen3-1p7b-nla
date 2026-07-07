@@ -1,0 +1,37 @@
+# v24 cross-model held-out sweep — eva01-native paths (all eval data + v22 flagship checkpoint
+# already exist natively here; only exp1/exp2 checkpoints are relayed in from eva02).
+# Same purpose as v24_xmodel_sweep.yaml (eva02 version): does exp2's win over v22 (seen on
+# llama3-8b) generalize to the other 4 held-out organisms, or is it organism-specific?
+
+batch_size: 16
+# launched on eva01 GPU2 (CUDA_VISIBLE_DEVICES=2) — most free memory at launch time
+dtype: fp16   # eva01's v22_xmodel acts are fp16, not the bf16 conversion that lives on eva02
+output_dir: /mnt/storage/alexw/eval_xmodel_sweep_v24
+
+detectors:
+  - id: v22_flagship
+    dir: /mnt/storage/vae_llm/artifacts/audit/v22/v22_1p7b_heldout_ep1
+    label: "v22 flagship"
+  - id: v24_exp1
+    dir: /mnt/storage/alexw/wikicode_v24_checkpoints/exp1_train
+    label: "v24 exp1 (wiki+code)"
+  - id: v24_exp2
+    dir: /mnt/storage/alexw/wikicode_v24_checkpoints/exp2_train
+    label: "v24 exp2 (wiki-only, champion)"
+
+tasks:
+  - {id: xarch_deepseek_v22,  kind: xarch, detector: v22_flagship, organism: deepseek-llm-7b, organism_label: "DeepSeek-LLM-7B (held-out)", acts_dir: /mnt/storage/vae_llm/artifacts/audit/v22_xmodel, acts_name: acts.safetensors, label: "POST", n_per_bias: 80, n_neg: 80}
+  - {id: xarch_deepseek_exp1, kind: xarch, detector: v24_exp1,     organism: deepseek-llm-7b, organism_label: "DeepSeek-LLM-7B (held-out)", acts_dir: /mnt/storage/vae_llm/artifacts/audit/v22_xmodel, acts_name: acts.safetensors, label: "POST", n_per_bias: 80, n_neg: 80}
+  - {id: xarch_deepseek_exp2, kind: xarch, detector: v24_exp2,     organism: deepseek-llm-7b, organism_label: "DeepSeek-LLM-7B (held-out)", acts_dir: /mnt/storage/vae_llm/artifacts/audit/v22_xmodel, acts_name: acts.safetensors, label: "POST", n_per_bias: 80, n_neg: 80}
+
+  - {id: xarch_lfm_v22,  kind: xarch, detector: v22_flagship, organism: lfm-7b, organism_label: "LFM2-1.2B (held-out)", acts_dir: /mnt/storage/vae_llm/artifacts/audit/v22_xmodel, acts_name: acts.safetensors, label: "POST", n_per_bias: 80, n_neg: 80}
+  - {id: xarch_lfm_exp1, kind: xarch, detector: v24_exp1,     organism: lfm-7b, organism_label: "LFM2-1.2B (held-out)", acts_dir: /mnt/storage/vae_llm/artifacts/audit/v22_xmodel, acts_name: acts.safetensors, label: "POST", n_per_bias: 80, n_neg: 80}
+  - {id: xarch_lfm_exp2, kind: xarch, detector: v24_exp2,     organism: lfm-7b, organism_label: "LFM2-1.2B (held-out)", acts_dir: /mnt/storage/vae_llm/artifacts/audit/v22_xmodel, acts_name: acts.safetensors, label: "POST", n_per_bias: 80, n_neg: 80}
+
+  - {id: xarch_vikhr_v22,  kind: xarch, detector: v22_flagship, organism: vikhr-7b-01, organism_label: "Vikhr-7B-0.1 (held-out)", acts_dir: /mnt/storage/vae_llm/artifacts/audit/v22_xmodel, acts_name: acts.safetensors, label: "POST", n_per_bias: 80, n_neg: 80}
+  - {id: xarch_vikhr_exp1, kind: xarch, detector: v24_exp1,     organism: vikhr-7b-01, organism_label: "Vikhr-7B-0.1 (held-out)", acts_dir: /mnt/storage/vae_llm/artifacts/audit/v22_xmodel, acts_name: acts.safetensors, label: "POST", n_per_bias: 80, n_neg: 80}
+  - {id: xarch_vikhr_exp2, kind: xarch, detector: v24_exp2,     organism: vikhr-7b-01, organism_label: "Vikhr-7B-0.1 (held-out)", acts_dir: /mnt/storage/vae_llm/artifacts/audit/v22_xmodel, acts_name: acts.safetensors, label: "POST", n_per_bias: 80, n_neg: 80}
+
+  - {id: xarch_yagpt_v22,  kind: xarch, detector: v22_flagship, organism: yagpt-5-8b, organism_label: "YandexGPT-5-Lite-8B (held-out)", acts_dir: /mnt/storage/vae_llm/artifacts/audit/v22_xmodel, acts_name: acts.safetensors, label: "POST", n_per_bias: 80, n_neg: 80}
+  - {id: xarch_yagpt_exp1, kind: xarch, detector: v24_exp1,     organism: yagpt-5-8b, organism_label: "YandexGPT-5-Lite-8B (held-out)", acts_dir: /mnt/storage/vae_llm/artifacts/audit/v22_xmodel, acts_name: acts.safetensors, label: "POST", n_per_bias: 80, n_neg: 80}
+  - {id: xarch_yagpt_exp2, kind: xarch, detector: v24_exp2,     organism: yagpt-5-8b, organism_label: "YandexGPT-5-Lite-8B (held-out)", acts_dir: /mnt/storage/vae_llm/artifacts/audit/v22_xmodel, acts_name: acts.safetensors, label: "POST", n_per_bias: 80, n_neg: 80}

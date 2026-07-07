@@ -1,0 +1,24 @@
+# v24 gen0 exp3 — DoReMi-style alt ratio: en-wiki 20 / code 20 / {ru,zh,ja,de,es}wiki 60 (12 each).
+# Tests whether the user's 30/30/40 ratio prior is actually the best point (arXiv:2305.10429).
+out_dir: artifacts/wikicode_v24/exp3_lang_heavy_202060
+n_passages: 5000
+max_chars: 4000
+max_length: 512
+batch_size: 8
+dtype: fp16
+seed: 0
+depth_fraction: 0.5
+
+pool:
+  - tag: qwen3-1p7b
+    model: Qwen/Qwen3-1.7B
+  - tag: phi-1p5
+    model: microsoft/phi-1_5
+  - tag: smollm3-3b
+    model: HuggingFaceTB/SmolLM3-3B
+  - tag: qwen2p5-7b
+    model: Qwen/Qwen2.5-7B
+    layer_index: 20
+  - tag: gemma2
+    model: google/gemma-2-9b-it
+    layer_index: 21

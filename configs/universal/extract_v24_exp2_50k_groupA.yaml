@@ -1,0 +1,37 @@
+# exp2 corpus scaled 10x (5000 -> 50000 passages), per user request to test whether corpus size
+# fixes the broken closed-form held-out encoder extension (see RESULTS.md correction).
+# Split into two groups for 2-GPU parallel extraction on eva01 (GPU1 + GPU2).
+# Group A: bigger/slower models, run on GPU1.
+# NOTE: deepseek-llm-7b DROPPED — deepseek-ai/deepseek-llm-7b-base only ships pytorch_model.bin
+# (no safetensors), and the container's transformers 4.57.6 refuses torch.load on non-safetensors
+# checkpoints unless torch>=2.6 (CVE-2025-32434); force-upgrading torch in-container broke
+# transformers' model loading entirely (ABI mismatch). Accepted as a 19/20-architecture deviation
+# for this scale-up run rather than destabilizing the container further.
+out_dir: artifacts/wikicode_v24/exp2_50k
+n_passages: 50000
+max_chars: 4000
+max_length: 512
+batch_size: 8
+dtype: fp16
+seed: 0
+depth_fraction: 0.5
+
+pool:
+  - tag: qwen2p5-7b
+    model: Qwen/Qwen2.5-7B
+    layer_index: 20
+  - tag: vikhr-7b-01
+    model: Vikhrmodels/Vikhr-7b-0.1
+  - tag: yagpt-5-8b
+    model: yandex/YandexGPT-5-Lite-8B-pretrain
+  # gemma4-e4b DROPPED — transformers 4.57.6 does not recognize the "gemma4" model_type at all
+  - tag: bloom-560m
+    model: bigscience/bloom-560m
+  - tag: gpt-neo-1p3b
+    model: EleutherAI/gpt-neo-1.3B
+  - tag: gpt2-medium
+    model: openai-community/gpt2-medium
+  - tag: pythia-410m
+    model: EleutherAI/pythia-410m-deduped
+  - tag: qwen2p5-0p5b
+    model: Qwen/Qwen2.5-0.5B

@@ -1,0 +1,59 @@
+# v24 gen0 exp1 — user's literal spec: en-wiki 30 / code(py) 30 / {ru,zh,ja,de,es}wiki 8each.
+# passages.jsonl must be pre-built by scripts/audit/build_wikicode_corpus.py BEFORE running this
+# (materialize_passages() in extract_multi.py caches/reuses if the file exists with n_passages rows).
+#
+# AV pool EXPANDED per user request ("собери с очень большого количества моделей") to the full
+# 20-tag set already present in adapters_v9_serve_llama (minus llama3-8b, kept held-out for zero-
+# shot eval) — 16 architecture families, not just the 5-tag AV_TAGS_V21 subset.
+out_dir: artifacts/wikicode_v24/exp1_baseline_303040
+n_passages: 5000
+max_chars: 4000
+max_length: 512
+batch_size: 8
+dtype: fp16
+seed: 0
+depth_fraction: 0.5
+
+pool:
+  - tag: qwen3-1p7b
+    model: Qwen/Qwen3-1.7B
+  - tag: phi-1p5
+    model: microsoft/phi-1_5
+  - tag: smollm3-3b
+    model: HuggingFaceTB/SmolLM3-3B
+  - tag: qwen2p5-7b
+    model: Qwen/Qwen2.5-7B
+    layer_index: 20
+  - tag: gemma2
+    model: google/gemma-2-9b-it
+    layer_index: 21
+  - tag: bloom-560m
+    model: bigscience/bloom-560m
+  - tag: deepseek-llm-7b
+    model: deepseek-ai/deepseek-llm-7b-base
+  - tag: gemma4-e4b
+    model: google/gemma-4-E4B
+  - tag: gpt-neo-1p3b
+    model: EleutherAI/gpt-neo-1.3B
+  - tag: gpt2-medium
+    model: openai-community/gpt2-medium
+  - tag: lfm-7b
+    model: LiquidAI/LFM2-1.2B
+  - tag: nemotron-mini-4b
+    model: nvidia/Nemotron-Mini-4B-Instruct
+  - tag: pythia-410m
+    model: EleutherAI/pythia-410m-deduped
+  - tag: qwen2p5-0p5b
+    model: Qwen/Qwen2.5-0.5B
+  - tag: qwen3-0p6b
+    model: Qwen/Qwen3-0.6B-Base
+  - tag: qwen3-4b
+    model: Qwen/Qwen3-4B
+  - tag: rugpt3-large
+    model: ai-forever/rugpt3large_based_on_gpt2
+  - tag: smollm2-360m
+    model: HuggingFaceTB/SmolLM2-360M
+  - tag: vikhr-7b-01
+    model: Vikhrmodels/Vikhr-7b-0.1
+  - tag: yagpt-5-8b
+    model: yandex/YandexGPT-5-Lite-8B-pretrain

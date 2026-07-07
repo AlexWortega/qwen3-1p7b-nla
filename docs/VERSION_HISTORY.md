@@ -366,6 +366,59 @@ All v9: Qwen3-1.7B, 13 trained tags, 10.5k passages (10k FineWeb-Edu + 500 multi
 
 ---
 
+### v24 — Wiki+code AV corpus + direction hard-neg training ★
+
+- **Task:** replace v22's FineWeb-Edu AV verbalization corpus with a multilingual-Wikipedia +
+  Python-code mixture (en-wiki 30% / code 30% / {ru,zh,ja,de,es}-wiki 40% per user spec), across a
+  full 16-20-architecture AV pool (not just the 5-tag `AV_TAGS_V21` subset), to test whether corpus
+  breadth/diversity beats v22 on cross-architecture generalization. Full write-up + all intermediate
+  corrections: `~/autoresearch-runs/nla-wiki-code-mix/RESULTS.md` (kept outside the repo — session
+  scratch, not checked in).
+- **Datasets:** `wikimedia/wikipedia` (per-language, NOT `wikimedia/structured-wikipedia` — that repo
+  only ships en/fr configs), `bigcode/self-oss-instruct-sc2-exec-filter-50k` (100% Python).
+  `scripts/audit/build_wikicode_corpus.py` builds the mixture into the standard `extract_multi.py`
+  passages.jsonl format (reused unmodified for extraction).
+- **Key negative result, corrected:** an initial "exp2 beats v22 on 5 held-out organisms" claim was
+  **confounded** (4/5 organisms were actually inside exp2's AV training pool). On 12 genuinely-novel
+  architectures (OLMo/OLMo2, Mistral/Ministral, Qwen1.5-7B, Qwen2.5-Coder-7B, Qwen2.5-1.5B,
+  SmolLM2-1.7B, Llama-3.2-1B, Qvikhr-1.7B, LFM2.5-ColBERT-350M), exp2 **catastrophically failed**
+  (mean AUROC ~0.58) — traced to a missing `build_serve_cache.py` call after AV SFT: `add_held_out_tag`
+  was fitting new encoders against a **stale pre-SFT target**, not exp2's actual post-SFT encoder
+  space. v22 "looked fine" by luck (its narrow 5-tag pool barely drifts its encoders from init).
+  **Corpus size (5k→50k passages) had zero effect** — the real fix was rebuilding `serve_cache`
+  correctly; once done, `enc_fve` jumped 0.91–0.98 → 0.99+ and eval flipped to a clean win.
+- **v24 flagship = `exp2_50k_dirfix`:** wiki-only (no code — a code-ablation counterfactual showed
+  code specifically hurt cross-arch direction/deception transfer) 50k-passage corpus, 16-arch AV pool
+  (`deepseek-llm-7b`, `nemotron-mini-4b`, `gemma4-e4b`, `rugpt3-large` dropped — eva01 Docker image
+  environment limits: bin-only checkpoints needing torch≥2.6, one unsupported architecture),
+  `--detect-mix 2:1.5:1.5:1:1` (adds direction hard-negative pairs via `--dir-pairs-dir`, existing
+  `v22_dir` data, no new extraction needed).
+- **Final results (mean across 12 genuinely-novel organisms, apples-to-apples vs a properly-extended
+  v22):**
+  - xarch supervised: v22 0.9674 → **exp2_dirfix 0.9901** (+2.27pp)
+  - xarch held-out: v22 0.9374 → **exp2_dirfix 0.9804** (+4.30pp)
+  - direction (7 organisms): v22 0.8733 → **exp2_dirfix 0.9011** (+2.78pp)
+  - deception (4 organisms): v22 0.5744 → **exp2_dirfix 0.6781** (+10.37pp)
+  - Cost: clean-FP higher than v22 across the board (0.05–0.13 vs 0.02–0.05) — needs a calibration
+    pass, not another training change.
+- **Bonus finding (exploratory, N=1):** replicated a "concept-swap + verbal report" probe (patch an
+  intermediate activation with a different concept's activation, check whether both the target
+  model's own completion AND the oracle's open-verbalization flip) on Qwen3-1.7B (in-pool) and
+  Llama-3-8B (held-out, lstsq encoder). Both show the same two-part pattern: **oracle verbalization
+  is most accurate near the layer the encoder was originally calibrated at** (depth≈0.5), while
+  **causal behavioral control over the model's own output only kicks in at later layers** (depth
+  0.7–0.9) — the concept is legible before it's load-bearing.
+- **Scripts:** `scripts/audit/build_wikicode_corpus.py`, `scripts/audit/concept_swap_probe.py`,
+  `scripts/audit/eval_harness.py` (fixed a transformers-5.x `apply_chat_template` compat bug —
+  `BatchEncoding`/`tokenizers.Encoding` instead of a plain list), `nla/injection.py` + `nla/schema.py`
+  (Python-3.8 compat for eva01's Docker image: `from __future__ import annotations`).
+- **HF:** `AlexWortega/universal-nla-v24-dirfix` (pending push).
+- **Compute:** eva01 (4×V100, Docker container `vae_llm:latest`) for extraction/training (eva02's
+  single A6000 was intermittently contended by unrelated jobs); relayed data between boxes via the
+  local machine where direct rsync wasn't available.
+
+---
+
 ## 3. Pre-speech / Intent probe
 
 ### Pre-speech task generalization
