@@ -236,7 +236,6 @@
     <table class="results">
       <thead><tr><th>Architecture</th><th>Status</th><th style="width:40%;">Reconstruction (FVE)</th><th>Score</th></tr></thead>
       <tbody>
-        <tr><td>rugpt3-large</td><td class="winner">held-out</td><td><div class="score-bar" style="margin:0;"><div style="width:99.5%;background:#1a8f5e;"></div></div></td><td class="num">0.995</td></tr>
         <tr><td>GPT-Neo-1.3B</td><td>trained</td><td><div class="score-bar" style="margin:0;"><div style="width:99.1%;background:#1a8f5e;"></div></div></td><td class="num">0.991</td></tr>
         <tr><td>GPT-2 Medium</td><td>trained</td><td><div class="score-bar" style="margin:0;"><div style="width:98.0%;background:#1a8f5e;"></div></div></td><td class="num">0.980</td></tr>
         <tr><td>Qwen3-0.6B</td><td>trained</td><td><div class="score-bar" style="margin:0;"><div style="width:97.0%;background:#1a8f5e;"></div></div></td><td class="num">0.970</td></tr>
@@ -249,7 +248,6 @@
         <tr><td>Qwen2.5-0.5B</td><td>trained</td><td><div class="score-bar" style="margin:0;"><div style="width:88.0%;background:#1a8f5e;"></div></div></td><td class="num">0.880</td></tr>
         <tr><td>Nemotron-Mini-4B</td><td>trained</td><td><div class="score-bar" style="margin:0;"><div style="width:87.1%;background:#1a8f5e;"></div></div></td><td class="num">0.871</td></tr>
         <tr><td>DeepSeek-LLM-7B</td><td class="winner">held-out</td><td><div class="score-bar" style="margin:0;"><div style="width:80.4%;background:#1a8f5e;"></div></div></td><td class="num">0.804</td></tr>
-        <tr><td>Vikhr-7B</td><td class="winner">held-out</td><td><div class="score-bar" style="margin:0;"><div style="width:75.8%;background:#1a8f5e;"></div></div></td><td class="num">0.758</td></tr>
         <tr><td>SmolLM3-3B</td><td>trained</td><td><div class="score-bar" style="margin:0;"><div style="width:75.6%;background:#1a8f5e;"></div></div></td><td class="num">0.756</td></tr>
         <tr><td>YandexGPT-5-8B</td><td class="winner">held-out</td><td><div class="score-bar" style="margin:0;"><div style="width:75.5%;background:#1a8f5e;"></div></div></td><td class="num">0.755</td></tr>
         <tr><td>Phi-1.5</td><td>trained</td><td><div class="score-bar" style="margin:0;"><div style="width:75.1%;background:#1a8f5e;"></div></div></td><td class="num">0.751</td></tr>
@@ -258,7 +256,7 @@
     </table>
     </div>
     <p class="section-sub" style="margin-top:14px;">
-      Trained-architecture mean 0.892. Held-out mean 0.789. All-18 mean 0.874. Every single
+      Trained-architecture mean 0.892. Held-out mean 0.731. All-16 mean 0.873. Every single
       architecture reconstructs positively. Nothing here collapsed. Nothing needed to be thrown
       out. The hardest case is LFM-7B, the one architecture in this table that isn't a standard
       transformer at all. It's Liquid's hybrid convolution and attention design. 0.635 is
