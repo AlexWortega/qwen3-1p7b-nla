@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Universal NLA v24 — Activation Oracle</title>
-<meta name="description" content="One architecture to read them all: a linear activation-adapter stack that reads bias, direction, and deception straight out of any decoder-only LLM's residual stream — zero-shot on unseen architectures.">
+<title>Universal NLA — Activation Oracle</title>
+<meta name="description" content="A Qwen3 trunk under 2B parameters that reads bias, direction, and deception out of the activations of models 4-5x its own size — architectures it has never seen included.">
 <style>
   :root {
     --ink: #1a1a2e;
@@ -114,16 +114,20 @@
 
 <header class="hero">
   <div class="wrap">
-    <span class="kicker">Universal NLA · Activation Oracle · v24</span>
+    <span class="kicker">Universal NLA · Activation Oracle</span>
     <h1>One architecture to read them all.</h1>
+    <p class="lede" style="font-weight:600;color:var(--ink);">
+      A Qwen3 trunk under 2B parameters reads bias, direction, and deception straight out of the
+      activations of models up to 8B — 4-5× its own size — including architectures it has never
+      seen.
+    </p>
     <p class="lede">
-      A single trained trunk — Qwen3-1.7B + LoRA, paired with a small per-architecture linear
-      adapter — reads bias, direction, and deception straight out of any LLM's activations,
-      answering calibrated "does this exhibit behaviour X?" questions across a pool of structurally
-      different models. Adding a brand-new architecture is a closed-form linear fit, not a retrain.
-      This page documents <b>v24</b>: trained on a 50,000-passage multilingual-Wikipedia corpus with
-      direction-aware hard-negative training, evaluated on 12 architectures it never saw during
-      training — spanning 350M to 8B parameters across six different model families.
+      That trunk — Qwen3-1.7B + LoRA, paired with a small per-architecture linear adapter — answers
+      calibrated "does this exhibit behaviour X?" questions across a pool of structurally different
+      models. Adding a brand-new architecture is a closed-form linear fit, not a retrain. Trained on
+      a 50,000-passage multilingual-Wikipedia corpus with direction-aware hard-negative training,
+      evaluated on 12 architectures it never saw during training — spanning 350M to 8B parameters
+      across six different model families.
     </p>
     <div class="links">
       <a href="https://github.com/AlexWortega/qwen3-1p7b-nla/tree/autoresearch/nla-wikicode-v24">GitHub — code</a>
@@ -146,6 +150,12 @@
       from a model it has never even seen before.</b>
     </p>
     <div class="grid2" style="margin-top:24px;">
+      <div class="card">
+        <h3>Small reader, big targets</h3>
+        <p>The reader itself is a Qwen3 trunk under 2B parameters. It reads activations from
+          architectures up to 8B — 4-5× its own size — through nothing but a small linear
+          projection per target model. Reading doesn't require a bigger brain than the one being read.</p>
+      </div>
       <div class="card">
         <h3>One reader, any model</h3>
         <p>Train once on ~16 architectures. Point it at architecture #17 — a model it has
@@ -369,7 +379,7 @@
 
         <!-- legend -->
         <rect x="420" y="420" width="720" height="100" rx="12" fill="#fbfbfd" stroke="#e6e6ef"/>
-        <text x="444" y="448" font-size="12.5" fill="#4a4a5e"><tspan font-weight="700" fill="#1a1a2e">Detect path (v24's focus):</tspan> h_M → enc_M → marker-inject into trunk → "Does this exhibit X? Yes/No"</text>
+        <text x="444" y="448" font-size="12.5" fill="#4a4a5e"><tspan font-weight="700" fill="#1a1a2e">Detect path (this page's focus):</tspan> h_M → enc_M → marker-inject into trunk → "Does this exhibit X? Yes/No"</text>
         <text x="444" y="470" font-size="12.5" fill="#4a4a5e"><tspan font-weight="700" fill="#1a1a2e">Verbalize + reconstruct path:</tspan> z → AR → ĥ_shared → dec_M → ĥ_M, scored by FVE against the true h_M</text>
         <text x="444" y="492" font-size="12.5" fill="#4a4a5e"><tspan font-weight="700" fill="#1a1a2e">Cross-model:</tspan> the trunk is architecture-agnostic — only enc_M/dec_M differ per model, ~d_M×d_shared parameters each</text>
       </svg>
@@ -381,8 +391,8 @@
   <div class="wrap">
     <h2>Training data</h2>
     <p class="section-sub">
-      v24's own verbalization corpus, built from scratch for this run — not reused from any prior
-      iteration. Everything below is the exact recipe behind the checkpoint this page reports on.
+      A verbalization corpus built from scratch for this checkpoint. Everything below is the exact
+      recipe behind the numbers on this page.
     </p>
 
     <div class="grid2">
@@ -576,7 +586,7 @@
 <section id="code">
   <div class="wrap">
     <h2>Code</h2>
-    <p class="section-sub">Three entry points cover the whole v24 pipeline: extend the corpus, train, and read a new architecture zero-shot.</p>
+    <p class="section-sub">Three entry points cover the whole pipeline: extend the corpus, train, and read a new architecture zero-shot.</p>
 
     <div class="grid2">
       <div class="code-block">
