@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Universal NLA — Activation Oracle</title>
+<title>Universal NLA — a cross-architecture activation reader</title>
 <meta name="description" content="A Qwen3 trunk under 2B parameters that reads bias, direction, and deception out of the activations of models 4-5x its own size — architectures it has never seen included.">
 <style>
   :root {
@@ -114,7 +114,7 @@
 
 <header class="hero">
   <div class="wrap">
-    <span class="kicker">Universal NLA · Activation Oracle</span>
+    <span class="kicker">Universal NLA · cross-architecture activation reader</span>
     <h1>One architecture to read them all.</h1>
     <p class="lede" style="font-weight:600;color:var(--ink);">
       A Qwen3 trunk under 2B parameters reads bias, direction, and deception straight out of the
@@ -478,6 +478,109 @@
   </div>
 </section>
 
+<section id="baselines">
+  <div class="wrap">
+    <h2>Baselines &amp; honest limits</h2>
+    <p class="section-sub">
+      Three questions worth asking before trusting any of the numbers above. We ran the first one
+      as a real experiment; the other two are corrections and open gaps, not wins.
+    </p>
+
+    <h3 style="font-size:17px;margin:0 0 6px;">Does this actually need an LLM, or would plain linear regression do?</h3>
+    <p class="section-sub" style="margin-bottom:10px;">
+      We trained a plain logistic-regression classifier directly on a model's own raw activations —
+      no reader, no shared space, nothing learned — for 12 behaviours across 6 of the architectures
+      above, evaluated with 5-fold cross-validation.
+    </p>
+    <div class="callout">
+      <b>Result:</b> that plain classifier also scores ~1.0 AUROC on almost everything (mean 0.998
+      across 72 architecture/behaviour pairs; worst case 0.975). <b>Within one architecture, most of
+      these behaviours are trivially linearly separable — the reader isn't earning its keep there.</b>
+    </div>
+    <p class="section-sub" style="margin: 14px 0 0;">
+      But that same classifier is <em>useless</em> on any architecture besides the one it was fit
+      to. It's a set of weights sized to that one model's activation dimensions; there's no such
+      thing as running it on a different model's activations, which live in a different space of a
+      different size entirely. That's the actual comparison worth making: the reader's accuracy on
+      12 architectures it has <em>zero</em> labeled examples from, against a method that cannot be
+      run on those architectures at all without first collecting and labeling data from each one
+      individually. The value isn't "smarter than a linear model" — it's "works on a model you have
+      no labels for yet."
+    </p>
+
+    <h3 style="font-size:17px;margin:32px 0 6px;">Where's the reconstruction number?</h3>
+    <p class="section-sub" style="margin-bottom:10px;">
+      An earlier checkpoint in this project line reported 0.874 mean reconstruction accuracy
+      (fraction of variance explained, or FVE — how well an activation can be rebuilt after being
+      described in English and translated back). <b>That number belongs to a different, earlier
+      checkpoint, not this one</b> — worth stating plainly since it's an easy mix-up. This checkpoint
+      was trained purely for calibrated yes/no detection; nobody ever paired it with the reconstruction
+      half of the pipeline, so there is no reconstruction score for it, high or low. That's a real
+      gap, not a hidden result — closing it means training that missing half, which hasn't happened yet.
+    </p>
+
+    <h3 style="font-size:17px;margin:32px 0 6px;">What does it get wrong, and how?</h3>
+    <p class="section-sub">
+      We don't yet have a systematic breakdown of <em>how</em> this checkpoint's English descriptions
+      fail — whether it's confidently wrong about specifics while getting the general topic right,
+      whether repeated claims across similar inputs are more trustworthy, and so on. The
+      concept-swap probe above is a first data point (descriptions degrade in a specific, structured
+      way outside the calibrated layer), but a real failure-mode taxonomy is still open work.
+    </p>
+  </div>
+</section>
+
+<section id="vs-nla">
+  <div class="wrap">
+    <h2>How this relates to Anthropic's work</h2>
+    <p class="section-sub">
+      This project is a from-scratch reimplementation inspired by Anthropic's public research on
+      reading LLM activations in natural language, not code or checkpoints they released. Two
+      distinct things they've published are worth naming precisely, because this project sits
+      differently relative to each.
+    </p>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>Their Natural Language Autoencoders (reconstruction)</h3>
+        <p>One NLA per target model — the describer and reconstructor both <em>start out as a
+          copy of the exact model being read</em>, then get trained with reinforcement learning
+          (plus a penalty that keeps descriptions close to fluent English) toward faithfully
+          rebuilding that one model's own activations. They report reconstruction accuracy of
+          0.6–0.8, improving roughly in proportion to the log of training steps, on runs using two
+          8-GPU nodes per model and several hundred tokens of generation per activation read.</p>
+      </div>
+      <div class="card">
+        <h3>Their Activation Oracles (supervised, cross-context)</h3>
+        <p>A separate line of work (Karvonen, Chua, Dumas, et al.) trains one reader on labeled
+          question-answering over activations, evaluated on questions and inputs far outside its
+          training distribution. This project sits much closer to that supervised tradition than
+          to the reconstruction one — the difference is that theirs generalizes across
+          <em>questions and contexts</em> within roughly one model family, and this one generalizes
+          across <em>architectures</em>, via the shared linear-adapter space described above.</p>
+      </div>
+    </div>
+
+    <p class="section-sub" style="margin-top:20px;">The one-line version, stated plainly:</p>
+    <div class="callout">
+      Their reconstruction work reads one model deeply — a full copy of it, retrained per model, to
+      rebuild that model's own activations as faithfully as possible. This reads many structurally
+      different models cheaply — one fixed reader, a few hundred parameters of linear algebra per
+      new model, seconds to add one, no retraining.
+    </div>
+
+    <p class="section-sub" style="margin-top:16px;">
+      That difference also shows up in cost. Their reconstruction runs train two full copies of the
+      target model with reinforcement learning on two 8-GPU nodes; this project's whole training
+      run — one reader, jointly taught detection, description, and honesty-checking together — took
+      about two hours on a single 32GB GPU, plus roughly the same again to extract activations from
+      all 16 training architectures. Adding a new architecture afterward is the one-time forward
+      pass to collect its activations, plus a linear solve that measured under 4 seconds on a
+      laptop CPU — no GPU required for that step at all.
+    </p>
+  </div>
+</section>
+
 <section id="heldout">
   <div class="wrap">
     <h2>Held-out architectures</h2>
@@ -513,7 +616,8 @@
         the same first step used for every model during training.</li>
       <li>Solve one small system of linear equations that maps those activations onto the shared
         reference point. This is ordinary linear algebra, not machine learning — no fine-tuning, no
-        gradient steps, and the reader's own weights are never touched.</li>
+        gradient steps, and the reader's own weights are never touched. Measured: under 4 seconds
+        on a laptop CPU, no GPU involved.</li>
       <li>The new model is queryable right away. Every number in the table below comes from doing
         exactly this, once, for each of 12 architectures.</li>
     </ul>
@@ -545,11 +649,13 @@
     <div class="grid2">
       <div class="code-block">
         <div class="file">scripts/audit/build_wikicode_corpus.py — <a href="https://github.com/AlexWortega/qwen3-1p7b-nla/blob/autoresearch/nla-wikicode-v24/scripts/audit/build_wikicode_corpus.py">view on GitHub</a></div>
-        <pre><span class="c"># 50k passages: 30% en-wiki / 30% code / 40% multilingual wiki</span>
+        <pre><span class="c"># shipped recipe: 30% en-wiki, 0% code, 70% split across 5 languages.</span>
+<span class="c"># code was tried at --code-frac 0.3 first and dropped -- it measurably hurt</span>
+<span class="c"># cross-architecture transfer, so the final corpus is code-free.</span>
 python scripts/audit/build_wikicode_corpus.py \
   <span class="f">--out-dir</span> artifacts/wikicode_v24/exp2_50k \
   <span class="f">--n-passages</span> 50000 \
-  <span class="f">--en-frac</span> 0.3 <span class="f">--code-frac</span> 0.3 \
+  <span class="f">--en-frac</span> 0.3 <span class="f">--code-frac</span> 0.0 \
   <span class="f">--other-langs</span> ru,zh,ja,de,es</pre>
       </div>
 
@@ -590,9 +696,12 @@ proj = adapters.encode(<span class="s">"my-new-model"</span>, h_vec)</pre>
 <footer>
   <div class="wrap">
     <p>
-      Part of the Universal NLA line — a cross-architecture reimplementation of Anthropic's
-      <a href="https://transformer-circuits.pub/2026/nla/index.html">Network Latent Aphasia / Activation Oracle</a>
-      work. Full experiment log and methodology notes:
+      Inspired by two related but distinct lines of published research: Anthropic's
+      <a href="https://transformer-circuits.pub/2026/nla/index.html">Natural Language Autoencoders</a>
+      (per-model reconstruction) and Karvonen, Chua, Dumas et al.'s
+      <a href="https://arxiv.org/abs/2512.15674">Activation Oracles</a> (supervised, cross-context).
+      This project reimplements neither directly — it's a from-scratch cross-architecture take, not
+      a port of their code. Full experiment log and methodology notes:
       <a href="https://github.com/AlexWortega/qwen3-1p7b-nla/blob/autoresearch/nla-wikicode-v24/docs/VERSION_HISTORY.md">docs/VERSION_HISTORY.md</a>.
     </p>
     <p>AlexWortega — <a href="https://github.com/AlexWortega/qwen3-1p7b-nla">github.com/AlexWortega/qwen3-1p7b-nla</a></p>
