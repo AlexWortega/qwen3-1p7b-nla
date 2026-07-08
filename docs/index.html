@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Universal NLA v24 — Activation Oracle</title>
-<meta name="description" content="One trunk, any architecture: a linear activation-adapter stack that reads bias, direction, and deception straight out of any decoder-only LLM's residual stream — zero-shot on unseen architectures.">
+<meta name="description" content="One architecture to read them all: a linear activation-adapter stack that reads bias, direction, and deception straight out of any decoder-only LLM's residual stream — zero-shot on unseen architectures.">
 <style>
   :root {
     --ink: #1a1a2e;
@@ -96,11 +96,12 @@
 <header class="hero">
   <div class="wrap">
     <span class="kicker">Universal NLA · Activation Oracle · v24</span>
-    <h1>One trained trunk reads bias, direction, and deception<br>from any LLM's activations — architectures it has never seen included.</h1>
+    <h1>One architecture to read them all.</h1>
     <p class="lede">
-      A single Qwen3-1.7B + LoRA trunk, paired with a small per-architecture linear adapter, answers
-      calibrated "does this activation exhibit behaviour X?" questions across a pool of structurally
-      different models. Adding a brand-new architecture is a closed-form linear fit — not a retrain.
+      A single trained trunk — Qwen3-1.7B + LoRA, paired with a small per-architecture linear
+      adapter — reads bias, direction, and deception straight out of any LLM's activations,
+      answering calibrated "does this exhibit behaviour X?" questions across a pool of structurally
+      different models. Adding a brand-new architecture is a closed-form linear fit, not a retrain.
       This page documents <b>v24</b>: trained on a 50,000-passage multilingual-Wikipedia corpus with
       direction-aware hard-negative training, evaluated on 12 architectures it never saw during
       training — spanning 350M to 8B parameters across six different model families.
