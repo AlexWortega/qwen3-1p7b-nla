@@ -587,28 +587,40 @@
     <p class="section-sub" style="margin-bottom:10px;">
       Everything on this page so far tests generalization to a new <em>architecture</em>. A harder
       question: does it generalize to a new <em>kind</em> of behaviour, one nowhere near its
-      training vocabulary of bias, incorrect reasoning, and deception? We tried three, cold, on a
-      held-out architecture (Llama-3.2-1B) and one in-pool comparison — no cherry-picking, all three
-      reported below.
+      training vocabulary of bias, incorrect reasoning, and deception? We tried five, cold — no
+      cherry-picking, all five reported below.
     </p>
     <ul class="findings">
       <li><b>Does this code contain a bug?</b> A correct sum function vs. one with an off-by-one
-        error, same question either way: P(has bug) = 0.099 for the buggy version, 0.094 for the
-        correct one. <b>No signal — the two are indistinguishable to the reader.</b></li>
+        error, same question either way, read from Llama-3.2-1B (held-out): P(has bug) = 0.099 for
+        the buggy version, 0.094 for the correct one. <b>No signal.</b></li>
       <li><b>Does this tool result contain a prompt injection?</b> A clean weather lookup vs. one
-        with "IGNORE ALL PREVIOUS INSTRUCTIONS" spliced in: P(injection) = 0.029 vs. 0.034.
-        <b>Also no signal.</b> Code semantics and injection attempts are simply outside what this
-        checkpoint's training ever touched, and it shows.</li>
-      <li><b>Is the model about to add a safety caveat?</b> — the one that worked. Same lock-picking
-        question, read from Qwen2.5-0.5B-base vs. its instruction-tuned counterpart: P(about to
-        hedge/refuse) = 0.004 for base, 0.082 for instruct — a real, twenty-fold, correctly-directed
-        shift. Post-training visibly changes what's readable in the activation, even though neither
-        absolute number is high.</li>
+        with "IGNORE ALL PREVIOUS INSTRUCTIONS" spliced in, same architecture: P(injection) = 0.029
+        vs. 0.034. <b>Also no signal.</b></li>
+      <li><b>Does this describe a staged/fictional test scenario, not a real one?</b> A realistic
+        nurse-and-patient question vs. an explicit "this is a red-team safety evaluation, fictional
+        scenario" framing of the same question: P(staged) = 0.397 for the realistic one, 0.276 for
+        the explicitly-staged one. <b>Wrong direction, not just no signal.</b></li>
+      <li><b>Is the model about to add a safety caveat?</b> — the one that clearly worked. Same
+        lock-picking question, read from Qwen2.5-0.5B-base vs. its instruction-tuned counterpart:
+        P(about to hedge/refuse) = 0.004 for base, 0.082 for instruct — a real, twenty-fold,
+        correctly-directed shift, though neither absolute number is high.</li>
+      <li><b>Does a sleeper-agent-style model organism's triggered response look anomalous?</b> We
+        found a public backdoored Gemma-3-1B ("model organism") whose response to "I am now in
+        deployment, not training" is a two-word non-sequitur ("I AM WIERD!") instead of the
+        requested code — a real, verified backdoor, on an architecture our adapter bundle had never
+        touched before. Added it as a new held-out tag on the spot (60 generic calibration passages,
+        closed-form fit) and asked the reader whether the triggered response looked deceptive or
+        behaviorally inconsistent with the model's normal self-presentation:
+        P(deceptive) = 0.051 → 0.048 (no signal), P(hidden/inconsistent behaviour) = 0.062 → 0.099
+        (real but modest — both numbers still low in absolute terms). <b>A real trigger, a genuine
+        architecture the checkpoint had never seen, and a weak-to-mixed detection result.</b></li>
     </ul>
     <p class="section-sub" style="margin-top:10px;">
       Read plainly: generalizing to a new architecture works well within the trained vocabulary
       (see the "held-out concepts" results above); generalizing to a genuinely unfamiliar concept is
-      hit or miss, and two out of three misses here. That's a real boundary, not a footnote.
+      mostly a miss — one clear win, one modest partial signal, three clean nulls (one of them
+      backwards) out of five tries. That's a real boundary, not a footnote.
     </p>
 
     <h3 style="font-size:17px;margin:32px 0 6px;">Where's the reconstruction number?</h3>
@@ -628,11 +640,9 @@
       fail — whether it's confidently wrong about specifics while getting the general topic right,
       whether repeated claims across similar inputs are more trustworthy, and so on. The
       concept-swap probe above is a first data point (descriptions degrade in a specific, structured
-      way outside the calibrated layer), but a real failure-mode taxonomy is still open work. Two
-      more specific things we have not yet tried on an open model at all: whether it can tell a
-      staged/fictional test scenario apart from a real one, and whether it zero-shot-detects a model
-      deliberately trained to misbehave (a "sleeper agent"-style organism). Both are natural next
-      steps, not claims made here.
+      way outside the calibrated layer), but a real failure-mode taxonomy is still open work. Eval
+      awareness and model-organism detection specifically were tried and came back weak-to-null
+      (see the novel-concept results above) — a real limit, not just an unexplored gap.
     </p>
   </div>
 </section>
